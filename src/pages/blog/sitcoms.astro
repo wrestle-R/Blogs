@@ -36,18 +36,20 @@ const sitcoms = [
 
   <section class="grid grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-8">
     <div class="col-start-2 pt-4">
-      <div class="flex items-center gap-3 text-sm text-muted-foreground mb-8">
+      <div class="flex items-center gap-3 text-sm text-muted-foreground mb-4 pb-3 border-b border-border/40">
         {authors.length > 0 && (
-          <div class="flex items-center gap-1.5">
+          <a href={`/authors/${authors[0].id}`} class="flex items-center gap-1.5 hover:text-foreground transition-colors">
             <Icon name="lucide:user" class="size-3.5" />
             <span>{authors[0].name}</span>
-          </div>
+          </a>
         )}
         <span class="text-muted-foreground/40">•</span>
         <div class="flex items-center">
           <span>{formatDate(post.data.date)}</span>
         </div>
       </div>
+      
+      <h1 class="text-2xl font-semibold text-foreground">{post.data.title}</h1>
     </div>
 
     <article class="col-start-2 max-w-none prose dark:prose-invert">

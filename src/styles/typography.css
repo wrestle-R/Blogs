@@ -27,10 +27,10 @@
 
 @layer components {
   .prose {
-    @apply text-foreground text-[15px] leading-relaxed;
+    @apply text-foreground text-[16px] leading-[1.7];
 
     :where(p):not(:where(.not-prose, .not-prose *)) {
-      @apply text-foreground/75 my-4;
+      @apply text-foreground/80 my-4;
     }
 
     :where(h1, h2, h3, h4, h5, h6):not(:where(.not-prose, .not-prose *)) {
@@ -43,11 +43,11 @@
 
     /* Don't use an <h1> in your posts, one is already generated in blog/[...id].astro */
     :where(h1):not(:where(.not-prose, .not-prose *)) {
-      @apply mt-10 mb-5 text-2xl;
+      @apply mt-10 mb-5 text-2xl font-semibold;
     }
 
     :where(h2):not(:where(.not-prose, .not-prose *)) {
-      @apply mt-10 mb-4 text-xl;
+      @apply mt-10 mb-4 text-xl font-medium;
     }
 
     :where(h3):not(:where(.not-prose, .not-prose *)) {
