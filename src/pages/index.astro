@@ -6,6 +6,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getAllPosts } from '@/lib/data-utils'
+import Analytics from '@vercel/analytics/astro'
 
 const allPosts = await getAllPosts()
 const sortedPosts = allPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
@@ -13,6 +14,7 @@ const latestPosts = sortedPosts.slice(0, 5)
 const myBlogs = sortedPosts.filter((post) => post.data.authors?.includes('russel')).slice(0, 5)
 const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('russel')).slice(0, 5)
 ---
+
 
 <Layout class="max-w-4xl">
   <PageHead slot="head" title="Home" />
@@ -137,8 +139,9 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
       </div>
     </div>
   </section>
-</Layout>
 
+</Layout>
+<Analytics/>
 <script>
   document.addEventListener('astro:page-load', () => {
     const tabButtons = document.querySelectorAll('.tab-button')
