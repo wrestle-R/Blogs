@@ -8,6 +8,7 @@ import { parseAuthors } from '@/lib/data-utils'
 import { formatDate } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 import { getEntry } from 'astro:content'
+import { FaRunning } from 'react-icons/fa'
 
 const post = await getEntry('blog', 'voices-told-me-to-write')
 if (!post) return Astro.redirect('/404')
@@ -33,28 +34,65 @@ const authors = await parseAuthors(post.data.authors ?? [])
         </div>
       </div>
       
-      <h1 class="text-2xl font-semibold mb-8 text-foreground">{post.data.title}</h1>
+      <h1 class="text-2xl font-semibold mb-2 text-foreground">{post.data.title}</h1>
     </div>
 
     <article class="col-start-2 max-w-none prose dark:prose-invert">
       <p>
-        I have been thinking of starting a blog for a long time now, but then i didn't really have a good enough reason or motivation to start one. I came across this quote recently in a YouTube Short of all places actually:
+        I have been thinking of starting a blog for a long time now, but I didn't really have a good enough reason or motivation to start one. I came across this quote recently in a YouTube Short of all places:
       </p>
-      
-      <blockquote>
+
+      <blockquote class="text-xl mx-auto text-center max-w-2xl px-4 py-3 rounded-md bg-muted-foreground/5 border border-border">
         "I think we forget things if we have no one to tell them to"
       </blockquote>
-      
+
       <p>
-        I think I have had a few good thoughts over the years and if i had penned them down, they'd have been nice reflections to look back on once in awhile.
+        I think I have had a few good thoughts over the years and if I had penned them down, they'd have been nice reflections to look back on once in a while.
       </p>
-      
+
       <p>
-        Mehh I don't think I am serious enough person for my writings to be clear enough for many to relate or even understand, most of them will probably read like I was arguing with myself and losing, this is a place for some of my thoughts to be placed so incase i get hit in the head one too many times i wont forget
+        Mehh — I don't think I'm a serious enough person for my writings to be clear enough for many to relate to or even understand. Most of them will probably sound like I was arguing with myself and losing. This is a place for some of my thoughts to be placed so in case I get hit in the head one too many times I won't forget.
       </p>
-      
+
       <p>
-        Writing for people to read isn't the primary goal but entertaining people is always fun.
+        A friend of mine brought up a TV show I used to follow religiously (Supernatural — 15 seasons, about 20 forty-minute episodes each). I finished it in under two months during the COVID lockdown. Not sure how good a defense that is, but I couldn't remember a single character's name afterward — suddenly it hit me: my memory's gone. THE INFAMOUS AGE is finally creeping up. Twenty now, forty tomorrow, sixty after... what's next, forgetting my face in the mirror? That actually doesn't sound so bad.
+      </p>
+
+      <!-- inserted: two-image responsive grid with captions (ensure bottom is cropped using object-top) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 items-stretch">
+        <!-- first image: hidden on mobile, visible md+ -->
+        <figure class="hidden md:flex flex-col h-70 md:h-96 w-full rounded-md overflow-hidden bg-card">
+          <div class="flex-1 overflow-hidden">
+            <img src="/blogimages/blog1.jpg" alt="On a run" class="w-full h-full object-cover object-top" />
+          </div>
+          <figcaption class="px-3 mr-3 py-2 text-sm text-muted-foreground flex items-center justify-center gap-2">
+            <span>On a Run rn</span>
+            <FaRunning className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+          </figcaption>
+        </figure>
+
+        <!-- second image: visible on all sizes, matches first image height on md+ -->
+        <figure class="flex flex-col h-64 md:h-96 w-full rounded-md overflow-hidden bg-card">
+          <div class="flex-1 overflow-hidden">
+            <img src="/blogimages/Supernatural.jpg" alt="They are sooooo cool" class="w-full h-full object-cover object-top" />
+          </div>
+          <figcaption class="px-3 py-2 text-sm text-muted-foreground flex items-center justify-center">
+            They are sooooo cool
+          </figcaption>
+        </figure>
+      </div>
+      <!-- end inserted -->
+
+      <p>
+        I really hope this isn't one of those three-post blogs that doesn't get updated after the first month, but to be fair, far stranger things have happened.
+      </p>
+
+      <p>
+        Writing for people to read isn't the primary goal, but if someone chuckles or relates to it, I call that a W.
+      </p>
+
+      <p>
+        I think the most challenging part is not using emojis.
       </p>
     </article>
   </section>
