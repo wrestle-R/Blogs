@@ -1,0 +1,279 @@
+---
+import PageHead from '@/components/PageHead.astro'
+import { buttonVariants } from '@/components/ui/button'
+import Layout from '@/layouts/Layout.astro'
+import { cn } from '@/lib/utils'
+---
+
+<Layout class="max-w-4xl">
+  <PageHead slot="head" title="Collaborate" />
+  
+  <section class="flex flex-col gap-y-6">
+    <div class="space-y-2">
+      <h1 class="text-4xl font-bold">Let's Collaborate</h1>
+      <p class="text-muted-foreground">
+        Have an idea, feedback, or want to contribute? Send me a message and let's create something together.
+      </p>
+    </div>
+
+    <div class="rounded-lg border bg-card">
+      <div class="p-6">
+        <form id="collaborate-form" class="space-y-6">
+          <div class="space-y-2">
+            <label for="name" class="text-sm font-medium">
+              Name <span class="text-destructive">*</span>
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              class="w-full rounded-md border bg-background px-4 py-2.5 text-sm transition-colors focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
+              placeholder="Your name"
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label for="email" class="text-sm font-medium">
+              Email <span class="text-destructive">*</span>
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              class="w-full rounded-md border bg-background px-4 py-2.5 text-sm transition-colors focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20"
+              placeholder="your.email@example.com"
+            />
+          </div>
+
+          <div class="space-y-2">
+            <label for="message" class="text-sm font-medium">
+              Message <span class="text-destructive">*</span>
+            </label>
+            <textarea
+              id="message"
+              name="message"
+              required
+              rows="6"
+              class="w-full rounded-md border bg-background px-4 py-2.5 text-sm transition-colors focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 resize-none"
+              placeholder="Share your thoughts, ideas, or collaboration proposal..."
+            ></textarea>
+          </div>
+
+          <div class="flex flex-col gap-3">
+            <button
+              type="submit"
+              class={cn(
+                buttonVariants({ size: 'lg' }),
+                'w-full sm:w-auto'
+              )}
+              id="submit-btn"
+            >
+              <span id="submit-text">Send Message</span>
+              <svg id="submit-spinner" class="hidden w-4 h-4 ml-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </button>
+            
+            <div id="status-message" class="hidden rounded-md p-4 text-sm">
+              <div class="flex items-start gap-3">
+                <svg id="status-icon" class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"></svg>
+                <div>
+                  <p id="status-text" class="font-medium"></p>
+                  <p id="status-description" class="text-sm opacity-90 mt-1"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="rounded-lg border bg-gradient-to-br from-muted/50 to-muted/20 p-6">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+        <div class="flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 shrink-0">
+          <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <div class="space-y-1">
+          <h3 class="font-semibold">Quick Response</h3>
+          <p class="text-sm text-muted-foreground">
+            I typically respond within 24-48 hours. For urgent matters, feel free to reach out directly via email.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import emailjs from '@emailjs/browser'
+
+  document.addEventListener('astro:page-load', () => {
+    console.log('=== EmailJS Debug Info ===')
+    
+    const form = document.getElementById('collaborate-form') as HTMLFormElement
+    const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement
+    const submitText = document.getElementById('submit-text') as HTMLSpanElement
+    const submitSpinner = document.getElementById('submit-spinner') as HTMLElement
+    const statusMessage = document.getElementById('status-message') as HTMLElement
+    const statusIcon = document.getElementById('status-icon') as HTMLElement
+    const statusText = document.getElementById('status-text') as HTMLElement
+    const statusDescription = document.getElementById('status-description') as HTMLElement
+
+    const serviceId = import.meta.env.PUBLIC_EMAILJS_SERVICE_ID
+    const templateId = import.meta.env.PUBLIC_EMAILJS_TEMPLATE_ID
+    const publicKey = import.meta.env.PUBLIC_EMAILJS_PUBLIC_KEY
+
+    console.log('Service ID:', serviceId)
+    console.log('Template ID:', templateId)
+    console.log('Public Key:', publicKey)
+    console.log('Form element found:', !!form)
+
+    if (!form) {
+      console.error('Form not found!')
+      return
+    }
+
+    if (!serviceId || !templateId || !publicKey) {
+      console.error('Missing EmailJS credentials!')
+      console.error('Check your .env file has:', {
+        serviceId: !!serviceId,
+        templateId: !!templateId,
+        publicKey: !!publicKey
+      })
+      return
+    }
+
+    console.log('Initializing EmailJS with public key...')
+    emailjs.init(publicKey)
+    console.log('EmailJS initialized successfully')
+
+    const showStatus = (type: 'success' | 'error', title: string, description: string) => {
+      if (!statusMessage || !statusIcon || !statusText || !statusDescription) return
+      
+      statusMessage.classList.remove('hidden', 'bg-primary/10', 'text-primary', 'bg-destructive/10', 'text-destructive')
+      
+      if (type === 'success') {
+        statusMessage.classList.add('bg-primary/10', 'text-primary')
+        statusIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>'
+      } else {
+        statusMessage.classList.add('bg-destructive/10', 'text-destructive')
+        statusIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>'
+      }
+      
+      statusText.textContent = title
+      statusDescription.textContent = description
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      console.log('=== Form Submission Started ===')
+
+      const formData = new FormData(form)
+      const name = formData.get('name') as string
+      const email = formData.get('email') as string
+      const message = formData.get('message') as string
+
+      console.log('Form data:', { name, email, message })
+
+      submitBtn.disabled = true
+      submitText.textContent = 'Sending...'
+      submitSpinner.classList.remove('hidden')
+      statusMessage.classList.add('hidden')
+
+      try {
+        const currentTime = new Date().toLocaleString('en-US', {
+          dateStyle: 'full',
+          timeStyle: 'short'
+        })
+
+        console.log('Current time:', currentTime)
+        console.log('Sending email with params:', {
+          serviceId,
+          templateId,
+          templateParams: {
+            name,
+            email,
+            time: currentTime,
+            message
+          }
+        })
+
+        const response = await emailjs.send(serviceId, templateId, {
+          name: name,
+          email: email,
+          time: currentTime,
+          message: message,
+        })
+
+        console.log('EmailJS Response:', response)
+        console.log('Email sent successfully!')
+
+        showStatus(
+          'success',
+          'Message sent successfully!',
+          'Thank you for reaching out. I\'ll get back to you soon.'
+        )
+        
+        form.reset()
+      } catch (error: any) {
+        console.error('=== EmailJS Error ===')
+        console.error('Error object:', error)
+        console.error('Error message:', error?.message)
+        console.error('Error text:', error?.text)
+        console.error('Error status:', error?.status)
+        console.error('Full error:', JSON.stringify(error, null, 2))
+        
+        let errorMessage = 'Something went wrong. Please try again or contact me directly via email.'
+        
+        if (error?.text) {
+          errorMessage = `Error: ${error.text}`
+        } else if (error?.message) {
+          errorMessage = `Error: ${error.message}`
+        }
+        
+        showStatus(
+          'error',
+          'Failed to send message',
+          errorMessage
+        )
+      } finally {
+        submitBtn.disabled = false
+        submitText.textContent = 'Send Message'
+        submitSpinner.classList.add('hidden')
+        console.log('=== Form Submission Complete ===')
+      }
+    })
+  })
+</script>
+
+<style>
+  input:focus,
+  textarea:focus {
+    outline: none;
+  }
+
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  #status-message:not(.hidden) {
+    animation: fadeIn 0.3s ease-out;
+  }
+</style>

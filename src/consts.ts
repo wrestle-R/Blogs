@@ -21,6 +21,10 @@ export const NAV_LINKS: SocialLink[] = [
     label: 'authors',
   },
   {
+    href: '/collaborate',
+    label: 'collaborate',
+  },
+  {
     href: 'https://russeldanielpaul.tech',
     label: 'website',
   },

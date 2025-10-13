@@ -6,31 +6,140 @@ import { Image } from 'astro:assets'
 import logo from '../../public/static/logo.svg'
 ---
 
-<div>
-  <div
-    class="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 pt-5"
-  >
-    <Link href="/" class="flex shrink-0 items-center justify-center gap-1">
-      <!-- <Image src={logo} alt="Logo" class="size-5 sm:size-6" /> -->
-      <span
-        class="hidden h-full text-lg leading-none font-medium min-[400px]:block"
-        >{SITE.title}</span
-      >
-    </Link>
-    <div class="flex items-center gap-4">
-      <nav class="flex items-center gap-4 text-sm sm:gap-6">
-        {
-          NAV_LINKS.map((item) => (
+<header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+  <div class="mx-auto max-w-4xl px-4">
+    <div class="flex h-16 items-center justify-between">
+      <Link href="/" class="flex shrink-0 items-center gap-2 group">
+        <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20 group-hover:border-primary/40 transition-all duration-300">
+          <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <span class="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary/70 transition-all duration-300">
+          {SITE.title}
+        </span>
+      </Link>
+
+      <div class="flex items-center gap-3">
+        <nav class="hidden md:flex items-center gap-1">
+          {NAV_LINKS.map((item) => (
             <Link
               href={item.href}
-              class="text-foreground/60 hover:text-foreground capitalize transition-colors"
+              class="relative px-4 py-2 text-sm font-medium text-foreground/60 hover:text-foreground capitalize transition-colors rounded-md hover:bg-muted/50 group"
             >
-              {item.label}
+              <span class="relative z-10">{item.label}</span>
+              <span class="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></span>
             </Link>
-          ))
-        }
-      </nav>
-      <ThemeToggle transition:persist />
+          ))}
+        </nav>
+
+        <div class="flex items-center gap-2">
+          <ThemeToggle transition:persist />
+          
+          <button
+            id="mobile-menu-button"
+            class="md:hidden inline-flex items-center justify-center rounded-md p-2 text-foreground/60 hover:text-foreground hover:bg-muted/50 transition-colors"
+            aria-label="Toggle menu"
+          >
+            <svg id="menu-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+            <svg id="close-icon" class="hidden w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
-</div>
+
+  <div
+    id="mobile-menu"
+    class="hidden md:hidden border-t bg-background/95 backdrop-blur"
+  >
+    <nav class="mx-auto max-w-4xl px-4 py-4 space-y-1">
+      {NAV_LINKS.map((item, index) => (
+        <Link
+          href={item.href}
+          class="mobile-nav-link block px-4 py-3 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-muted/50 rounded-md transition-all capitalize"
+          style={`animation-delay: ${index * 50}ms`}
+        >
+          <span class="flex items-center gap-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary/40"></span>
+            {item.label}
+          </span>
+        </Link>
+      ))}
+    </nav>
+  </div>
+</header>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const mobileMenuButton = document.getElementById('mobile-menu-button')
+    const mobileMenu = document.getElementById('mobile-menu')
+    const menuIcon = document.getElementById('menu-icon')
+    const closeIcon = document.getElementById('close-icon')
+    const mobileNavLinks = document.querySelectorAll('.mobile-nav-link')
+
+    if (!mobileMenuButton || !mobileMenu || !menuIcon || !closeIcon) return
+
+    const toggleMenu = () => {
+      const isOpen = !mobileMenu.classList.contains('hidden')
+      
+      if (isOpen) {
+        mobileMenu.classList.add('hidden')
+        menuIcon.classList.remove('hidden')
+        closeIcon.classList.add('hidden')
+        document.body.style.overflow = ''
+      } else {
+        mobileMenu.classList.remove('hidden')
+        menuIcon.classList.add('hidden')
+        closeIcon.classList.remove('hidden')
+        document.body.style.overflow = 'hidden'
+      }
+    }
+
+    mobileMenuButton.addEventListener('click', toggleMenu)
+
+    mobileNavLinks.forEach((link) => {
+      link.addEventListener('click', () => {
+        if (!mobileMenu.classList.contains('hidden')) {
+          toggleMenu()
+        }
+      })
+    })
+
+    const mediaQuery = window.matchMedia('(min-width: 768px)')
+    const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
+      if (e.matches && !mobileMenu.classList.contains('hidden')) {
+        toggleMenu()
+      }
+    }
+
+    mediaQuery.addEventListener('change', handleMediaChange)
+    handleMediaChange(mediaQuery)
+  })
+</script>
+
+<style>
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  #mobile-menu:not(.hidden) .mobile-nav-link {
+    animation: slideIn 0.3s ease-out forwards;
+    opacity: 0;
+  }
+
+  header {
+    transition: all 0.3s ease;
+  }
+</style>
