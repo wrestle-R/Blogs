@@ -47,5 +47,4 @@ export const ICON_MAP: IconMap = {
   LinkedIn: 'lucide:linkedin',
   Twitter: 'lucide:twitter',
   Email: 'lucide:mail',
-  RSS: 'lucide:rss',
 }

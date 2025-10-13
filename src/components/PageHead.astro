@@ -15,9 +15,11 @@ const {
 const image = new URL('/static/1200x630.png', Astro.site)
 ---
 
+
 <title>{`${title} | ${SITE.title}`}</title>
 <meta name="description" content={description} />
 <link rel="canonical" href={SITE.href} />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Arial, sans-serif' font-weight='bold'>R</text></svg>" />
 {noindex && <meta name="robots" content="noindex, nofollow" />}
 
 <meta property="og:title" content={title} />
