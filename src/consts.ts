@@ -8,7 +8,7 @@ export const SITE: Site = {
   author: 'Russel Daniel Paul',
   locale: 'en-US',
   featuredPostCount: 2,
-  postsPerPage: 3,
+  postsPerPage: 5,
 }
 
 export const NAV_LINKS: SocialLink[] = [
