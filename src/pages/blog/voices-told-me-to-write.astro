@@ -18,65 +18,40 @@ const authors = await parseAuthors(post.data.authors ?? [])
 <Layout>
   <PostHead slot="head" post={post} />
 
-  <section class="grid grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-6">
-    <div class="col-start-2">
-      <Breadcrumbs
-        items={[
-          { href: '/blog', label: 'Blog', icon: 'lucide:library-big' },
-          { label: post.data.title, icon: 'lucide:pen-line' }
-        ]}
-      />
-    </div>
-
-    <section class="col-start-2 flex flex-col gap-y-6 text-center">
-      <div class="flex flex-col">
-        <div class="mb-4 relative">
-          <h1 class="scroll-mt-31 text-3xl leading-tight font-medium sm:text-4xl text-foreground relative inline-block">
-            {post.data.title}
-            <div class="absolute -top-6 -right-8 text-4xl animate-pulse">💭</div>
-          </h1>
-        </div>
-
-        <div class="text-muted-foreground divide-border mb-4 flex flex-col items-center justify-center divide-y text-xs sm:flex-row sm:flex-wrap sm:divide-x sm:divide-y-0 sm:text-sm">
-          {authors.length > 0 && (
-            <div class="flex w-full items-center justify-center gap-2 py-2 sm:w-fit sm:px-2 sm:py-0 first:sm:pl-0 last:sm:pr-0">
-              <Icon name="lucide:user" class="size-3.5" />
-              <span>{authors[0].name}</span>
-            </div>
-          )}
-          <div class="flex w-full items-center justify-center gap-2 py-2 sm:w-fit sm:px-2 sm:py-0 first:sm:pl-0 last:sm:pr-0">
-            <span>{formatDate(post.data.date)}</span>
+  <section class="grid grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-8">
+    <div class="col-start-2 pt-4">
+      <div class="flex items-center gap-3 text-sm text-muted-foreground mb-8">
+        {authors.length > 0 && (
+          <div class="flex items-center gap-1.5">
+            <Icon name="lucide:user" class="size-3.5" />
+            <span>{authors[0].name}</span>
           </div>
-        </div>
-
-        <div class="flex flex-wrap justify-center gap-2">
-          {post.data.tags && post.data.tags.map((tag: string) => (
-            <a href={`/tags/${tag}`} class={badgeVariants({ variant: 'muted' })}>
-              {tag}
-            </a>
-          ))}
+        )}
+        <span class="text-muted-foreground/40">•</span>
+        <div class="flex items-center">
+          <span>{formatDate(post.data.date)}</span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <article class="col-start-2 max-w-none prose prose-lg dark:prose-invert">
-      <p class="text-lg leading-relaxed">
+    <article class="col-start-2 max-w-none prose dark:prose-invert">
+      <p>
         I have been thinking of starting a blog for a long time now, but then i didn't really have a good enough reason or motivation to start one. I came across this quote recently in a YouTube Short of all places actually:
       </p>
       
-      <blockquote class="border-l-4 border-primary pl-4 italic my-6 text-muted-foreground">
+      <blockquote>
         "I think we forget things if we have no one to tell them to"
       </blockquote>
       
-      <p class="text-lg leading-relaxed">
+      <p>
         I think I have had a few good thoughts over the years and if i had penned them down, they'd have been nice reflections to look back on once in awhile.
       </p>
       
-      <p class="text-lg leading-relaxed">
+      <p>
         Mehh I don't think I am serious enough person for my writings to be clear enough for many to relate or even understand, most of them will probably read like I was arguing with myself and losing, this is a place for some of my thoughts to be placed so incase i get hit in the head one too many times i wont forget
       </p>
       
-      <p class="text-lg leading-relaxed">
+      <p>
         Writing for people to read isn't the primary goal but entertaining people is always fun.
       </p>
     </article>
