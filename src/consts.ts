@@ -15,7 +15,15 @@ export const NAV_LINKS: SocialLink[] = [
   {
     href: '/blog',
     label: 'blog',
-  },  
+  },
+  {
+    href: '/authors',
+    label: 'authors',
+  },
+  {
+    href: 'https://russeldanielpaul.tech',
+    label: 'website',
+  },
 ]
 
 export const SOCIAL_LINKS: SocialLink[] = [
