@@ -7,7 +7,7 @@ import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getAllPosts } from '@/lib/data-utils'
 import Analytics from '@vercel/analytics/astro'
-
+import { inject } from '@vercel/analytics';
 const allPosts = await getAllPosts()
 const sortedPosts = allPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
 const latestPosts = sortedPosts.slice(0, 5)
@@ -140,9 +140,10 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
     </div>
   </section>
 
+
 </Layout>
 <Analytics/>
-<script>
+<script >
   document.addEventListener('astro:page-load', () => {
     const tabButtons = document.querySelectorAll('.tab-button')
     const tabContents = document.querySelectorAll('.tab-content')
