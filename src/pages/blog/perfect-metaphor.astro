@@ -1,0 +1,109 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import PostHead from '@/components/PostHead.astro'
+import { badgeVariants } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import Layout from '@/layouts/Layout.astro'
+import { parseAuthors } from '@/lib/data-utils'
+import { formatDate } from '@/lib/utils'
+import { Icon } from 'astro-icon/components'
+import { getEntry } from 'astro:content'
+
+const post = await getEntry('blog', 'perfect-metaphor')
+if (!post) return Astro.redirect('/404')
+
+const authors = await parseAuthors(post.data.authors ?? [])
+---
+
+<Layout>
+  <PostHead slot="head" post={post} />
+
+  <section class="grid grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-6">
+    <div class="col-start-2">
+      <Breadcrumbs
+        items={[
+          { href: '/blog', label: 'Blog', icon: 'lucide:library-big' },
+          { label: post.data.title, icon: 'lucide:lightbulb' }
+        ]}
+      />
+    </div>
+
+    <section class="col-start-2 flex flex-col gap-y-6 text-center">
+      <div class="flex flex-col">
+        <div class="mb-4 relative">
+          <div class="emoji-float text-4xl absolute -left-12 top-0">😅</div>
+          <h1 class="scroll-mt-31 text-3xl leading-tight font-medium sm:text-4xl text-foreground">
+            {post.data.title}
+          </h1>
+          <div class="emoji-float text-4xl absolute -right-12 top-0" style="animation-delay: 0.5s">🤔</div>
+        </div>
+
+        <div class="text-muted-foreground divide-border mb-4 flex flex-col items-center justify-center divide-y text-xs sm:flex-row sm:flex-wrap sm:divide-x sm:divide-y-0 sm:text-sm">
+          {authors.length > 0 && (
+            <div class="flex w-full items-center justify-center gap-2 py-2 sm:w-fit sm:px-2 sm:py-0 first:sm:pl-0 last:sm:pr-0">
+              <Icon name="lucide:user" class="size-3.5" />
+              <span>{authors[0].name}</span>
+            </div>
+          )}
+          <div class="flex w-full items-center justify-center gap-2 py-2 sm:w-fit sm:px-2 sm:py-0 first:sm:pl-0 last:sm:pr-0">
+            <span>{formatDate(post.data.date)}</span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-2">
+          {post.data.tags && post.data.tags.map((tag: string) => (
+            <a href={`/tags/${tag}`} class={badgeVariants({ variant: 'muted' })}>
+              {tag}
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <article class="col-start-2 max-w-none prose prose-lg dark:prose-invert">
+      <p class="text-lg leading-relaxed">
+        You know when you hear something and your first reaction is to laugh/chuckle, but then a second later you realize, "Wait, that's actually kinda messed up" and then you awkwardly try to unlaugh, like that can happen.
+      </p>
+      
+      <p class="text-lg leading-relaxed">
+        Yeah, that's pretty much how my life has felt these past few weeks, it been a few trying weeks and its actually kinda funny how things can feel so normal in the moment but then when u take a step back you are like "woaahhh really"
+      </p>
+      
+      <p class="text-lg leading-relaxed">
+        Interestingly enough i somehow just know it will be alright, At the end of the day its night - Good Night.
+      </p>
+    </article>
+  </section>
+
+  <Button
+    variant="outline"
+    size="icon"
+    className="group fixed right-8 bottom-8 z-50 hidden"
+    id="scroll-to-top"
+    title="Scroll to top"
+    aria-label="Scroll to top"
+  >
+    <Icon name="lucide:arrow-up" class="mx-auto size-4 transition-all group-hover:-translate-y-0.5" />
+  </Button>
+
+  <script>
+    document.addEventListener('astro:page-load', () => {
+      const scrollToTopButton = document.getElementById('scroll-to-top')
+      const footer = document.querySelector('footer')
+
+      if (scrollToTopButton && footer) {
+        scrollToTopButton.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        })
+
+        window.addEventListener('scroll', () => {
+          const footerRect = footer.getBoundingClientRect()
+          const isFooterVisible = footerRect.top <= window.innerHeight
+          scrollToTopButton.classList.toggle('hidden', window.scrollY <= 300 || isFooterVisible)
+        })
+      }
+    })
+  </script>
+</Layout>
+
+

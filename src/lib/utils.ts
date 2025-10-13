@@ -35,3 +35,9 @@ export function getHeadingMargin(depth: number): string {
   }
   return margins[depth] || ''
 }
+
+export function getBlogRoute(postId: string): string {
+  // All blog posts now use their direct ID without the /index suffix
+  // since the glob loader collapses the folder structure
+  return postId
+}

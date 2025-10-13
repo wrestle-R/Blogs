@@ -29,10 +29,16 @@ import { render } from 'astro:content'
 
 export async function getStaticPaths() {
   const posts = await getAllPostsAndSubposts()
-  return posts.map((post) => ({
-    params: { id: post.id },
-    props: post,
-  }))
+  
+  // Filter out posts that have custom pages
+  const customPages = ['sitcoms', 'voices-told-me-to-write', 'perfect-metaphor', 'not-accept-defeat']
+  
+  return posts
+    .filter(post => !customPages.includes(post.id))
+    .map((post) => ({
+      params: { id: post.id },
+      props: post,
+    }))
 }
 
 const post = Astro.props
