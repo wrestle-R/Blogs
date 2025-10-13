@@ -22,7 +22,7 @@ export function calculateWordCountFromHtml(
 }
 
 export function readingTime(wordCount: number): string {
-  const readingTimeMinutes = Math.max(1, Math.round(wordCount / 200))
+  const readingTimeMinutes = Math.max(1, Math.round(wordCount / 75))
   return `${readingTimeMinutes} min read`
 }
 
