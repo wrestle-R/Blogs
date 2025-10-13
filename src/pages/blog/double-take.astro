@@ -9,7 +9,7 @@ import { formatDate } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
 import { getEntry } from 'astro:content'
 
-const post = await getEntry('blog', 'perfect-metaphor')
+const post = await getEntry('blog', 'double-take')
 if (!post) return Astro.redirect('/404')
 
 const authors = await parseAuthors(post.data.authors ?? [])
