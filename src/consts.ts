@@ -4,7 +4,7 @@ export const SITE: Site = {
   title: 'Blogs',
   description:
     'Personal blog and thoughts from Russel Daniel Paul and friends.',
-  href: 'https://russeldanielpaul.com',
+  href: 'https://russeldanielpaul.tech',
   author: 'Russel Daniel Paul',
   locale: 'en-US',
   featuredPostCount: 2,
