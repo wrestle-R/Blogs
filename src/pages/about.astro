@@ -9,36 +9,32 @@ import { getAllProjects } from '@/lib/data-utils'
 const projects = await getAllProjects()
 ---
 
-<Layout class="max-w-3xl">
+<Layout class="max-w-3xl  ">
   <PageHead slot="head" title="About" />
   <Breadcrumbs items={[{ label: 'About', icon: 'lucide:info' }]} />
 
   <section>
     <div class="min-w-full">
       <div class="prose mb-8">
+        <h1 class="text-3xl font-bold mb-4">Hey, I'm Russel 👋</h1>
         <p class="mt-0">
-          astro-erudite is an opinionated, unstyled static blogging template
-          that prioritizes simplicity and performance, built with <Link
-            href="https://astro.build"
-            external
-            underline>Astro</Link
-          >, <Link href="https://tailwindcss.com" external underline
-            >Tailwind</Link
-          >, and <Link href="https://ui.shadcn.com" external underline
-            >shadcn/ui</Link
-          >. It provides a clean foundation for your content while being
-          extremely easy to customize.
+          I'm a Computer Engineering student at Fr. CRCE, passionate about web development
+          and building intuitive applications. Currently exploring AI/ML and IoT while
+          working on various full-stack projects.
         </p>
         <p>
-          To learn more about the philosophy behind this template, check out the
-          following blog post: <Link
-            href="/blog/the-state-of-static-blogs"
-            underline>The State of Static Blogs in 2024</Link
-          >.
+          When I'm not coding, you'll find me playing football (I'm the vice-captain of my
+          college team!), strumming my guitar, or diving deep into music theory. I also have
+          a soft spot for sitcoms—check out my blog for my favorites.
+        </p>
+        <p>
+          This blog is my digital diary—a place to pen down thoughts, reflections, and
+          random musings before I forget them. It's not always serious, and sometimes it
+          reads like I'm arguing with myself (and losing), but that's the fun of it.
         </p>
       </div>
 
-      <h2 class="mb-4 text-2xl font-medium">Example Projects Listing</h2>
+      <h2 class="mb-4 text-2xl font-medium">Projects</h2>
       <div class="flex flex-col gap-4">
         {projects.map((project) => <ProjectCard project={project} />)}
       </div>

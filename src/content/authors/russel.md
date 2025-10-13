@@ -1,6 +1,5 @@
 ---
 name: 'Russel Daniel Paul'
-pronouns: 'he/him'
 avatar: 'https://github.com/wrestle-R.png'
 bio: 'Computer Engineering Student | Web Developer | Football Enthusiast'
 website: 'https://russeldanielpaul.com'

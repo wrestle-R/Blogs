@@ -4,10 +4,10 @@ import '@/styles/typography.css'
 
 import Footer from '@/components/Footer.astro'
 import Head from '@/components/Head.astro'
-import Header from '@/components/Header.astro'
 import { SITE } from '@/consts'
 import { cn } from '@/lib/utils'
 
+import Header from '@/components/Header.astro'
 interface Props {
   class?: string
 }
@@ -24,7 +24,7 @@ const { class: className } = Astro.props
     <slot name="head" />
   </Head>
   <body class="flex h-fit min-h-screen flex-col gap-y-6 font-sans">
-    <header
+        <header
       class="bg-background/50 sticky top-0 z-50 divide-y backdrop-blur-sm xl:divide-none"
     >
       <Header />
