@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import "tw-animate-css";
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 @theme inline {
   --font-sans:
@@ -17,6 +18,48 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-ring: var(--ring);
+  --animate-accordion-down:
+    accordion-down 0.2s ease-out;
+  --animate-accordion-up:
+    accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes accordion-down {
+  from {
+    height:
+    0;
+    }
+  to {
+    height:
+    var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+  from {
+    height:
+    var(--radix-accordion-content-height);
+    }
+  to {
+    height:
+    0;
+    }
+  }
 }
 
 @font-face {
@@ -279,5 +322,14 @@
   body::before,
   body::after {
     animation: none;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
   }
 }
