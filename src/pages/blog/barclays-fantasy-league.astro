@@ -1,0 +1,107 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import PostHead from '@/components/PostHead.astro'
+import { badgeVariants } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import Layout from '@/layouts/Layout.astro'
+import { parseAuthors } from '@/lib/data-utils'
+import { formatDate } from '@/lib/utils'
+import { Icon } from 'astro-icon/components'
+import { getEntry } from 'astro:content'
+
+const post = await getEntry('blog', 'barclays-fantasy-league')
+if (!post) return Astro.redirect('/404')
+
+const authors = await parseAuthors(post.data.authors ?? [])
+---
+
+<Layout>
+  <PostHead slot="head" post={post} />
+
+  <section class="grid grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-8">
+    <div class="col-start-2 pt-4">
+      <div class="flex items-center gap-3 text-sm text-muted-foreground mb-8 pb-3 border-b border-border/40">
+        {authors.length > 0 && (
+          <a href={`/authors/${authors[0].id}`} class="flex items-center gap-1.5 hover:text-foreground transition-colors">
+            <Icon name="lucide:user" class="size-3.5" />
+            <span>{authors[0].name}</span>
+          </a>
+        )}
+        <span class="text-muted-foreground/40">•</span>
+        <div class="flex items-center">
+          <span>{formatDate(post.data.date)}</span>
+        </div>
+      </div>
+      
+      <h1 class="text-2xl font-semibold mb-2 text-foreground">{post.data.title}</h1>
+    </div>
+
+    <article class="col-start-2 max-w-none prose dark:prose-invert">
+      <p>
+        Hello there!
+      </p>
+
+      <p>
+        I have been playing fpl for a couple of years, but this year was my first time playing it since the start and following every single update and more importantly making transfer decisions rationally instead of just randomly. Every review of the week hence I play the game the more I feel its like gambling, but ahh well its pretty fun that i take 1 litre petrol thousands of kilometers away decide how my weekend goes.
+      </p>
+
+      <p>
+        The most important thing fpl taught me is the importance of being consistent, initially in my first season I started playing then forgot, sometimes even forgot that i have an fpl team, until it was too late, but now I set reminders so that i don't miss a deadline. Now that I am more consistent I notice that most weeks I get a score above the average, except one week when I foolishly bet captaining the king (salah) is a better choice than the robot (haaland).
+      </p>
+
+      <p>
+        I have been selected to play fpl by the best in the college fpl league and I have a solid peer, let's say my guru, Big Rom to guide me in transfer decisions and timing of playing the chips when need. That guy has been playing fpl since he learnt how to hold a mobile.
+      </p>
+
+      <p>
+        A few tips and tricks I picked up along the way
+      </p>
+
+      <ol>
+        <li>Don't make early transfers cuz those 100k a week players are apparently made of glass and get injured pretty easily.</li>
+        <li>Don't run behind last week's points, if you believe in a player stick with them and they will come through (kudos to kudus)</li>
+        <li>Never trust a Chelsea player (most random team in the league imo)</li>
+        <li>Sometimes it's just better to play it safe when you're on top rather than going for differentials every week</li>
+        <li>Don't get confused between a wildcard and a freehit, happened to me two seasons in a row (╥﹏╥)</li>
+      </ol>
+
+      <p>
+        Follow these and you'll wake up on green arrows in all your leagues on a Monday morning.
+      </p>
+
+      <p>
+        Anyway, hoping my bench doesn't outscore my starting 11 again this week, see you next time.
+      </p>
+    </article>
+  </section>
+
+  <Button
+    variant="outline"
+    size="icon"
+    className="group fixed right-8 bottom-8 z-50 hidden"
+    id="scroll-to-top"
+    title="Scroll to top"
+    aria-label="Scroll to top"
+  >
+    <Icon name="lucide:arrow-up" class="mx-auto size-4 transition-all group-hover:-translate-y-0.5" />
+  </Button>
+
+  <script>
+    document.addEventListener('astro:page-load', () => {
+      const scrollToTopButton = document.getElementById('scroll-to-top')
+      const footer = document.querySelector('footer')
+
+      if (scrollToTopButton && footer) {
+        scrollToTopButton.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        })
+
+        window.addEventListener('scroll', () => {
+          const footerRect = footer.getBoundingClientRect()
+          const isFooterVisible = footerRect.top <= window.innerHeight
+          scrollToTopButton.classList.toggle('hidden', window.scrollY <= 300 || isFooterVisible)
+        })
+      }
+    })
+  </script>
+</Layout>
