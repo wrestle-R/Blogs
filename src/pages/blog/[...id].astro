@@ -31,7 +31,7 @@ export async function getStaticPaths() {
   const posts = await getAllPostsAndSubposts()
   
   // Filter out posts that have custom pages
-  const customPages = ['sitcoms', 'voices-told-me-to-write', 'perfect-metaphor', 'not-accept-defeat']
+  const customPages = ['sitcoms', 'voices-told-me-to-write', 'perfect-metaphor', 'not-accept-defeat', 'munnar-trip']
   
   return posts
     .filter(post => !customPages.includes(post.id))
