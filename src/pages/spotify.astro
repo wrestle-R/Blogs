@@ -84,6 +84,46 @@ import Layout from '../layouts/Layout.astro';
           </div>
         </div>
 
+        <div id="last-played-card" class="hidden">
+          <div class="flex gap-4 items-start">
+            <img 
+              id="last-album-art" 
+              src="" 
+              alt="Album Art" 
+              class="w-24 h-24 rounded-md shadow-md object-cover flex-shrink-0"
+            />
+            
+            <div class="flex-1 min-w-0">
+              <div class="mb-2">
+                <span class="inline-flex items-center gap-1.5 px-2 py-1 bg-muted/50 text-muted-foreground text-xs font-medium rounded-full">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Last Played
+                </span>
+              </div>
+              
+              <h3 id="last-song-name" class="text-xl font-bold mb-1 truncate"></h3>
+              <p id="last-artist-name" class="text-sm text-muted-foreground mb-1 truncate"></p>
+              <p id="last-album-name" class="text-xs text-muted-foreground/70 truncate"></p>
+              <p id="last-played-time" class="text-xs text-muted-foreground/60 mt-2"></p>
+              
+              <a 
+                id="last-spotify-link" 
+                href="" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                class="mt-3 inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+              >
+                Open in Spotify
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+
         <div id="not-playing-card" class="hidden text-center py-8">
           <svg class="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
@@ -164,33 +204,31 @@ import Layout from '../layouts/Layout.astro';
     document.getElementById('content-section')?.classList.remove('hidden');
   };
 
-  const updateNowPlaying = async () => {
+  const loadLastPlayed = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/now-playing`);
+      const response = await fetch(`${API_BASE_URL}/api/last-played`);
       
       if (!response.ok) {
-        throw new Error('Failed to fetch now playing');
+        throw new Error('Failed to fetch last played');
       }
 
       const data = await response.json();
 
-      if (!data.isPlaying || !data.name) {
-        document.getElementById('now-playing-card')?.classList.add('hidden');
+      if (!data.name) {
+        document.getElementById('last-played-card')?.classList.add('hidden');
         document.getElementById('not-playing-card')?.classList.remove('hidden');
         return;
       }
 
       document.getElementById('not-playing-card')?.classList.add('hidden');
-      document.getElementById('now-playing-card')?.classList.remove('hidden');
+      document.getElementById('last-played-card')?.classList.remove('hidden');
 
-      const albumArt = document.getElementById('album-art') as HTMLImageElement;
-      const songName = document.getElementById('song-name');
-      const artistName = document.getElementById('artist-name');
-      const albumName = document.getElementById('album-name');
-      const spotifyLink = document.getElementById('spotify-link') as HTMLAnchorElement;
-      const progressBar = document.getElementById('progress-bar') as HTMLDivElement;
-      const currentTime = document.getElementById('current-time');
-      const totalTime = document.getElementById('total-time');
+      const albumArt = document.getElementById('last-album-art') as HTMLImageElement;
+      const songName = document.getElementById('last-song-name');
+      const artistName = document.getElementById('last-artist-name');
+      const albumName = document.getElementById('last-album-name');
+      const playedTime = document.getElementById('last-played-time');
+      const spotifyLink = document.getElementById('last-spotify-link') as HTMLAnchorElement;
 
       if (albumArt) albumArt.src = data.albumArt || '';
       if (songName) songName.textContent = data.name;
@@ -198,273 +236,32 @@ import Layout from '../layouts/Layout.astro';
       if (albumName) albumName.textContent = data.album;
       if (spotifyLink) spotifyLink.href = data.songUrl;
 
-      const progress = (data.progress / data.duration) * 100;
-      if (progressBar) progressBar.style.width = `${progress}%`;
-      if (currentTime) currentTime.textContent = formatTime(data.progress);
-      if (totalTime) totalTime.textContent = formatTime(data.duration);
-    } catch (error) {
-      console.error('Error updating now playing:', error);
-      document.getElementById('now-playing-card')?.classList.add('hidden');
-      document.getElementById('not-playing-card')?.classList.remove('hidden');
-    }
-  };
+      // Format the played time
+      if (playedTime && data.playedAt) {
+        const playedDate = new Date(data.playedAt);
+        const now = new Date();
+        const diffMs = now.getTime() - playedDate.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
 
-  const loadTopTracks = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/top-tracks`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch top tracks');
-      }
-      
-      const data = await response.json();
-      
-      if (data.tracks && data.tracks.length > 0) {
-        const tracksList = document.getElementById('top-tracks-list');
-        
-        if (tracksList) {
-          tracksList.innerHTML = data.tracks.map((track: {
-            albumArt: string;
-            name: string;
-            artist: string;
-            songUrl: string;
-            popularity: number;
-          }, index: number) => `
-            <div class="flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-lg transition-colors group">
-              <span class="text-2xl font-bold opacity-30 w-8">${index + 1}</span>
-              <img src="${track.albumArt}" alt="${track.name}" class="w-16 h-16 rounded shadow-lg" />
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold truncate">${track.name}</h3>
-                <p class="text-sm opacity-70 truncate">${track.artist}</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="hidden md:block w-20">
-                  <div class="bg-white/10 rounded-full h-1.5 overflow-hidden">
-                    <div class="bg-purple-500 h-full" style="width: ${track.popularity}%"></div>
-                  </div>
-                </div>
-                <a 
-                  href="${track.songUrl}" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  class="p-2 hover:bg-white/10 rounded-full transition-colors opacity-0 group-hover:opacity-100"
-                  title="Open in Spotify"
-                >
-                  <svg class="w-5 h-5 text-green-500" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-                </svg>
-                </a>
-              </div>
-            </div>
-          `).join('');
-        }
-      }
-    } catch (error) {
-      console.error('Error loading top tracks:', error);
-    }
-  };
-
-  const loadTopArtists = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/top-artists`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch top artists');
-      }
-      
-      const data = await response.json();
-      
-      if (data.artists && data.artists.length > 0) {
-        const artistsList = document.getElementById('top-artists-list');
-        
-        if (artistsList) {
-          artistsList.innerHTML = data.artists.map((artist: any, index: number) => `
-            <div class="flex items-center gap-4 p-4 bg-white/5 hover:bg-white/10 rounded-lg transition-colors group">
-              <span class="text-2xl font-bold opacity-30 w-8">${index + 1}</span>
-              <img src="${artist.image}" alt="${artist.name}" class="w-16 h-16 rounded-full shadow-lg object-cover" />
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold truncate">${artist.name}</h3>
-                <p class="text-sm opacity-70 truncate">${artist.genres.slice(0, 2).join(', ') }</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <div class="hidden md:block w-20">
-                  <div class="bg-white/10 rounded-full h-1.5 overflow-hidden">
-                    <div class="bg-blue-500 h-full" style="width: ${artist.popularity}%"></div>
-                  </div>
-                </div>
-                <a 
-                  href="${artist.url}" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  class="p-2 hover:bg-white/10 rounded-full transition-colors opacity-0 group-hover:opacity-100"
-                  title="Open in Spotify"
-                >
-                  <svg class="w-5 h-5 text-green-500" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-                </svg>
-                </a>
-              </div>
-            </div>
-          `).join('');
-        }
-      }
-    } catch (error) {
-      console.error('Error loading top artists:', error);
-    }
-  };
-
-  const loadPlaylists = async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/playlists`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch playlists');
-      }
-      const data = await response.json();
-      if (data.playlists && data.playlists.length > 0) {
-        const playlistsList = document.getElementById('playlists-list');
-        if (playlistsList) {
-          // Show only top 10 playlists
-          playlistsList.innerHTML = data.playlists.slice(0, 10).map((playlist: {
-            image: string;
-            name: string;
-            trackCount: number;
-            isCollaborative: boolean;
-            isPublic: boolean;
-            url: string;
-          }, index: number) => `
-            <div class="flex items-center gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors group">
-              <span class="text-lg font-bold text-muted-foreground/30 w-6">${index + 1}</span>
-              <img src="${playlist.image || '/placeholder.png'}" alt="${playlist.name}" class="w-12 h-12 rounded shadow-sm" />
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm font-semibold truncate">${playlist.name}</h3>
-                <p class="text-xs text-muted-foreground truncate">
-                  ${playlist.trackCount} tracks${playlist.isCollaborative ? ' • Collaborative' : ''}${!playlist.isPublic ? ' • Private' : ''}
-                </p>
-              </div>
-              <a 
-                href="${playlist.url}" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                class="p-1.5 hover:bg-muted rounded-md transition-colors opacity-0 group-hover:opacity-100"
-                title="Open in Spotify"
-              >
-                <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-                </svg>
-              </a>
-            </div>
-          `).join('');
-        }
-      }
-    } catch (error) {
-      console.error('Error loading playlists:', error);
-    }
-  };
-
-  const loadAllData = async () => {
-    try {
-      showContent();
-      await Promise.all([
-        updateNowPlaying(),
-        loadTopTracks(),
-        loadTopArtists(),
-        loadPlaylists()
-      ]);
-    } catch (error) {
-      showError(error instanceof Error ? error.message : 'Failed to load Spotify data');
-    }
-  };
-
-  const toggleButtons = document.querySelectorAll('.view-toggle');
-  const viewContents = document.querySelectorAll('.view-content');
-
-  toggleButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      const viewName = button.getAttribute('data-view');
-      toggleButtons.forEach((btn) => {
-        const isActive = btn.getAttribute('data-view') === viewName;
-        btn.setAttribute('data-active', isActive.toString());
-      });
-      viewContents.forEach((content) => {
-        const contentView = content.id.replace('-view', '').replace('top-', '');
-        if (contentView === viewName) {
-          content.setAttribute('data-active', 'true');
-          content.classList.remove('hidden');
+        let timeAgo = '';
+        if (diffDays > 0) {
+          timeAgo = `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+        } else if (diffHours > 0) {
+          timeAgo = `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+        } else if (diffMins > 0) {
+          timeAgo = `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
         } else {
-          content.setAttribute('data-active', 'false');
-          content.classList.add('hidden');
+          timeAgo = 'Just now';
         }
-      });
-    });
-  });
-
-  document.getElementById('retry-button')?.addEventListener('click', loadAllData);
-
-  loadAllData();
-  
-  setInterval(updateNowPlaying, 5000);
-</script>
-
-<style>
-  /* Hardcoded theme colors from global.css */
-  .view-toggle[data-active="true"] {
-    background: oklch(0.995 0 0); /* --background */
-    color: oklch(0.2 0 0);        /* --foreground */
-    box-shadow: 0 2px 8px 0 oklch(0.9 0 0); /* --border */
-    font-weight: 600;
-    transition: background 0.2s, color 0.2s;
-  }
-  .view-toggle[data-active="false"] {
-    background: transparent;
-    color: oklch(0.5 0 0); /* --muted-foreground */
-    transition: color 0.2s;
-  }
-  .view-toggle[data-active="false"]:hover {
-    color: oklch(0.2 0 0); /* --foreground */
-  }
-  .view-toggle {
-    border-radius: 0.5rem;
-    padding: 0.375rem 1rem;
-    font-size: 0.875rem;
-    margin: 0 0.125rem;
-    cursor: pointer;
-    border: none;
-    outline: none;
-  }
-  .view-content {
-    animation: fadeIn 0.3s ease-in-out;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(4px);}
-    to   { opacity: 1; transform: translateY(0);}
-  }
-</style>
-</Layout>
-
-<script>
-  const API_BASE_URL = 'https://blogsbackend.vidyoyo.workers.dev';
-  
-  const formatTime = (ms: number) => {
-    const minutes = Math.floor(ms / 60000);
-    const seconds = Math.floor((ms % 60000) / 1000);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-  };
-
-  const hideLoading = () => {
-    document.getElementById('loading-section')?.classList.add('hidden');
-  };
-
-  const showError = (message: string) => {
-    hideLoading();
-    document.getElementById('error-section')?.classList.remove('hidden');
-    const errorMsg = document.getElementById('error-message');
-    if (errorMsg) errorMsg.textContent = message;
-  };
-
-  const showContent = () => {
-    hideLoading();
-    document.getElementById('error-section')?.classList.add('hidden');
-    document.getElementById('content-section')?.classList.remove('hidden');
+        playedTime.textContent = timeAgo;
+      }
+    } catch (error) {
+      console.error('Error loading last played:', error);
+      document.getElementById('last-played-card')?.classList.add('hidden');
+      document.getElementById('not-playing-card')?.classList.remove('hidden');
+    }
   };
 
   const updateNowPlaying = async () => {
@@ -478,12 +275,14 @@ import Layout from '../layouts/Layout.astro';
       const data = await response.json();
 
       if (!data.isPlaying || !data.name) {
+        // If nothing is playing, fetch last played song
         document.getElementById('now-playing-card')?.classList.add('hidden');
-        document.getElementById('not-playing-card')?.classList.remove('hidden');
+        await loadLastPlayed();
         return;
       }
 
       document.getElementById('not-playing-card')?.classList.add('hidden');
+      document.getElementById('last-played-card')?.classList.add('hidden');
       document.getElementById('now-playing-card')?.classList.remove('hidden');
 
       const albumArt = document.getElementById('album-art') as HTMLImageElement;
@@ -508,7 +307,7 @@ import Layout from '../layouts/Layout.astro';
     } catch (error) {
       console.error('Error updating now playing:', error);
       document.getElementById('now-playing-card')?.classList.add('hidden');
-      document.getElementById('not-playing-card')?.classList.remove('hidden');
+      await loadLastPlayed();
     }
   };
 
@@ -612,7 +411,7 @@ import Layout from '../layouts/Layout.astro';
         }
       }
     } catch (error) {
-      console.error('Error loading top artists:', error);
+      console.error('Error fetching top artists:', error);
     }
   };
 
@@ -626,7 +425,6 @@ import Layout from '../layouts/Layout.astro';
       if (data.playlists && data.playlists.length > 0) {
         const playlistsList = document.getElementById('playlists-list');
         if (playlistsList) {
-          // Show only top 10 playlists
           playlistsList.innerHTML = data.playlists.slice(0, 10).map((playlist: {
             image: string;
             name: string;
@@ -678,27 +476,83 @@ import Layout from '../layouts/Layout.astro';
     }
   };
 
-  document.getElementById('retry-button')?.addEventListener('click', loadAllData);
+  // Initialize on page load
+  document.addEventListener('astro:page-load', () => {
+    const toggleButtons = document.querySelectorAll('.view-toggle');
+    const viewContents = document.querySelectorAll('.view-content');
 
-  loadAllData();
+    toggleButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const viewName = button.getAttribute('data-view');
+        toggleButtons.forEach((btn) => {
+          const isActive = btn.getAttribute('data-view') === viewName;
+          btn.setAttribute('data-active', isActive.toString());
+        });
+        viewContents.forEach((content) => {
+          const contentView = content.id.replace('-view', '').replace('top-', '');
+          if (contentView === viewName) {
+            content.setAttribute('data-active', 'true');
+            content.classList.remove('hidden');
+          } else {
+            content.setAttribute('data-active', 'false');
+            content.classList.add('hidden');
+          }
+        });
+      });
+    });
+
+    document.getElementById('retry-button')?.addEventListener('click', loadAllData);
+
+    // Load data immediately
+    loadAllData();
+  });
   
+  // Update now playing every 5 seconds
   setInterval(updateNowPlaying, 5000);
 </script>
 
 <style>
+  .view-toggle[data-active="true"] {
+    background: oklch(0.995 0 0);
+    color: oklch(0.2 0 0);
+    box-shadow: 0 2px 8px 0 oklch(0.9 0 0);
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+  }
+  .view-toggle[data-active="false"] {
+    background: transparent;
+    color: oklch(0.5 0 0);
+    transition: color 0.2s;
+  }
+  .view-toggle[data-active="false"]:hover {
+    color: oklch(0.2 0 0);
+  }
+  .view-toggle {
+    border-radius: 0.5rem;
+    padding: 0.375rem 1rem;
+    font-size: 0.875rem;
+    margin: 0 0.125rem;
+    cursor: pointer;
+    border: none;
+    outline: none;
+  }
+  .view-content {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px);}
+    to   { opacity: 1; transform: translateY(0);}
+  }
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
-  
   .animate-spin {
     animation: spin 1s linear infinite;
   }
-  
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
   }
-  
   .animate-pulse {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }

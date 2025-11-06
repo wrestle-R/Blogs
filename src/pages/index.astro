@@ -20,35 +20,21 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
   <PageHead slot="head" title="Home" />
   
 <section class="rounded-lg border bg-gradient-to-br from-background to-muted/20 relative">
-<a 
+  <a 
     id="now-playing-badge" 
     href="/spotify"
-    class="hidden absolute top-4 right-4 group max-w-[calc(100%-2rem)]"
+    class="hidden absolute top-4 right-4 max-w-[calc(100%-2rem)]"
   >
     <div class="flex items-center gap-2.5 px-4 py-2 bg-primary/15 hover:bg-primary/25 rounded-full transition-all shadow-sm">
-      <span class="inline-block w-2.5 h-2.5 bg-primary rounded-full animate-pulse"></span>
+      <span id="playing-indicator" class="inline-block w-2.5 h-2.5 bg-primary rounded-full animate-pulse"></span>
       <div class="flex items-center gap-2 max-w-[120px] sm:max-w-[180px] md:max-w-[250px] overflow-hidden">
-        <svg class="w-4 h-4 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg id="badge-icon" class="w-4 h-4 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
         </svg>
         <div class="overflow-hidden relative">
           <span id="now-playing-text" class="text-sm font-semibold text-primary whitespace-nowrap inline-block">Now Playing</span>
         </div>
       </div>
-    </div>
-    
-    <!-- Tooltip -->
-    <div class="tooltip absolute -bottom-12 right-0 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 pointer-events-none z-50">
-      <div class="bg-popover border rounded-lg px-2.5 py-1.5 shadow-lg max-w-[160px] sm:max-w-[180px]">
-        <div class="flex items-center gap-1.5 text-xs">
-          <svg class="w-3.5 h-3.5 text-primary flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-          </svg>
-          <span class="text-foreground font-medium leading-tight">Listening now!</span>
-        </div>
-      </div>
-      <!-- Arrow -->
-      <div class="absolute -top-1 right-4 w-2 h-2 bg-popover border-l border-t rotate-45"></div>
     </div>
   </a>
   
@@ -72,9 +58,21 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
         
         const badge = document.getElementById('now-playing-badge');
         const text = document.getElementById('now-playing-text');
+        const indicator = document.getElementById('playing-indicator');
+        const icon = document.getElementById('badge-icon');
         
         if (data.isPlaying && data.name && badge && text) {
           const songName = data.name;
+          
+          // Update icon to show currently playing
+          if (icon) {
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />';
+          }
+          
+          // Show pulse animation for currently playing
+          if (indicator) {
+            indicator.classList.remove('hidden');
+          }
           
           // Check if text is too long (more than 20 characters)
           if (songName.length > 20) {
@@ -87,12 +85,78 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
           }
           
           badge.classList.remove('hidden');
+        } else {
+          // Try to get last played song
+          await checkLastPlayed();
+        }
+      }
+    } catch (error) {
+      console.log('Spotify server not available');
+    }
+  };
+
+  const checkLastPlayed = async () => {
+    try {
+      const response = await fetch('https://blogsbackend.vidyoyo.workers.dev/api/last-played');
+      if (response.ok) {
+        const data = await response.json();
+        
+        const badge = document.getElementById('now-playing-badge');
+        const text = document.getElementById('now-playing-text');
+        const indicator = document.getElementById('playing-indicator');
+        const icon = document.getElementById('badge-icon');
+        
+        if (data.name && badge && text) {
+          const songName = data.name;
+          
+          // Update icon to show last played (clock icon)
+          if (icon) {
+            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />';
+          }
+          
+          // Hide pulse animation for last played
+          if (indicator) {
+            indicator.classList.add('hidden');
+          }
+          
+          // Calculate time ago
+          const playedDate = new Date(data.playedAt);
+          const now = new Date();
+          const diffMs = now.getTime() - playedDate.getTime();
+          const diffMins = Math.floor(diffMs / 60000);
+          const diffHours = Math.floor(diffMins / 60);
+          
+          let timeAgo = '';
+          if (diffHours > 0) {
+            timeAgo = `${diffHours}h ago`;
+          } else if (diffMins > 0) {
+            timeAgo = `${diffMins}m ago`;
+          } else {
+            timeAgo = 'Just now';
+          }
+          
+          const displayText = `${songName} (${timeAgo})`;
+          
+          // Check if text is too long
+          if (displayText.length > 20) {
+            text.textContent = displayText + ' • ' + displayText + ' • ';
+            text.classList.add('scrolling-text');
+          } else {
+            text.textContent = displayText;
+            text.classList.remove('scrolling-text');
+          }
+          
+          badge.classList.remove('hidden');
         } else if (badge) {
           badge.classList.add('hidden');
         }
       }
     } catch (error) {
-      console.log('Spotify server not available');
+      console.log('Could not fetch last played song');
+      const badge = document.getElementById('now-playing-badge');
+      if (badge) {
+        badge.classList.add('hidden');
+      }
     }
   };
 
@@ -101,27 +165,6 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
     setInterval(checkNowPlaying, 10000);
   });
 </script>
-
-<style>
-  /* Scrolling animation for long song names */
-  .scrolling-text {
-    animation: scroll-text 8s linear infinite;
-  }
-
-  @keyframes scroll-text {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-50%);
-    }
-  }
-
-  /* Pause scrolling on hover to read full title */
-  #now-playing-badge:hover .scrolling-text {
-    animation-play-state: paused;
-  }
-</style>
 
 <style>
   /* Scrolling animation for long song names */
@@ -256,33 +299,6 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
 
 </Layout>
 <Analytics/>
-<script>
-  const checkNowPlaying = async () => {
-    try {
-      const response = await fetch('https://blogsbackend.vidyoyo.workers.dev/api/now-playing');
-      if (response.ok) {
-        const data = await response.json();
-        
-        const badge = document.getElementById('now-playing-badge');
-        const text = document.getElementById('now-playing-text');
-        
-        if (data.isPlaying && data.name && badge && text) {
-          text.textContent = data.name;
-          badge.classList.remove('hidden');
-        } else if (badge) {
-          badge.classList.add('hidden');
-        }
-      }
-    } catch (error) {
-      console.log('Spotify server not available');
-    }
-  };
-
-  document.addEventListener('astro:page-load', () => {
-    checkNowPlaying();
-    setInterval(checkNowPlaying, 10000);
-  });
-</script>
 
 <script >
   document.addEventListener('astro:page-load', () => {
