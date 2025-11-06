@@ -50,9 +50,15 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
 </section>
 
 <script>
+  let nowPlayingInterval: ReturnType<typeof setInterval> | undefined;
+  let lastKnownSong = '';
+
   const checkNowPlaying = async () => {
     try {
-      const response = await fetch('https://blogsbackend.vidyoyo.workers.dev/api/now-playing');
+      const response = await fetch('https://blogsbackend.vidyoyo.workers.dev/api/now-playing', {
+        cache: 'no-cache'
+      });
+      
       if (response.ok) {
         const data = await response.json();
         
@@ -64,27 +70,32 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
         if (data.isPlaying && data.name && badge && text) {
           const songName = data.name;
           
-          // Update icon to show currently playing
-          if (icon) {
-            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />';
+          // Only update DOM if song changed for better performance
+          if (songName !== lastKnownSong) {
+            lastKnownSong = songName;
+            
+            // Update icon to show currently playing
+            if (icon) {
+              icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />';
+            }
+            
+            // Show pulse animation for currently playing
+            if (indicator) {
+              indicator.classList.remove('hidden');
+            }
+            
+            // Check if text is too long (more than 20 characters)
+            if (songName.length > 20) {
+              // Duplicate text for seamless scrolling
+              text.textContent = songName + ' • ' + songName + ' • ';
+              text.classList.add('scrolling-text');
+            } else {
+              text.textContent = songName;
+              text.classList.remove('scrolling-text');
+            }
+            
+            badge.classList.remove('hidden');
           }
-          
-          // Show pulse animation for currently playing
-          if (indicator) {
-            indicator.classList.remove('hidden');
-          }
-          
-          // Check if text is too long (more than 20 characters)
-          if (songName.length > 20) {
-            // Duplicate text for seamless scrolling
-            text.textContent = songName + ' • ' + songName + ' • ';
-            text.classList.add('scrolling-text');
-          } else {
-            text.textContent = songName;
-            text.classList.remove('scrolling-text');
-          }
-          
-          badge.classList.remove('hidden');
         } else {
           // Try to get last played song
           await checkLastPlayed();
@@ -92,12 +103,16 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
       }
     } catch (error) {
       console.log('Spotify server not available');
+      await checkLastPlayed();
     }
   };
 
   const checkLastPlayed = async () => {
     try {
-      const response = await fetch('https://blogsbackend.vidyoyo.workers.dev/api/last-played');
+      const response = await fetch('https://blogsbackend.vidyoyo.workers.dev/api/last-played', {
+        cache: 'no-cache'
+      });
+      
       if (response.ok) {
         const data = await response.json();
         
@@ -109,17 +124,7 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
         if (data.name && badge && text) {
           const songName = data.name;
           
-          // Update icon to show last played (clock icon)
-          if (icon) {
-            icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />';
-          }
-          
-          // Hide pulse animation for last played
-          if (indicator) {
-            indicator.classList.add('hidden');
-          }
-          
-          // Calculate time ago
+          // Calculate time ago dynamically
           const playedDate = new Date(data.playedAt);
           const now = new Date();
           const diffMs = now.getTime() - playedDate.getTime();
@@ -137,16 +142,31 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
           
           const displayText = `${songName} (${timeAgo})`;
           
-          // Check if text is too long
-          if (displayText.length > 20) {
-            text.textContent = displayText + ' • ' + displayText + ' • ';
-            text.classList.add('scrolling-text');
-          } else {
-            text.textContent = displayText;
-            text.classList.remove('scrolling-text');
+          // Only update if changed
+          if (displayText !== lastKnownSong) {
+            lastKnownSong = displayText;
+            
+            // Update icon to show last played (clock icon)
+            if (icon) {
+              icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />';
+            }
+            
+            // Hide pulse animation for last played
+            if (indicator) {
+              indicator.classList.add('hidden');
+            }
+            
+            // Check if text is too long
+            if (displayText.length > 20) {
+              text.textContent = displayText + ' • ' + displayText + ' • ';
+              text.classList.add('scrolling-text');
+            } else {
+              text.textContent = displayText;
+              text.classList.remove('scrolling-text');
+            }
+            
+            badge.classList.remove('hidden');
           }
-          
-          badge.classList.remove('hidden');
         } else if (badge) {
           badge.classList.add('hidden');
         }
@@ -161,8 +181,23 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
   };
 
   document.addEventListener('astro:page-load', () => {
+    // Clear any existing interval
+    if (nowPlayingInterval) {
+      clearInterval(nowPlayingInterval);
+    }
+    
+    // Initial check
     checkNowPlaying();
-    setInterval(checkNowPlaying, 10000);
+    
+    // Update every second for dynamic, real-time updates
+    nowPlayingInterval = setInterval(checkNowPlaying, 1000);
+  });
+
+  // Clean up on page navigation
+  document.addEventListener('astro:before-preparation', () => {
+    if (nowPlayingInterval) {
+      clearInterval(nowPlayingInterval);
+    }
   });
 </script>
 
