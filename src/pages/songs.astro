@@ -1,0 +1,586 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+  <div class="container mx-auto px-4 py-8 max-w-5xl">
+    <!-- Back Navigation -->
+    <a 
+      href="/spotify" 
+      class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 group"
+    >
+      <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <span>Back to Spotify</span>
+    </a>
+    
+    <div class="mb-8 text-center space-y-2">
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+        I love listening to songs
+      </h1>
+      <p class="text-sm text-muted-foreground">Search and add your favorite tracks to the playlist</p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="mb-8 rounded-lg border bg-card p-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="relative flex-1">
+          <input
+            id="search-input"
+            type="text"
+            placeholder="Search for songs..."
+            class="w-full px-4 py-3 pr-10 rounded-lg border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+          />
+          <svg 
+            class="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none"
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <button
+          id="search-button"
+          class="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all font-medium whitespace-nowrap"
+        >
+          Search
+        </button>
+      </div>
+
+      <!-- Search Results -->
+      <div id="search-results" class="mt-6 hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-sm font-semibold text-muted-foreground">Search Results</h3>
+          <button id="clear-results" class="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            Clear
+          </button>
+        </div>
+        <div id="search-results-list" class="space-y-2 max-h-96 overflow-y-auto pr-2">
+          <!-- Results will be inserted here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Playlist Section -->
+    <div class="rounded-lg border bg-card shadow-sm">
+      <div class="p-6 border-b bg-gradient-to-br from-primary/5 to-transparent">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-primary/10 rounded-lg">
+              <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="text-xl font-bold">My Playlist</h2>
+              <p id="playlist-count" class="text-sm text-muted-foreground">0 songs</p>
+            </div>
+          </div>
+          <button
+            id="refresh-playlist"
+            class="p-2 hover:bg-muted rounded-lg transition-colors"
+            title="Refresh playlist"
+          >
+            <svg class="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="playlist-loading" class="p-6">
+        <div class="space-y-3">
+          <div class="flex items-center gap-4 p-4 rounded-lg bg-muted/30 animate-pulse">
+            <div class="w-12 h-12 bg-muted rounded-md"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-4 bg-muted rounded w-2/3"></div>
+              <div class="h-3 bg-muted rounded w-1/2"></div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 p-4 rounded-lg bg-muted/30 animate-pulse">
+            <div class="w-12 h-12 bg-muted rounded-md"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-4 bg-muted rounded w-3/4"></div>
+              <div class="h-3 bg-muted rounded w-1/3"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Playlist Tracks -->
+      <div id="playlist-tracks" class="hidden p-6">
+        <div id="playlist-tracks-list" class="space-y-2">
+          <!-- Tracks will be inserted here -->
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div id="playlist-empty" class="hidden p-12 text-center">
+        <svg class="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+        </svg>
+        <h3 class="text-lg font-semibold mb-2">No songs yet</h3>
+        <p class="text-sm text-muted-foreground">Search and add your favorite tracks to get started</p>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  const API_BASE_URL = 'https://blogsbackend.vidyoyo.workers.dev';
+  
+  const formatDuration = (ms: number) => {
+    const minutes = Math.floor(ms / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  let playlistTracks: any[] = [];
+  let searchTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  // Load playlist tracks
+  const loadPlaylist = async () => {
+    const playlistLoading = document.getElementById('playlist-loading');
+    const playlistTracks = document.getElementById('playlist-tracks');
+    const playlistEmpty = document.getElementById('playlist-empty');
+    const playlistTracksList = document.getElementById('playlist-tracks-list');
+    const playlistCount = document.getElementById('playlist-count');
+
+    try {
+      playlistLoading?.classList.remove('hidden');
+      playlistTracks?.classList.add('hidden');
+      playlistEmpty?.classList.add('hidden');
+
+      const response = await fetch(`${API_BASE_URL}/api/playlist-tracks?limit=50`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch playlist');
+      }
+
+      const data = await response.json();
+      
+      if (playlistCount) {
+        playlistCount.textContent = `${data.total || 0} ${data.total === 1 ? 'song' : 'songs'}`;
+      }
+
+      playlistLoading?.classList.add('hidden');
+
+      if (data.tracks && data.tracks.length > 0) {
+        (window as any).playlistTracks = data.tracks;
+        
+        if (playlistTracksList) {
+          playlistTracksList.innerHTML = data.tracks.map((track: any, index: number) => `
+            <div 
+              class="track-item flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/50 transition-all group"
+              data-track-id="${track.id}"
+            >
+              <span class="text-sm font-bold text-muted-foreground/40 w-6">${index + 1}</span>
+              <img 
+                src="${track.albumArt || '/placeholder.png'}" 
+                alt="${track.name}" 
+                class="w-12 h-12 sm:w-14 sm:h-14 rounded-md shadow-md flex-shrink-0 object-cover"
+              />
+              <div class="flex-1 min-w-0">
+                <h4 class="font-semibold text-sm sm:text-base truncate">${track.name}</h4>
+                <p class="text-xs sm:text-sm text-muted-foreground truncate">${track.artist}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="hidden sm:block text-xs text-muted-foreground font-medium">${formatDuration(track.duration)}</span>
+                <a 
+                  href="${track.url}" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  class="p-2 hover:bg-primary/10 rounded-full transition-colors flex-shrink-0"
+                  title="Open in Spotify"
+                >
+                  <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          `).join('');
+        }
+        
+        playlistTracks?.classList.remove('hidden');
+      } else {
+        playlistEmpty?.classList.remove('hidden');
+      }
+    } catch (error) {
+      console.error('Error loading playlist:', error);
+      playlistLoading?.classList.add('hidden');
+      playlistEmpty?.classList.remove('hidden');
+    }
+  };
+
+  // Add optimistic track to UI before API call
+  const addOptimisticTrack = (track: any) => {
+    const playlistTracksList = document.getElementById('playlist-tracks-list');
+    const playlistTracks = document.getElementById('playlist-tracks');
+    const playlistEmpty = document.getElementById('playlist-empty');
+    const playlistCount = document.getElementById('playlist-count');
+    
+    // Hide empty state
+    playlistEmpty?.classList.add('hidden');
+    playlistTracks?.classList.remove('hidden');
+    
+    // Get current count
+    const currentCount = (window as any).playlistTracks?.length || 0;
+    const newCount = currentCount + 1;
+    
+    // Update count
+    if (playlistCount) {
+      playlistCount.textContent = `${newCount} ${newCount === 1 ? 'song' : 'songs'}`;
+    }
+    
+    // Create optimistic track element
+    const optimisticTrack = document.createElement('div');
+    optimisticTrack.className = 'track-item flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-primary/5 border border-primary/20 transition-all animate-fade-in-up';
+    optimisticTrack.setAttribute('data-track-id', track.id);
+    optimisticTrack.setAttribute('data-optimistic', 'true');
+    optimisticTrack.innerHTML = `
+      <span class="text-sm font-bold text-primary/60 w-6">${newCount}</span>
+      <img 
+        src="${track.albumArt || '/placeholder.png'}" 
+        alt="${track.name}" 
+        class="w-12 h-12 sm:w-14 sm:h-14 rounded-md shadow-md flex-shrink-0 object-cover"
+      />
+      <div class="flex-1 min-w-0">
+        <h4 class="font-semibold text-sm sm:text-base truncate">${track.name}</h4>
+        <p class="text-xs sm:text-sm text-muted-foreground truncate">${track.artist}</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="hidden sm:block text-xs text-muted-foreground font-medium">${formatDuration(track.duration)}</span>
+        <div class="p-2 rounded-full">
+          <svg class="w-4 h-4 text-primary animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </div>
+      </div>
+    `;
+    
+    // Add to top of list
+    playlistTracksList?.prepend(optimisticTrack);
+    
+    // Scroll to top
+    playlistTracksList?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // Remove optimistic track on error
+  const removeOptimisticTrack = (trackId: string) => {
+    const optimisticTrack = document.querySelector(`[data-track-id="${trackId}"][data-optimistic="true"]`);
+    if (optimisticTrack) {
+      optimisticTrack.classList.add('opacity-0', 'scale-95');
+      setTimeout(() => optimisticTrack.remove(), 300);
+    }
+  };
+
+  // Confirm optimistic track (remove optimistic styling)
+  const confirmOptimisticTrack = (trackId: string) => {
+    const optimisticTrack = document.querySelector(`[data-track-id="${trackId}"][data-optimistic="true"]`) as HTMLElement;
+    if (optimisticTrack) {
+      optimisticTrack.removeAttribute('data-optimistic');
+      optimisticTrack.classList.remove('bg-primary/5', 'border', 'border-primary/20');
+      optimisticTrack.classList.add('hover:bg-muted/50');
+      
+      // Replace spinner with Spotify link
+      const spinner = optimisticTrack.querySelector('.animate-spin')?.parentElement;
+      if (spinner) {
+        const track = (window as any).playlistTracks?.find((t: any) => t.id === trackId);
+        if (track) {
+          spinner.outerHTML = `
+            <a 
+              href="${track.url}" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="p-2 hover:bg-primary/10 rounded-full transition-colors flex-shrink-0"
+              title="Open in Spotify"
+            >
+              <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+              </svg>
+            </a>
+          `;
+        }
+      }
+    }
+  };
+
+  // Add track to playlist
+  const addTrackToPlaylist = async (track: any, button: HTMLButtonElement) => {
+    const originalHTML = button.innerHTML;
+    
+    // Show loading state
+    button.disabled = true;
+    button.innerHTML = `
+      <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      <span>Adding...</span>
+    `;
+    
+    // Add optimistic UI
+    addOptimisticTrack(track);
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/addTrack`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ track_id: track.id })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to add track: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      
+      // Confirm optimistic track
+      confirmOptimisticTrack(track.id);
+      
+      // Update global playlist
+      if (!(window as any).playlistTracks) {
+        (window as any).playlistTracks = [];
+      }
+      (window as any).playlistTracks.unshift(track);
+      
+      // Show success
+      button.innerHTML = `
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <span>Added!</span>
+      `;
+      button.classList.remove('bg-primary/10', 'hover:bg-primary/20', 'text-primary');
+      button.classList.add('bg-green-500/10', 'text-green-600');
+      
+      // Reset after 2 seconds
+      setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.classList.remove('bg-green-500/10', 'text-green-600');
+        button.classList.add('bg-primary/10', 'hover:bg-primary/20', 'text-primary');
+        button.disabled = false;
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Error adding track:', error);
+      
+      // Remove optimistic track
+      removeOptimisticTrack(track.id);
+      
+      // Update count back
+      const playlistCount = document.getElementById('playlist-count');
+      const currentCount = (window as any).playlistTracks?.length || 0;
+      if (playlistCount) {
+        playlistCount.textContent = `${currentCount} ${currentCount === 1 ? 'song' : 'songs'}`;
+      }
+      
+      // Show error
+      button.innerHTML = `
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        <span>Failed</span>
+      `;
+      button.classList.remove('bg-primary/10', 'hover:bg-primary/20', 'text-primary');
+      button.classList.add('bg-destructive/10', 'text-destructive');
+      
+      setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.classList.remove('bg-destructive/10', 'text-destructive');
+        button.classList.add('bg-primary/10', 'hover:bg-primary/20', 'text-primary');
+        button.disabled = false;
+      }, 2000);
+    }
+  };
+
+  // Search functionality
+  const performSearch = async () => {
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const searchResults = document.getElementById('search-results');
+    const searchResultsList = document.getElementById('search-results-list');
+    
+    const query = searchInput?.value.trim();
+    
+    if (!query || query.length < 2) {
+      searchResults?.classList.add('hidden');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}&limit=10`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.suggestions && data.suggestions.length > 0) {
+        if (searchResultsList) {
+          searchResultsList.innerHTML = data.suggestions.map((track: any) => `
+            <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/30 transition-all group border border-transparent hover:border-border">
+              <img 
+                src="${track.albumArt || '/placeholder.png'}" 
+                alt="${track.name}" 
+                class="w-12 h-12 sm:w-14 sm:h-14 rounded-md shadow-sm flex-shrink-0 object-cover"
+              />
+              <div class="flex-1 min-w-0">
+                <h4 class="font-semibold text-sm sm:text-base truncate">${track.name}</h4>
+                <p class="text-xs sm:text-sm text-muted-foreground truncate">${track.artist}</p>
+                <p class="text-xs text-muted-foreground/60 truncate">${track.album}</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button 
+                  class="add-to-playlist-btn px-3 sm:px-4 py-2 text-xs font-medium bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
+                  data-track='${JSON.stringify(track)}'
+                  title="Add to playlist"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Add</span>
+                </button>
+              </div>
+            </div>
+          `).join('');
+          
+          // Attach event listeners
+          document.querySelectorAll('.add-to-playlist-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+              const btn = e.currentTarget as HTMLButtonElement;
+              const trackData = btn.dataset.track;
+              if (trackData) {
+                const track = JSON.parse(trackData);
+                addTrackToPlaylist(track, btn);
+              }
+            });
+          });
+        }
+        
+        searchResults?.classList.remove('hidden');
+      } else {
+        if (searchResultsList) {
+          searchResultsList.innerHTML = '<p class="text-sm text-muted-foreground p-4 text-center">No results found</p>';
+        }
+        searchResults?.classList.remove('hidden');
+      }
+      
+    } catch (error) {
+      console.error('Search error:', error);
+      if (searchResultsList) {
+        searchResultsList.innerHTML = `<p class="text-sm text-destructive p-4 text-center">Error: ${error instanceof Error ? error.message : 'Failed to search'}</p>`;
+      }
+      searchResults?.classList.remove('hidden');
+    }
+  };
+
+  // Initialize on page load
+  document.addEventListener('astro:page-load', () => {
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const searchButton = document.getElementById('search-button');
+    const clearResults = document.getElementById('clear-results');
+    const refreshPlaylist = document.getElementById('refresh-playlist');
+    
+    // Load playlist
+    loadPlaylist();
+    
+    // Search with debounce
+    searchInput?.addEventListener('input', () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+      searchTimeout = setTimeout(performSearch, 300);
+    });
+    
+    // Manual search
+    searchButton?.addEventListener('click', () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+      performSearch();
+    });
+    
+    // Enter key
+    searchInput?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        if (searchTimeout) {
+          clearTimeout(searchTimeout);
+        }
+        performSearch();
+      }
+    });
+    
+    // Clear results
+    clearResults?.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      document.getElementById('search-results')?.classList.add('hidden');
+    });
+    
+    // Refresh playlist
+    refreshPlaylist?.addEventListener('click', () => {
+      const icon = refreshPlaylist.querySelector('svg');
+      icon?.classList.add('animate-spin');
+      loadPlaylist().finally(() => {
+        setTimeout(() => icon?.classList.remove('animate-spin'), 500);
+      });
+    });
+  });
+</script>
+
+<style>
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in-up {
+    animation: fade-in-up 0.3s ease-out;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .animate-spin {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  .animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Smooth scrollbar */
+  #search-results-list::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  #search-results-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  #search-results-list::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border-radius: 3px;
+  }
+  
+  #search-results-list::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
+</style>
