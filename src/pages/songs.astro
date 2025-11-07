@@ -17,7 +17,7 @@ import Layout from '../layouts/Layout.astro';
     
     <div class="mb-8 text-center space-y-2">
       <h1 class="text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-        I like to listen to new songs
+        I like to listen to YOUR new songs
       </h1>
       <p class="text-base text-muted-foreground">Drop a song you like</p>
     </div>
@@ -262,11 +262,13 @@ import Layout from '../layouts/Layout.astro';
       </div>
     `;
     
-    // Add to top of list
-    playlistTracksList?.prepend(optimisticTrack);
+    // Add to bottom of list
+    playlistTracksList?.append(optimisticTrack);
     
-    // Scroll to top
-    playlistTracksList?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Scroll to the newly added track
+    setTimeout(() => {
+      optimisticTrack.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 100);
   };
 
   // Remove optimistic track on error
@@ -278,34 +280,41 @@ import Layout from '../layouts/Layout.astro';
     }
   };
 
-  // Confirm optimistic track (remove optimistic styling)
+  // Confirm optimistic track (remove optimistic styling and stop loading)
   const confirmOptimisticTrack = (trackId: string) => {
     const optimisticTrack = document.querySelector(`[data-track-id="${trackId}"][data-optimistic="true"]`) as HTMLElement;
     if (optimisticTrack) {
+      // Remove optimistic attribute and styling
       optimisticTrack.removeAttribute('data-optimistic');
-      optimisticTrack.classList.remove('bg-primary/5', 'border', 'border-primary/20');
+      optimisticTrack.classList.remove('bg-primary/5', 'border', 'border-primary/20', 'animate-fade-in-up');
       optimisticTrack.classList.add('hover:bg-muted/50');
       
       // Replace spinner with Spotify link
       const spinner = optimisticTrack.querySelector('.animate-spin')?.parentElement;
       if (spinner) {
-        const track = (window as any).playlistTracks?.find((t: any) => t.id === trackId);
-        if (track) {
-          spinner.outerHTML = `
-            <a 
-              href="${track.url}" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              class="p-2 hover:bg-primary/10 rounded-full transition-colors flex-shrink-0"
-              title="Open in Spotify"
-            >
-              <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-              </svg>
-            </a>
-          `;
-        }
+        spinner.outerHTML = `
+          <a 
+            href="https://open.spotify.com/track/${trackId}" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="p-2 hover:bg-primary/10 rounded-full transition-colors flex-shrink-0"
+            title="Open in Spotify"
+          >
+            <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+            </svg>
+          </a>
+        `;
       }
+      
+      // Update the number to reflect actual position
+      const allTracks = document.querySelectorAll('.track-item');
+      allTracks.forEach((track, index) => {
+        const numberSpan = track.querySelector('span:first-child');
+        if (numberSpan) {
+          numberSpan.textContent = (index + 1).toString();
+        }
+      });
     }
   };
 
@@ -340,14 +349,14 @@ import Layout from '../layouts/Layout.astro';
       
       const result = await response.json();
       
-      // Confirm optimistic track
-      confirmOptimisticTrack(track.id);
-      
       // Update global playlist
       if (!(window as any).playlistTracks) {
         (window as any).playlistTracks = [];
       }
-      (window as any).playlistTracks.unshift(track);
+      (window as any).playlistTracks.push(track);
+      
+      // Confirm optimistic track (stops loading)
+      confirmOptimisticTrack(track.id);
       
       // Show success
       button.innerHTML = `
