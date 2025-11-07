@@ -5,18 +5,20 @@ import Layout from '../layouts/Layout.astro';
 <Layout >
   <div class="container mx-auto px-4 py-8 max-w-4xl">
     <div class="mb-8 text-center space-y-4">
-      <h1 class="text-3xl font-bold mb-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">My Spotify</h1>
-      <p class="text-sm text-muted-foreground">Real-time music stats and listening history</p>
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+        What I'm Vibing To
+      </h1>
+      <p class="text-base text-muted-foreground">Live from my Spotify feed</p>
       
       <!-- Navigation to Songs Page -->
       <a 
         href="/songs" 
-        class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-all font-medium text-sm shadow-sm hover:shadow-md"
+        class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 hover:scale-105 transition-all font-medium text-sm shadow-sm hover:shadow-md"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        <span>My Playlist</span>
+        <span>Add a song you like</span>
       </a>
     </div>
     
@@ -288,31 +290,6 @@ import Layout from '../layouts/Layout.astro';
           <div id="playlists-view" class="view-content hidden" data-active="false">
             <div id="playlists-list" class="space-y-2"></div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Search Box Section -->
-    <div class="mt-8 rounded-lg border bg-card p-6">
-      <h2 class="text-lg font-semibold mb-4">Search Spotify Tracks</h2>
-      <div class="space-y-4">
-        <div class="flex gap-3">
-          <input
-            id="search-input"
-            type="text"
-            placeholder="Search for tracks (min 2 characters)..."
-            class="flex-1 px-4 py-2 rounded-md border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-          <button
-            id="search-button"
-            class="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity font-medium"
-          >
-            Search
-          </button>
-        </div>
-        <div id="search-results" class="space-y-2 hidden">
-          <h3 class="text-sm font-semibold text-muted-foreground">Results:</h3>
-          <div id="search-results-list" class="space-y-2"></div>
         </div>
       </div>
     </div>
@@ -705,249 +682,6 @@ import Layout from '../layouts/Layout.astro';
   document.addEventListener('astro:before-preparation', () => {
     if (updateInterval) {
       clearInterval(updateInterval);
-    }
-  });
-
-  // Search functionality
-  const searchInput = document.getElementById('search-input') as HTMLInputElement;
-  const searchButton = document.getElementById('search-button') as HTMLButtonElement;
-  const searchResults = document.getElementById('search-results');
-  const searchResultsList = document.getElementById('search-results-list');
-
-  let searchTimeout: ReturnType<typeof setTimeout> | null = null;
-
-  const performSearch = async () => {
-    const query = searchInput?.value.trim();
-    
-    console.log('=== SEARCH INITIATED ===');
-    console.log('Query:', query);
-    
-    if (!query || query.length < 2) {
-      console.log('Query too short, hiding results');
-      searchResults?.classList.add('hidden');
-      return;
-    }
-
-    try {
-      const searchUrl = `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}&limit=6`;
-      console.log('Fetching URL:', searchUrl);
-      
-      const response = await fetch(searchUrl);
-      console.log('Response Status:', response.status);
-      console.log('Response OK:', response.ok);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log('=== SEARCH RESPONSE DATA ===');
-      console.log('Full Response:', JSON.stringify(data, null, 2));
-      console.log('Query:', data.query);
-      console.log('Count:', data.count);
-      console.log('Suggestions:', data.suggestions);
-      
-      if (data.suggestions && data.suggestions.length > 0) {
-        console.log('=== INDIVIDUAL TRACKS ===');
-        data.suggestions.forEach((track: any, index: number) => {
-          console.log(`Track ${index + 1}:`, {
-            id: track.id,
-            name: track.name,
-            artist: track.artist,
-            album: track.album,
-            albumArt: track.albumArt,
-            duration: track.duration,
-            url: track.url,
-            previewUrl: track.previewUrl
-          });
-        });
-        
-        // Display results
-        if (searchResultsList) {
-          searchResultsList.innerHTML = data.suggestions.map((track: any) => `
-            <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-all group">
-              <img src="${track.albumArt || '/placeholder.png'}" alt="${track.name}" class="w-12 h-12 rounded-md shadow-sm flex-shrink-0" />
-              <div class="flex-1 min-w-0">
-                <h4 class="font-semibold text-sm truncate">${track.name}</h4>
-                <p class="text-xs text-muted-foreground truncate">${track.artist} • ${track.album}</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <button 
-                  class="add-to-playlist-btn px-3 py-1.5 text-xs font-medium bg-primary/10 hover:bg-primary/20 text-primary rounded-md transition-all flex items-center gap-1.5"
-                  data-track-id="${track.id}"
-                  data-track-name="${track.name}"
-                  data-track-artist="${track.artist}"
-                  title="Add to playlist"
-                >
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>Add</span>
-                </button>
-                <a 
-                  href="${track.url}" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  class="p-2 hover:bg-primary/10 rounded-full transition-colors flex-shrink-0"
-                  title="Open in Spotify"
-                >
-                  <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-                  </svg>
-                </a>
-              </div>
-            </div>
-          `).join('');
-          
-          // Attach event listeners to all Add buttons
-          document.querySelectorAll('.add-to-playlist-btn').forEach(button => {
-            button.addEventListener('click', async (e) => {
-              const btn = e.currentTarget as HTMLButtonElement;
-              const trackId = btn.dataset.trackId;
-              const trackName = btn.dataset.trackName;
-              const trackArtist = btn.dataset.trackArtist;
-              
-              if (!trackId) return;
-              
-              console.log('=== ADD TO PLAYLIST INITIATED ===');
-              console.log('Track ID:', trackId);
-              console.log('Track Name:', trackName);
-              console.log('Track Artist:', trackArtist);
-              
-              // Disable button and show loading state
-              btn.disabled = true;
-              const originalHTML = btn.innerHTML;
-              btn.innerHTML = `
-                <svg class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span>Adding...</span>
-              `;
-              
-              try {
-                const addUrl = `${API_BASE_URL}/api/addTrack`;
-                console.log('Posting to URL:', addUrl);
-                
-                const response = await fetch(addUrl, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({ track_id: trackId })
-                });
-                
-                console.log('Response Status:', response.status);
-                console.log('Response OK:', response.ok);
-                
-                if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                console.log('=== ADD TO PLAYLIST RESPONSE ===');
-                console.log('Full Response:', JSON.stringify(result, null, 2));
-                console.log('Status:', result.status);
-                console.log('Message:', result.message);
-                
-                // Show success state
-                btn.innerHTML = `
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Added!</span>
-                `;
-                btn.classList.remove('bg-primary/10', 'hover:bg-primary/20');
-                btn.classList.add('bg-green-500/10', 'text-green-600');
-                
-                // Reset button after 2 seconds
-                setTimeout(() => {
-                  btn.innerHTML = originalHTML;
-                  btn.classList.remove('bg-green-500/10', 'text-green-600');
-                  btn.classList.add('bg-primary/10', 'hover:bg-primary/20');
-                  btn.disabled = false;
-                }, 2000);
-                
-              } catch (error) {
-                console.error('=== ADD TO PLAYLIST ERROR ===');
-                console.error('Error Type:', error instanceof Error ? error.constructor.name : typeof error);
-                console.error('Error Message:', error instanceof Error ? error.message : error);
-                console.error('Full Error:', error);
-                
-                // Show error state
-                btn.innerHTML = `
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                  <span>Failed</span>
-                `;
-                btn.classList.remove('bg-primary/10', 'hover:bg-primary/20');
-                btn.classList.add('bg-destructive/10', 'text-destructive');
-                
-                // Reset button after 2 seconds
-                setTimeout(() => {
-                  btn.innerHTML = originalHTML;
-                  btn.classList.remove('bg-destructive/10', 'text-destructive');
-                  btn.classList.add('bg-primary/10', 'hover:bg-primary/20');
-                  btn.disabled = false;
-                }, 2000);
-              }
-            });
-          });
-        }
-        
-        searchResults?.classList.remove('hidden');
-      } else {
-        console.log('No tracks found');
-        if (searchResultsList) {
-          searchResultsList.innerHTML = '<p class="text-sm text-muted-foreground p-3">No results found</p>';
-        }
-        searchResults?.classList.remove('hidden');
-      }
-      
-    } catch (error) {
-      console.error('=== SEARCH ERROR ===');
-      console.error('Error Type:', error instanceof Error ? error.constructor.name : typeof error);
-      console.error('Error Message:', error instanceof Error ? error.message : error);
-      console.error('Full Error:', error);
-      
-      if (searchResultsList) {
-        searchResultsList.innerHTML = `<p class="text-sm text-destructive p-3">Error: ${error instanceof Error ? error.message : 'Failed to search'}</p>`;
-      }
-      searchResults?.classList.remove('hidden');
-    }
-  };
-
-  // Debounced search on input (autocomplete)
-  searchInput?.addEventListener('input', () => {
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    
-    const query = searchInput.value.trim();
-    console.log('Input changed:', query);
-    
-    // Debounce: wait 300ms after user stops typing
-    searchTimeout = setTimeout(() => {
-      console.log('Debounce complete, triggering search');
-      performSearch();
-    }, 200);
-  });
-
-  // Also allow manual search button click
-  searchButton?.addEventListener('click', () => {
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    performSearch();
-  });
-  
-  // Allow Enter key to trigger immediate search
-  searchInput?.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
-      performSearch();
     }
   });
 </script>
