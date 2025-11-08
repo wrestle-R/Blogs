@@ -141,6 +141,22 @@ import Layout from '../layouts/Layout.astro';
   let playlistTracks: any[] = [];
   let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
+  // Helpers
+  const uniqueById = (arr: any[] = []) => {
+    const seen = new Set();
+    return arr.filter(item => {
+      if (!item || !item.id) return false;
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    });
+  };
+
+  const isTrackInPlaylist = (id: string) => {
+    const list = (window as any).playlistTracks || [];
+    return list.some((t: any) => t && t.id === id);
+  };
+  
   // Load playlist tracks
   const loadPlaylist = async () => {
     const playlistLoading = document.getElementById('playlist-loading');
@@ -161,18 +177,21 @@ import Layout from '../layouts/Layout.astro';
       }
 
       const data = await response.json();
+      // Deduplicate incoming playlist tracks and update global
+      const tracks = uniqueById(data.tracks || []);
+      (window as any).playlistTracks = tracks;
       
       if (playlistCount) {
-        playlistCount.textContent = `${data.total || 0} ${data.total === 1 ? 'song' : 'songs'}`;
+        const total = tracks.length || 0;
+        playlistCount.textContent = `${total} ${total === 1 ? 'song' : 'songs'}`;
       }
-
+ 
       playlistLoading?.classList.add('hidden');
 
-      if (data.tracks && data.tracks.length > 0) {
-        (window as any).playlistTracks = data.tracks;
+      if (tracks && tracks.length > 0) {
         
         if (playlistTracksList) {
-          playlistTracksList.innerHTML = data.tracks.map((track: any, index: number) => `
+          playlistTracksList.innerHTML = tracks.map((track: any, index: number) => `
             <div 
               class="track-item flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/50 transition-all group"
               data-track-id="${track.id}"
@@ -203,18 +222,18 @@ import Layout from '../layouts/Layout.astro';
               </div>
             </div>
           `).join('');
-        }
-        
+         }
+         
         playlistTracks?.classList.remove('hidden');
-      } else {
-        playlistEmpty?.classList.remove('hidden');
-      }
-    } catch (error) {
-      console.error('Error loading playlist:', error);
-      playlistLoading?.classList.add('hidden');
-      playlistEmpty?.classList.remove('hidden');
-    }
-  };
+       } else {
+         playlistEmpty?.classList.remove('hidden');
+       }
+     } catch (error) {
+       console.error('Error loading playlist:', error);
+       playlistLoading?.classList.add('hidden');
+       playlistEmpty?.classList.remove('hidden');
+     }
+   };
 
   // Add optimistic track to UI before API call
   const addOptimisticTrack = (track: any) => {
@@ -302,7 +321,6 @@ import Layout from '../layouts/Layout.astro';
           >
             <svg class="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-            </svg>
           </a>
         `;
       }
@@ -321,6 +339,14 @@ import Layout from '../layouts/Layout.astro';
   // Add track to playlist
   const addTrackToPlaylist = async (track: any, button: HTMLButtonElement) => {
     const originalHTML = button.innerHTML;
+    
+    if (isTrackInPlaylist(track.id) || !!document.querySelector(`[data-track-id="${track.id}"][data-optimistic="true"]`)) {
+      button.disabled = true;
+      button.innerHTML = `<span>Added</span>`;
+      button.classList.remove('bg-primary/10', 'hover:bg-primary/20', 'text-primary');
+      button.classList.add('bg-muted/10', 'text-muted-foreground', 'cursor-not-allowed');
+      return;
+    }
     
     // Show loading state
     button.disabled = true;
@@ -349,32 +375,25 @@ import Layout from '../layouts/Layout.astro';
       
       const result = await response.json();
       
-      // Update global playlist
       if (!(window as any).playlistTracks) {
         (window as any).playlistTracks = [];
       }
-      (window as any).playlistTracks.push(track);
+      if (!isTrackInPlaylist(track.id)) {
+        (window as any).playlistTracks.push(track);
+      }
       
-      // Confirm optimistic track (stops loading)
       confirmOptimisticTrack(track.id);
-      
-      // Show success
-      button.innerHTML = `
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-        </svg>
-        <span>Added!</span>
-      `;
+
+      button.disabled = true;
+      button.innerHTML = `<span>Added</span>`;
       button.classList.remove('bg-primary/10', 'hover:bg-primary/20', 'text-primary');
-      button.classList.add('bg-green-500/10', 'text-green-600');
-      
-      // Reset after 2 seconds
-      setTimeout(() => {
-        button.innerHTML = originalHTML;
-        button.classList.remove('bg-green-500/10', 'text-green-600');
-        button.classList.add('bg-primary/10', 'hover:bg-primary/20', 'text-primary');
-        button.disabled = false;
-      }, 2000);
+      button.classList.add('bg-muted/10', 'text-muted-foreground', 'cursor-not-allowed');
+
+      loadPlaylist().finally(() => {
+        if (document.getElementById('search-results')?.classList.contains('hidden') === false) {
+          performSearch();
+       }
+      });
       
     } catch (error) {
       console.error('Error adding track:', error);
@@ -430,37 +449,71 @@ import Layout from '../layouts/Layout.astro';
       
       const data = await response.json();
       
-      if (data.suggestions && data.suggestions.length > 0) {
+      // Deduplicate suggestions but do NOT filter out already-added tracks;
+      // instead show them with a disabled "Added" button.
+      const raw = data.suggestions || [];
+      const uniqueSuggestions = uniqueById(raw);
+
+      if (uniqueSuggestions && uniqueSuggestions.length > 0) {
         if (searchResultsList) {
-          searchResultsList.innerHTML = data.suggestions.map((track: any) => `
-            <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/30 transition-all group border border-transparent hover:border-border">
-              <img 
-                src="${track.albumArt || '/placeholder.png'}" 
-                alt="${track.name}" 
-                class="w-12 h-12 sm:w-14 sm:h-14 rounded-md shadow-sm flex-shrink-0 object-cover"
-              />
-              <div class="flex-1 min-w-0">
-                <h4 class="font-semibold text-sm sm:text-base truncate">${track.name}</h4>
-                <p class="text-xs sm:text-sm text-muted-foreground truncate">${track.artist}</p>
-                <p class="text-xs text-muted-foreground/60 truncate">${track.album}</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <button 
-                  class="add-to-playlist-btn px-3 sm:px-4 py-2 text-xs font-medium bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
-                  data-track='${JSON.stringify(track)}'
-                  title="Add to playlist"
-                >
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>Add</span>
-                </button>
-              </div>
-            </div>
-          `).join('');
+          searchResultsList.innerHTML = uniqueSuggestions.map((track: any) => {
+            const alreadyAdded = isTrackInPlaylist(track.id) || !!document.querySelector(`[data-track-id="${track.id}"][data-optimistic="true"]`);
+            if (alreadyAdded) {
+              return `
+                <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/30 transition-all group border border-transparent hover:border-border">
+                  <img 
+                    src="${track.albumArt || '/placeholder.png'}" 
+                    alt="${track.name}" 
+                    class="w-12 h-12 sm:w-14 sm:h-14 rounded-md shadow-sm flex-shrink-0 object-cover"
+                  />
+                  <div class="flex-1 min-w-0">
+                    <h4 class="font-semibold text-sm sm:text-base truncate">${track.name}</h4>
+                    <p class="text-xs sm:text-sm text-muted-foreground truncate">${track.artist}</p>
+                    <p class="text-xs text-muted-foreground/60 truncate">${track.album}</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button 
+                      disabled
+                      class="px-3 sm:px-4 py-2 text-xs font-medium rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap text-muted-foreground bg-muted/10 cursor-not-allowed"
+                      title="Already added"
+                    >
+                      <span>Added</span>
+                    </button>
+                  </div>
+                </div>
+              `;
+            } else {
+              return `
+                <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/30 transition-all group border border-transparent hover:border-border">
+                  <img 
+                    src="${track.albumArt || '/placeholder.png'}" 
+                    alt="${track.name}" 
+                    class="w-12 h-12 sm:w-14 sm:h-14 rounded-md shadow-sm flex-shrink-0 object-cover"
+                  />
+                  <div class="flex-1 min-w-0">
+                    <h4 class="font-semibold text-sm sm:text-base truncate">${track.name}</h4>
+                    <p class="text-xs sm:text-sm text-muted-foreground truncate">${track.artist}</p>
+                    <p class="text-xs text-muted-foreground/60 truncate">${track.album}</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button 
+                      class="add-to-playlist-btn px-3 sm:px-4 py-2 text-xs font-medium bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
+                      data-track='${JSON.stringify(track)}'
+                      title="Add to playlist"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                      </svg>
+                      <span>Add</span>
+                    </button>
+                  </div>
+                </div>
+              `;
+            }
+          }).join('');
           
-          // Attach event listeners
-          document.querySelectorAll('.add-to-playlist-btn').forEach(button => {
+          // Attach event listeners only to enabled add buttons
+          document.querySelectorAll('.add-to-playlist-btn:not([disabled])').forEach(button => {
             button.addEventListener('click', (e) => {
               const btn = e.currentTarget as HTMLButtonElement;
               const trackData = btn.dataset.track;
