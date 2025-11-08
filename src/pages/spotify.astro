@@ -718,7 +718,11 @@ import Layout from '../layouts/Layout.astro';
 
   const loadTopTracks = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/top-tracks`);
+      // Determine limit based on screen size
+      const isMobile = window.innerWidth < 768;
+      const limit = isMobile ? 5 : 10;
+      
+      const response = await fetch(`${API_BASE_URL}/api/top-tracks?limit=${limit}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch top tracks');
@@ -774,7 +778,11 @@ import Layout from '../layouts/Layout.astro';
 
   const loadTopArtists = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/top-artists`);
+      // Determine limit based on screen size
+      const isMobile = window.innerWidth < 768;
+      const limit = isMobile ? 5 : 10;
+      
+      const response = await fetch(`${API_BASE_URL}/api/top-artists?limit=${limit}`);
       
       if (!response.ok) {
         throw new Error('Failed to fetch top artists');
@@ -824,6 +832,10 @@ import Layout from '../layouts/Layout.astro';
 
   const loadPlaylists = async () => {
     try {
+      // Determine limit based on screen size
+      const isMobile = window.innerWidth < 768;
+      const limit = isMobile ? 5 : 10;
+      
       const response = await fetch(`${API_BASE_URL}/api/playlists`);
       if (!response.ok) {
         throw new Error('Failed to fetch playlists');
@@ -832,7 +844,7 @@ import Layout from '../layouts/Layout.astro';
       if (data.playlists && data.playlists.length > 0) {
         const playlistsList = document.getElementById('playlists-list');
         if (playlistsList) {
-          playlistsList.innerHTML = data.playlists.slice(0, 10).map((playlist: {
+          playlistsList.innerHTML = data.playlists.slice(0, limit).map((playlist: {
             image: string;
             name: string;
             trackCount: number;
@@ -884,12 +896,33 @@ import Layout from '../layouts/Layout.astro';
   };
 
   let updateInterval: ReturnType<typeof setInterval> | undefined;
+  let lastScreenSize: 'mobile' | 'desktop' | null = null;
+
+  // Function to detect screen size change
+  const getScreenSize = (): 'mobile' | 'desktop' => {
+    return window.innerWidth < 768 ? 'mobile' : 'desktop';
+  };
+
+  // Function to reload data if screen size category changed
+  const handleResize = () => {
+    const currentSize = getScreenSize();
+    if (lastScreenSize !== null && lastScreenSize !== currentSize) {
+      // Screen size category changed, reload the lists
+      loadTopTracks();
+      loadTopArtists();
+      loadPlaylists();
+    }
+    lastScreenSize = currentSize;
+  };
 
   // Initialize on page load
   document.addEventListener('astro:page-load', () => {
     // Initialize audio players
     nowPlayingPlayer = new AudioPlayer('now');
     lastPlayedPlayer = new AudioPlayer('last');
+
+    // Set initial screen size
+    lastScreenSize = getScreenSize();
 
     const toggleButtons = document.querySelectorAll('.view-toggle');
     const viewContents = document.querySelectorAll('.view-content');
@@ -916,6 +949,9 @@ import Layout from '../layouts/Layout.astro';
 
     document.getElementById('retry-button')?.addEventListener('click', loadAllData);
 
+    // Add resize listener
+    window.addEventListener('resize', handleResize);
+
     // Load data immediately
     loadAllData();
 
@@ -933,6 +969,7 @@ import Layout from '../layouts/Layout.astro';
     if (updateInterval) {
       clearInterval(updateInterval);
     }
+    window.removeEventListener('resize', handleResize);
   });
 </script>
 

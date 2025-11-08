@@ -141,6 +141,9 @@ import Layout from '../layouts/Layout.astro';
   let playlistTracks: any[] = [];
   let searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
+  // LocalStorage key for user-added tracks
+  const USER_TRACKS_KEY = 'userAddedTracks';
+
   // Helpers
   const uniqueById = (arr: any[] = []) => {
     const seen = new Set();
@@ -155,6 +158,49 @@ import Layout from '../layouts/Layout.astro';
   const isTrackInPlaylist = (id: string) => {
     const list = (window as any).playlistTracks || [];
     return list.some((t: any) => t && t.id === id);
+  };
+
+  // Get user-added tracks from localStorage
+  const getUserAddedTracks = (): Set<string> => {
+    try {
+      const stored = localStorage.getItem(USER_TRACKS_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return new Set(Array.isArray(parsed) ? parsed : []);
+      }
+    } catch (error) {
+      console.error('Error reading user tracks from localStorage:', error);
+    }
+    return new Set();
+  };
+
+  // Save user-added tracks to localStorage
+  const saveUserAddedTracks = (tracks: Set<string>) => {
+    try {
+      localStorage.setItem(USER_TRACKS_KEY, JSON.stringify(Array.from(tracks)));
+    } catch (error) {
+      console.error('Error saving user tracks to localStorage:', error);
+    }
+  };
+
+  // Add track ID to user's list
+  const addUserTrack = (trackId: string) => {
+    const userTracks = getUserAddedTracks();
+    userTracks.add(trackId);
+    saveUserAddedTracks(userTracks);
+  };
+
+  // Remove track ID from user's list
+  const removeUserTrack = (trackId: string) => {
+    const userTracks = getUserAddedTracks();
+    userTracks.delete(trackId);
+    saveUserAddedTracks(userTracks);
+  };
+
+  // Check if user added this track
+  const isUserAddedTrack = (trackId: string): boolean => {
+    const userTracks = getUserAddedTracks();
+    return userTracks.has(trackId);
   };
   
   // Load playlist tracks
@@ -191,7 +237,9 @@ import Layout from '../layouts/Layout.astro';
       if (tracks && tracks.length > 0) {
         
         if (playlistTracksList) {
-          playlistTracksList.innerHTML = tracks.map((track: any, index: number) => `
+          playlistTracksList.innerHTML = tracks.map((track: any, index: number) => {
+            const canDelete = isUserAddedTrack(track.id);
+            return `
             <div 
               class="track-item flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/50 transition-all group"
               data-track-id="${track.id}"
@@ -208,6 +256,17 @@ import Layout from '../layouts/Layout.astro';
               </div>
               <div class="flex items-center gap-2">
                 <span class="hidden sm:block text-xs text-muted-foreground font-medium">${formatDuration(track.duration)}</span>
+                ${canDelete ? `
+                  <button 
+                    class="delete-track-btn p-2 hover:bg-destructive/10 rounded-full transition-colors flex-shrink-0 opacity-0 group-hover:opacity-100"
+                    data-track-id="${track.id}"
+                    title="Remove from playlist"
+                  >
+                    <svg class="w-4 h-4 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                ` : ''}
                 <a 
                   href="${track.url}" 
                   target="_blank" 
@@ -221,7 +280,18 @@ import Layout from '../layouts/Layout.astro';
                 </a>
               </div>
             </div>
-          `).join('');
+          `}).join('');
+
+          // Attach delete event listeners
+          document.querySelectorAll('.delete-track-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+              const btn = e.currentTarget as HTMLButtonElement;
+              const trackId = btn.dataset.trackId;
+              if (trackId) {
+                deleteTrackFromPlaylist(trackId, btn);
+              }
+            });
+          });
          }
          
         playlistTracks?.classList.remove('hidden');
@@ -340,9 +410,10 @@ import Layout from '../layouts/Layout.astro';
   const addTrackToPlaylist = async (track: any, button: HTMLButtonElement) => {
     const originalHTML = button.innerHTML;
     
+    // Frontend validation: Check if already in playlist or being added
     if (isTrackInPlaylist(track.id) || !!document.querySelector(`[data-track-id="${track.id}"][data-optimistic="true"]`)) {
       button.disabled = true;
-      button.innerHTML = `<span>Added</span>`;
+      button.innerHTML = `<span>Already Added</span>`;
       button.classList.remove('bg-primary/10', 'hover:bg-primary/20', 'text-primary');
       button.classList.add('bg-muted/10', 'text-muted-foreground', 'cursor-not-allowed');
       return;
@@ -369,11 +440,29 @@ import Layout from '../layouts/Layout.astro';
         body: JSON.stringify({ track_id: track.id })
       });
       
-      if (!response.ok) {
-        throw new Error(`Failed to add track: ${response.status}`);
+      const result = await response.json();
+      
+      // Handle duplicate error from backend
+      if (response.status === 409) {
+        // Remove optimistic UI
+        removeOptimisticTrack(track.id);
+        
+        button.disabled = true;
+        button.innerHTML = `<span>Already in Playlist</span>`;
+        button.classList.remove('bg-primary/10', 'hover:bg-primary/20', 'text-primary');
+        button.classList.add('bg-muted/10', 'text-muted-foreground', 'cursor-not-allowed');
+        
+        // Refresh to sync state
+        await loadPlaylist();
+        return;
       }
       
-      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || `Failed to add track: ${response.status}`);
+      }
+      
+      // Track was successfully added - save to localStorage
+      addUserTrack(track.id);
       
       if (!(window as any).playlistTracks) {
         (window as any).playlistTracks = [];
@@ -389,6 +478,7 @@ import Layout from '../layouts/Layout.astro';
       button.classList.remove('bg-primary/10', 'hover:bg-primary/20', 'text-primary');
       button.classList.add('bg-muted/10', 'text-muted-foreground', 'cursor-not-allowed');
 
+      // Reload playlist to show delete button for user's track
       loadPlaylist().finally(() => {
         if (document.getElementById('search-results')?.classList.contains('hidden') === false) {
           performSearch();
@@ -427,6 +517,97 @@ import Layout from '../layouts/Layout.astro';
     }
   };
 
+  // Delete track from playlist
+  const deleteTrackFromPlaylist = async (trackId: string, button: HTMLButtonElement) => {
+    // Verify user owns this track
+    if (!isUserAddedTrack(trackId)) {
+      console.error('Cannot delete track not added by user');
+      return;
+    }
+
+    const originalHTML = button.innerHTML;
+    const trackElement = button.closest('.track-item') as HTMLElement;
+    
+    // Show loading state
+    button.disabled = true;
+    button.innerHTML = `
+      <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+    `;
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/removeTrack`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ track_id: trackId })
+      });
+      
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || `Failed to remove track: ${response.status}`);
+      }
+      
+      // Remove from localStorage
+      removeUserTrack(trackId);
+      
+      // Remove from UI with animation
+      trackElement.classList.add('opacity-0', 'scale-95');
+      setTimeout(() => {
+        trackElement.remove();
+        
+        // Update playlist array
+        if ((window as any).playlistTracks) {
+          (window as any).playlistTracks = (window as any).playlistTracks.filter((t: any) => t.id !== trackId);
+        }
+        
+        // Update count
+        const playlistCount = document.getElementById('playlist-count');
+        const currentCount = (window as any).playlistTracks?.length || 0;
+        if (playlistCount) {
+          playlistCount.textContent = `${currentCount} ${currentCount === 1 ? 'song' : 'songs'}`;
+        }
+        
+        // Re-number tracks
+        const allTracks = document.querySelectorAll('.track-item');
+        allTracks.forEach((track, index) => {
+          const numberSpan = track.querySelector('span:first-child');
+          if (numberSpan) {
+            numberSpan.textContent = (index + 1).toString();
+          }
+        });
+        
+        // Show empty state if no tracks left
+        if (currentCount === 0) {
+          document.getElementById('playlist-tracks')?.classList.add('hidden');
+          document.getElementById('playlist-empty')?.classList.remove('hidden');
+        }
+
+        // Refresh search results to update button states
+        if (document.getElementById('search-results')?.classList.contains('hidden') === false) {
+          performSearch();
+        }
+      }, 300);
+      
+    } catch (error) {
+      console.error('Error deleting track:', error);
+      
+      // Show error
+      button.innerHTML = `
+        <svg class="w-4 h-4 text-destructive" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      `;
+      
+      setTimeout(() => {
+        button.innerHTML = originalHTML;
+        button.disabled = false;
+      }, 2000);
+    }
+  };
+
   // Search functionality
   const performSearch = async () => {
     const searchInput = document.getElementById('search-input') as HTMLInputElement;
@@ -458,18 +639,31 @@ import Layout from '../layouts/Layout.astro';
         if (searchResultsList) {
           searchResultsList.innerHTML = uniqueSuggestions.map((track: any) => {
             const alreadyAdded = isTrackInPlaylist(track.id) || !!document.querySelector(`[data-track-id="${track.id}"][data-optimistic="true"]`);
+            
+            // Helper to escape HTML special characters
+            const escapeHtml = (text: string) => {
+              const div = document.createElement('div');
+              div.textContent = text;
+              return div.innerHTML;
+            };
+            
+            // Escape track data for safe HTML insertion
+            const escapedName = escapeHtml(track.name || '');
+            const escapedArtist = escapeHtml(track.artist || '');
+            const escapedAlbum = escapeHtml(track.album || '');
+            
             if (alreadyAdded) {
               return `
                 <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/30 transition-all group border border-transparent hover:border-border">
                   <img 
                     src="${track.albumArt || '/placeholder.png'}" 
-                    alt="${track.name}" 
+                    alt="${escapedName}" 
                     class="w-12 h-12 sm:w-14 sm:h-14 rounded-md shadow-sm flex-shrink-0 object-cover"
                   />
                   <div class="flex-1 min-w-0">
-                    <h4 class="font-semibold text-sm sm:text-base truncate">${track.name}</h4>
-                    <p class="text-xs sm:text-sm text-muted-foreground truncate">${track.artist}</p>
-                    <p class="text-xs text-muted-foreground/60 truncate">${track.album}</p>
+                    <h4 class="font-semibold text-sm sm:text-base truncate">${escapedName}</h4>
+                    <p class="text-xs sm:text-sm text-muted-foreground truncate">${escapedArtist}</p>
+                    <p class="text-xs text-muted-foreground/60 truncate">${escapedAlbum}</p>
                   </div>
                   <div class="flex items-center gap-2">
                     <button 
@@ -487,18 +681,18 @@ import Layout from '../layouts/Layout.astro';
                 <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/30 transition-all group border border-transparent hover:border-border">
                   <img 
                     src="${track.albumArt || '/placeholder.png'}" 
-                    alt="${track.name}" 
+                    alt="${escapedName}" 
                     class="w-12 h-12 sm:w-14 sm:h-14 rounded-md shadow-sm flex-shrink-0 object-cover"
                   />
                   <div class="flex-1 min-w-0">
-                    <h4 class="font-semibold text-sm sm:text-base truncate">${track.name}</h4>
-                    <p class="text-xs sm:text-sm text-muted-foreground truncate">${track.artist}</p>
-                    <p class="text-xs text-muted-foreground/60 truncate">${track.album}</p>
+                    <h4 class="font-semibold text-sm sm:text-base truncate">${escapedName}</h4>
+                    <p class="text-xs sm:text-sm text-muted-foreground truncate">${escapedArtist}</p>
+                    <p class="text-xs text-muted-foreground/60 truncate">${escapedAlbum}</p>
                   </div>
                   <div class="flex items-center gap-2">
                     <button 
                       class="add-to-playlist-btn px-3 sm:px-4 py-2 text-xs font-medium bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
-                      data-track='${JSON.stringify(track)}'
+                      data-track-id="${track.id}"
                       title="Add to playlist"
                     >
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -512,13 +706,20 @@ import Layout from '../layouts/Layout.astro';
             }
           }).join('');
           
+          // Store track data separately to avoid JSON parsing in data attributes
+          const trackDataMap = new Map();
+          uniqueSuggestions.forEach((track: any) => {
+            trackDataMap.set(track.id, track);
+          });
+          (window as any).searchTrackDataMap = trackDataMap;
+          
           // Attach event listeners only to enabled add buttons
           document.querySelectorAll('.add-to-playlist-btn:not([disabled])').forEach(button => {
             button.addEventListener('click', (e) => {
               const btn = e.currentTarget as HTMLButtonElement;
-              const trackData = btn.dataset.track;
-              if (trackData) {
-                const track = JSON.parse(trackData);
+              const trackId = btn.dataset.trackId;
+              if (trackId && trackDataMap.has(trackId)) {
+                const track = trackDataMap.get(trackId);
                 addTrackToPlaylist(track, btn);
               }
             });
@@ -626,6 +827,19 @@ import Layout from '../layouts/Layout.astro';
   
   .animate-pulse {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Track item transitions */
+  .track-item {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .track-item.opacity-0 {
+    opacity: 0;
+  }
+
+  .track-item.scale-95 {
+    transform: scale(0.95);
   }
 
   /* Smooth scrollbar */
