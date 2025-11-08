@@ -179,7 +179,7 @@ import Layout from '../layouts/Layout.astro';
             
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-2">
-                <h3 id="song-name" class="text-2xl font-bold truncate flex-1"></h3>
+                <h3 id="song-name" class="text-2xl font-bold flex-1 break-words"></h3>
                 <a 
                   id="spotify-link-title" 
                   href="" 
@@ -193,10 +193,10 @@ import Layout from '../layouts/Layout.astro';
                   </svg>
                 </a>
               </div>
-              <p id="artist-name" class="text-base text-muted-foreground mb-1 truncate"></p>
-              <p id="album-name" class="text-sm text-muted-foreground/70 truncate"></p>
+              <p id="artist-name" class="text-base text-muted-foreground mb-1 break-words"></p>
+              <p id="album-name" class="text-sm text-muted-foreground/70 break-words"></p>
               
-              <div class="mt-4 space-y-2">
+              <div class="mt-4 space-y-3">
                 <div class="flex items-center gap-3 text-xs">
                   <span id="current-time" class="text-muted-foreground font-medium min-w-[2.5rem]">0:00</span>
                   <div class="flex-1 bg-muted rounded-full h-1.5 overflow-hidden">
@@ -204,9 +204,42 @@ import Layout from '../layouts/Layout.astro';
                   </div>
                   <span id="total-time" class="text-muted-foreground font-medium min-w-[2.5rem]">0:00</span>
                 </div>
+                
+                <!-- Audio Player Controls -->
+                <div id="now-playing-player" class="hidden">
+                  <div class="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                    <button 
+                      id="now-play-pause-btn" 
+                      class="w-9 h-9 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors flex-shrink-0"
+                      title="Play preview"
+                    >
+                      <svg id="now-play-icon" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                      <svg id="now-pause-icon" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                      </svg>
+                    </button>
+                    <div class="flex-1 min-w-0">
+                      <input 
+                        id="now-audio-seek" 
+                        type="range" 
+                        min="0" 
+                        max="100" 
+                        value="0" 
+                        class="w-full h-1.5 bg-muted rounded-full appearance-none cursor-pointer audio-seek-slider"
+                      />
+                      <div class="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                        <span id="now-audio-current">0:00</span>
+                        <span id="now-audio-duration">0:30</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+          <audio id="now-audio-element" preload="auto"></audio>
         </div>
 
         <div id="last-played-card" class="hidden">
@@ -220,7 +253,7 @@ import Layout from '../layouts/Layout.astro';
             
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-2">
-                <h3 id="last-song-name" class="text-2xl font-bold truncate flex-1"></h3>
+                <h3 id="last-song-name" class="text-2xl font-bold flex-1 break-words"></h3>
                 <a 
                   id="last-spotify-link-title" 
                   href="" 
@@ -234,11 +267,44 @@ import Layout from '../layouts/Layout.astro';
                   </svg>
                 </a>
               </div>
-              <p id="last-artist-name" class="text-base text-muted-foreground mb-1 truncate"></p>
-              <p id="last-album-name" class="text-sm text-muted-foreground/70 truncate"></p>
+              <p id="last-artist-name" class="text-base text-muted-foreground mb-1 break-words"></p>
+              <p id="last-album-name" class="text-sm text-muted-foreground/70 break-words"></p>
               <p id="last-played-time" class="text-xs text-muted-foreground/60 mt-3 font-medium"></p>
+              
+              <!-- Audio Player Controls -->
+              <div id="last-played-player" class="hidden mt-4">
+                <div class="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                  <button 
+                    id="last-play-pause-btn" 
+                    class="w-9 h-9 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors flex-shrink-0"
+                    title="Play preview"
+                  >
+                    <svg id="last-play-icon" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    <svg id="last-pause-icon" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                    </svg>
+                  </button>
+                  <div class="flex-1 min-w-0">
+                    <input 
+                      id="last-audio-seek" 
+                      type="range" 
+                      min="0" 
+                      max="100" 
+                      value="0" 
+                      class="w-full h-1.5 bg-muted rounded-full appearance-none cursor-pointer audio-seek-slider"
+                    />
+                    <div class="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                      <span id="last-audio-current">0:00</span>
+                      <span id="last-audio-duration">0:30</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+          <audio id="last-audio-element" preload="auto"></audio>
         </div>
 
         <div id="not-playing-card" class="hidden text-center py-12">
@@ -304,6 +370,140 @@ import Layout from '../layouts/Layout.astro';
     const seconds = Math.floor((ms % 60000) / 1000);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
+
+  const formatAudioTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Audio player class to handle playback
+  class AudioPlayer {
+    private audio: HTMLAudioElement;
+    private playPauseBtn: HTMLButtonElement;
+    private playIcon: HTMLElement;
+    private pauseIcon: HTMLElement;
+    private seekSlider: HTMLInputElement;
+    private currentTimeEl: HTMLElement;
+    private durationEl: HTMLElement;
+    private playerContainer: HTMLElement;
+    private previewUrl: string | null = null;
+
+    constructor(prefix: 'now' | 'last') {
+      this.audio = document.getElementById(`${prefix}-audio-element`) as HTMLAudioElement;
+      this.playPauseBtn = document.getElementById(`${prefix}-play-pause-btn`) as HTMLButtonElement;
+      this.playIcon = document.getElementById(`${prefix}-play-icon`) as HTMLElement;
+      this.pauseIcon = document.getElementById(`${prefix}-pause-icon`) as HTMLElement;
+      this.seekSlider = document.getElementById(`${prefix}-audio-seek`) as HTMLInputElement;
+      this.currentTimeEl = document.getElementById(`${prefix}-audio-current`) as HTMLElement;
+      this.durationEl = document.getElementById(`${prefix}-audio-duration`) as HTMLElement;
+      
+      // Handle different ID patterns for the container
+      if (prefix === 'now') {
+        this.playerContainer = document.getElementById('now-playing-player') as HTMLElement;
+      } else {
+        this.playerContainer = document.getElementById('last-played-player') as HTMLElement;
+      }
+
+      this.setupEventListeners();
+    }
+
+    private setupEventListeners() {
+      // Play/Pause button
+      this.playPauseBtn?.addEventListener('click', () => {
+        if (this.audio.paused) {
+          this.play();
+        } else {
+          this.pause();
+        }
+      });
+
+      // Seek slider
+      this.seekSlider?.addEventListener('input', (e) => {
+        const target = e.target as HTMLInputElement;
+        const time = (parseFloat(target.value) / 100) * this.audio.duration;
+        this.audio.currentTime = time;
+      });
+
+      // Audio events
+      this.audio?.addEventListener('loadedmetadata', () => {
+        if (this.durationEl) {
+          this.durationEl.textContent = formatAudioTime(this.audio.duration);
+        }
+        this.seekSlider.max = '100';
+      });
+
+      this.audio?.addEventListener('timeupdate', () => {
+        if (!isNaN(this.audio.duration)) {
+          const progress = (this.audio.currentTime / this.audio.duration) * 100;
+          this.seekSlider.value = progress.toString();
+          
+          if (this.currentTimeEl) {
+            this.currentTimeEl.textContent = formatAudioTime(this.audio.currentTime);
+          }
+        }
+      });
+
+      this.audio?.addEventListener('ended', () => {
+        this.showPlayIcon();
+        this.seekSlider.value = '0';
+        if (this.currentTimeEl) {
+          this.currentTimeEl.textContent = '0:00';
+        }
+      });
+
+      this.audio?.addEventListener('error', () => {
+        console.error('Audio playback error');
+      });
+    }
+
+    async loadPreview(previewUrl: string | null) {
+      this.previewUrl = previewUrl;
+      
+      if (previewUrl) {
+        this.audio.src = previewUrl;
+        this.audio.load();
+        this.playerContainer?.classList.remove('hidden');
+      } else {
+        this.playerContainer?.classList.add('hidden');
+      }
+    }
+
+    play() {
+      if (this.previewUrl) {
+        this.audio.play();
+        this.showPauseIcon();
+      }
+    }
+
+    pause() {
+      this.audio.pause();
+      this.showPlayIcon();
+    }
+
+    private showPlayIcon() {
+      this.playIcon?.classList.remove('hidden');
+      this.pauseIcon?.classList.add('hidden');
+    }
+
+    private showPauseIcon() {
+      this.playIcon?.classList.add('hidden');
+      this.pauseIcon?.classList.remove('hidden');
+    }
+
+    reset() {
+      this.pause();
+      this.audio.currentTime = 0;
+      this.seekSlider.value = '0';
+      if (this.currentTimeEl) {
+        this.currentTimeEl.textContent = '0:00';
+      }
+    }
+  }
+
+  // Global audio player instances
+  let nowPlayingPlayer: AudioPlayer | null = null;
+  let lastPlayedPlayer: AudioPlayer | null = null;
 
   const hideLoading = () => {
     document.getElementById('loading-section')?.classList.add('hidden');
@@ -395,6 +595,29 @@ import Layout from '../layouts/Layout.astro';
         }
         playedTime.textContent = timeAgo;
       }
+
+      // Load audio preview
+      if (lastPlayedPlayer) {
+        if (data.previewUrl) {
+          await lastPlayedPlayer.loadPreview(data.previewUrl);
+        } else if (data.songUrl) {
+          // Extract track ID from Spotify URL and fetch preview
+          const trackIdMatch = data.songUrl.match(/track\/([a-zA-Z0-9]+)/);
+          if (trackIdMatch) {
+            const trackId = trackIdMatch[1];
+            try {
+              const previewResponse = await fetch(`${API_BASE_URL}/api/preview/${trackId}`);
+              const previewData = await previewResponse.json();
+              
+              if (previewData.preview_url) {
+                await lastPlayedPlayer.loadPreview(previewData.preview_url);
+              }
+            } catch (error) {
+              console.error('Error fetching preview URL:', error);
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error('Error loading last played:', error);
       document.getElementById('last-played-card')?.classList.add('hidden');
@@ -463,6 +686,29 @@ import Layout from '../layouts/Layout.astro';
       if (progressBar) progressBar.style.width = `${progress}%`;
       if (currentTime) currentTime.textContent = formatTime(data.progress);
       if (totalTime) totalTime.textContent = formatTime(data.duration);
+
+      // Load audio preview
+      if (nowPlayingPlayer) {
+        if (data.previewUrl) {
+          await nowPlayingPlayer.loadPreview(data.previewUrl);
+        } else if (data.songUrl) {
+          // Extract track ID from Spotify URL and fetch preview
+          const trackIdMatch = data.songUrl.match(/track\/([a-zA-Z0-9]+)/);
+          if (trackIdMatch) {
+            const trackId = trackIdMatch[1];
+            try {
+              const previewResponse = await fetch(`${API_BASE_URL}/api/preview/${trackId}`);
+              const previewData = await previewResponse.json();
+              
+              if (previewData.preview_url) {
+                await nowPlayingPlayer.loadPreview(previewData.preview_url);
+              }
+            } catch (error) {
+              console.error('Error fetching preview URL:', error);
+            }
+          }
+        }
+      }
     } catch (error) {
       console.error('Error updating now playing:', error);
       document.getElementById('now-playing-card')?.classList.add('hidden');
@@ -641,6 +887,10 @@ import Layout from '../layouts/Layout.astro';
 
   // Initialize on page load
   document.addEventListener('astro:page-load', () => {
+    // Initialize audio players
+    nowPlayingPlayer = new AudioPlayer('now');
+    lastPlayedPlayer = new AudioPlayer('last');
+
     const toggleButtons = document.querySelectorAll('.view-toggle');
     const viewContents = document.querySelectorAll('.view-content');
 
@@ -749,4 +999,53 @@ import Layout from '../layouts/Layout.astro';
   .skeleton-item:nth-child(3) .animate-pulse { animation-delay: 0.2s; }
   .skeleton-item:nth-child(4) .animate-pulse { animation-delay: 0.3s; }
   .skeleton-item:nth-child(5) .animate-pulse { animation-delay: 0.4s; }
+
+  /* Audio seek slider */
+  .audio-seek-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+  }
+  
+  .audio-seek-slider::-webkit-slider-track {
+    background: hsl(var(--muted));
+    border-radius: 9999px;
+    height: 6px;
+  }
+  
+  .audio-seek-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: hsl(var(--primary));
+    cursor: pointer;
+    margin-top: -4px;
+    transition: transform 0.2s;
+  }
+  
+  .audio-seek-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+  
+  .audio-seek-slider::-moz-range-track {
+    background: hsl(var(--muted));
+    border-radius: 9999px;
+    height: 6px;
+  }
+  
+  .audio-seek-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: hsl(var(--primary));
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s;
+  }
+  
+  .audio-seek-slider::-moz-range-thumb:hover {
+    transform: scale(1.2);
+  }
 </style>
