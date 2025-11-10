@@ -158,15 +158,9 @@
                     const rect = wrapper.getBoundingClientRect();
                     const clickX = e.clientX - rect.left;
                     const clickPosition = (clickX / rect.width) * 100;
-                    
-                    // Determine which fret was clicked
-                    // Click before first fret line = open string (fret 0 = open note)
-                    // Click after first fret line but before second = fret 1
-                    // Click after second fret line but before third = fret 2, etc.
-                    
+ 
                     let fretNumber = 0; // Open string by default
                     
-                    // Find which fret we're in
                     for (let i = 0; i < fretPositions.length; i++) {
                         if (clickPosition >= fretPositions[i]) {
                             fretNumber = i + 1; // After fret line i means we're on fret i+1
