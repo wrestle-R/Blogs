@@ -2,6 +2,7 @@
 import BlogCard from '@/components/BlogCard.astro'
 import Link from '@/components/Link.astro'
 import PageHead from '@/components/PageHead.astro'
+import VirtualGuitar from '@/components/VirtualGuitar.astro'
 import { buttonVariants } from '@/components/ui/button'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
@@ -221,6 +222,8 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
     animation-play-state: paused;
   }
 </style>
+
+  <VirtualGuitar />
 
   <section class="flex flex-col gap-y-6">
     <div class="flex items-center justify-between">

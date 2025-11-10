@@ -1,0 +1,196 @@
+---
+// Minimalistic Guitar Display
+---
+
+<section class="guitar-section">
+    <div class="fretboard">
+        <!-- Fret markers with even spacing -->
+        <div class="fret-markers">
+            <div class="fret-line" style="left: 8.33%;"></div>
+            <div class="fret-line" style="left: 16.67%;"></div>
+            <div class="fret-line" style="left: 25%;"></div>
+            <div class="fret-line" style="left: 33.33%;"></div>
+            <div class="fret-line" style="left: 41.67%;"></div>
+            <div class="fret-line" style="left: 50%;"></div>
+            <div class="fret-line" style="left: 58.33%;"></div>
+            <div class="fret-line" style="left: 66.67%;"></div>
+            <div class="fret-line" style="left: 75%;"></div>
+            <div class="fret-line" style="left: 83.33%;"></div>
+            <div class="fret-line" style="left: 91.67%;"></div>
+        </div>
+        
+        <!-- Strings -->
+        <div class="strings-container">
+            <div class="string-row">
+                <span class="string-label">E</span>
+                <div class="string thickest"></div>
+            </div>
+            <div class="string-row">
+                <span class="string-label">A</span>
+                <div class="string thick"></div>
+            </div>
+            <div class="string-row">
+                <span class="string-label">D</span>
+                <div class="string medium"></div>
+            </div>
+            <div class="string-row">
+                <span class="string-label">G</span>
+                <div class="string thin"></div>
+            </div>
+            <div class="string-row">
+                <span class="string-label">B</span>
+                <div class="string thinner"></div>
+            </div>
+            <div class="string-row">
+                <span class="string-label">E</span>
+                <div class="string thinnest"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style is:global>
+    .guitar-section {
+        width: 100%;
+        margin: 2rem 0;
+    }
+
+    .fretboard {
+        position: relative;
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+        min-height: 250px;
+        padding: 2rem 0 2rem 2rem;
+        display: flex;
+        flex-direction: column;
+        background: oklch(0.995 0 0);
+        border-radius: 0.75rem;
+        border: 1px solid oklch(0.9 0 0);
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+        overflow: hidden;
+    }
+
+    :root[data-theme='dark'] .fretboard {
+        background: oklch(0.16 0 0);
+        border-color: oklch(1 0 0 / 8%);
+    }
+
+    .fret-markers {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .fret-line {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: oklch(0.85 0 0);
+        opacity: 0.4;
+    }
+
+    :root[data-theme='dark'] .fret-line {
+        background: oklch(0.3 0 0);
+        opacity: 0.6;
+    }
+
+    .strings-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        gap: 1rem;
+        position: relative;
+        flex: 1;
+        z-index: 2;
+    }
+
+    .string-row {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        position: relative;
+        width: 100%;
+    }
+
+    .string-label {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: oklch(0.25 0 0);
+        min-width: 1rem;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    :root[data-theme='dark'] .string-label {
+        color: oklch(0.9 0 0);
+    }
+
+    .string {
+        flex: 1;
+        min-width: 0;
+        background: linear-gradient(to bottom,
+            oklch(0.5 0 0 / 0.8),
+            oklch(0.5 0 0),
+            oklch(0.5 0 0 / 0.8)
+        );
+        border-radius: 1px;
+        box-shadow: 0 2px 4px oklch(0.2 0 0 / 0.2),
+                    inset 0 1px 0 oklch(0.995 0 0 / 0.1);
+    }
+
+    :root[data-theme='dark'] .string {
+        background: linear-gradient(to bottom,
+            oklch(0.65 0 0 / 0.9),
+            oklch(0.65 0 0),
+            oklch(0.65 0 0 / 0.9)
+        );
+        box-shadow: 0 2px 4px oklch(0 0 0 / 0.5),
+                    inset 0 1px 0 oklch(0.95 0 0 / 0.2);
+    }
+
+    .string.thickest {
+        height: 3px;
+    }
+
+    .string.thick {
+        height: 2.75px;
+    }
+
+    .string.medium {
+        height: 2.5px;
+    }
+
+    .string.thin {
+        height: 2px;
+    }
+
+    .string.thinner {
+        height: 1.6px;
+    }
+
+    .string.thinnest {
+        height: 1.5px;
+    }
+
+    @media (max-width: 768px) {
+        .fretboard {
+            min-height: 200px;
+            padding: 1.5rem 0 1.5rem 1.5rem;
+        }
+
+        .string-label {
+            font-size: 1rem;
+            min-width: 1.5rem;
+        }
+
+        .string-row {
+            gap: 1rem;
+        }
+    }
+</style>
