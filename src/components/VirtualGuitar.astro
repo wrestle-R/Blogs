@@ -84,25 +84,33 @@
     if (typeof window !== 'undefined') {
         let sampler: Tone.Sampler | null = null;
         let isAudioInitialized = false;
+        let samplerLoadedPromise: Promise<void> | null = null;
 
         // Initialize Tone.js sampler
         async function initAudio() {
             if (!isAudioInitialized) {
                 await Tone.start();
-                sampler = new Tone.Sampler({
-                    urls: {
-                        A2: "A2.mp3",
-                        A3: "A3.mp3",
-                        A4: "A4.mp3",
-                        C3: "C3.mp3",
-                        C4: "C4.mp3",
-                    },
-                    baseUrl: "https://tonejs.github.io/audio/salamander/",
-                    onload: () => {
-                        console.log("Guitar samples loaded");
-                    }
-                }).toDestination();
+                samplerLoadedPromise = new Promise((resolve) => {
+                    sampler = new Tone.Sampler({
+                        urls: {
+                            A2: "A2.mp3",
+                            A3: "A3.mp3",
+                            A4: "A4.mp3",
+                            C3: "C3.mp3",
+                            C4: "C4.mp3",
+                        },
+                        baseUrl: "https://tonejs.github.io/audio/salamander/",
+                        onload: () => {
+                            console.log("Guitar samples loaded");
+                            resolve();
+                        }
+                    }).toDestination();
+                });
                 isAudioInitialized = true;
+            }
+            // Wait for samples to load
+            if (samplerLoadedPromise) {
+                await samplerLoadedPromise;
             }
         }
 
@@ -141,7 +149,7 @@
             // Function to play note using Tone.js
             async function playNote(noteName: string) {
                 await initAudio();
-                if (sampler && sampler.loaded) {
+                if (sampler) {
                     const noteWithOctave = noteOctaveMap[noteName] || 'C3';
                     sampler.triggerAttackRelease(noteWithOctave, "0.5");
                 }
