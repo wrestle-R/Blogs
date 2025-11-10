@@ -22,42 +22,45 @@
         <!-- Strings -->
         <div class="strings-container">
             <div class="string-row">
-                <span class="string-label">E</span>
-                <div class="string-wrapper">
-                    <div class="string thickest" data-string="E4"></div>
+                <span class="string-label clickable" data-note="E">E</span>
+                <div class="string-wrapper" data-open-note="E">
+                    <div class="string thickest"></div>
                 </div>
             </div>
             <div class="string-row">
-                <span class="string-label">A</span>
-                <div class="string-wrapper">
-                    <div class="string thick" data-string="A3"></div>
+                <span class="string-label clickable" data-note="A">A</span>
+                <div class="string-wrapper" data-open-note="A">
+                    <div class="string thick"></div>
                 </div>
             </div>
             <div class="string-row">
-                <span class="string-label">D</span>
-                <div class="string-wrapper">
-                    <div class="string medium" data-string="D3"></div>
+                <span class="string-label clickable" data-note="D">D</span>
+                <div class="string-wrapper" data-open-note="D">
+                    <div class="string medium"></div>
                 </div>
             </div>
             <div class="string-row">
-                <span class="string-label">G</span>
-                <div class="string-wrapper">
-                    <div class="string thin" data-string="G2"></div>
+                <span class="string-label clickable" data-note="G">G</span>
+                <div class="string-wrapper" data-open-note="G">
+                    <div class="string thin"></div>
                 </div>
             </div>
             <div class="string-row">
-                <span class="string-label">B</span>
-                <div class="string-wrapper">
-                    <div class="string thinner" data-string="B2"></div>
+                <span class="string-label clickable" data-note="B">B</span>
+                <div class="string-wrapper" data-open-note="B">
+                    <div class="string thinner"></div>
                 </div>
             </div>
             <div class="string-row">
-                <span class="string-label">E</span>
-                <div class="string-wrapper">
-                    <div class="string thinnest" data-string="E2"></div>
+                <span class="string-label clickable" data-note="E">E</span>
+                <div class="string-wrapper" data-open-note="E">
+                    <div class="string thinnest"></div>
                 </div>
             </div>
         </div>
+        
+        <!-- Note Display -->
+        <div class="note-display" id="noteDisplay"></div>
     </div>
 </section>
 
@@ -65,13 +68,112 @@
     if (typeof window !== 'undefined') {
         document.addEventListener('DOMContentLoaded', () => {
             const wrappers = document.querySelectorAll('.string-wrapper');
+            const stringLabels = document.querySelectorAll('.string-label.clickable');
+            const noteDisplay = document.getElementById('noteDisplay');
             
+            // Note frequencies (Hz) - Using middle octave for simplicity
+            const noteFrequencies: { [key: string]: number } = {
+                'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13, 'E': 329.63, 
+                'F': 349.23, 'F#': 369.99, 'G': 392.00, 'G#': 415.30, 'A': 440.00, 
+                'A#': 466.16, 'B': 493.88
+            };
+            
+            // Chromatic scale
+            const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+            
+            // Fret positions (percentage) - These are the fret LINES
+            const fretPositions = [15.25, 27.17, 38.56, 49.85, 56.72, 62.63, 70.85, 78.42, 85.40, 91.82, 100.00];
+            
+            // Function to get note based on open string and fret number
+            function getNote(openNote: string, fretNumber: number): string {
+                const noteIndex = notes.indexOf(openNote);
+                const newNoteIndex = (noteIndex + fretNumber) % 12;
+                return notes[newNoteIndex];
+            }
+            
+            // Function to play note using Web Audio API
+            function playNote(frequency: number, duration: number = 300) {
+                const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = frequency;
+                oscillator.type = 'triangle'; // Triangle wave sounds more guitar-like
+                
+                // ADSR envelope for more natural sound
+                const now = audioContext.currentTime;
+                gainNode.gain.setValueAtTime(0, now);
+                gainNode.gain.linearRampToValueAtTime(0.3, now + 0.01); // Attack
+                gainNode.gain.exponentialRampToValueAtTime(0.2, now + 0.05); // Decay
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration / 1000); // Release
+                
+                oscillator.start(now);
+                oscillator.stop(now + duration / 1000);
+            }
+            
+            // Function to display note
+            function displayNote(noteName: string) {
+                if (noteDisplay) {
+                    noteDisplay.textContent = noteName;
+                    noteDisplay.classList.add('show');
+                    
+                    setTimeout(() => {
+                        noteDisplay.classList.remove('show');
+                    }, 300);
+                }
+            }
+            
+            // String label click handlers
+            stringLabels.forEach((label: any) => {
+                label.addEventListener('click', (e: any) => {
+                    e.stopPropagation();
+                    const noteName = label.getAttribute('data-note');
+                    const frequency = noteFrequencies[noteName];
+                    
+                    if (frequency) {
+                        playNote(frequency, 300);
+                        displayNote(noteName);
+                    }
+                });
+            });
+            
+            // String wrapper click handlers
             wrappers.forEach((wrapper: any) => {
                 wrapper.addEventListener('click', (e: any) => {
                     const string = wrapper.querySelector('.string') as any;
-                    const rect = string.getBoundingClientRect();
+                    const rect = wrapper.getBoundingClientRect();
                     const clickX = e.clientX - rect.left;
                     const clickPosition = (clickX / rect.width) * 100;
+                    
+                    // Determine which fret was clicked
+                    // Click before first fret line = open string (fret 0 = open note)
+                    // Click after first fret line but before second = fret 1
+                    // Click after second fret line but before third = fret 2, etc.
+                    
+                    let fretNumber = 0; // Open string by default
+                    
+                    // Find which fret we're in
+                    for (let i = 0; i < fretPositions.length; i++) {
+                        if (clickPosition >= fretPositions[i]) {
+                            fretNumber = i + 1; // After fret line i means we're on fret i+1
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    // Get the open note from the wrapper
+                    const openNote = wrapper.getAttribute('data-open-note');
+                    const notePlayed = getNote(openNote, fretNumber);
+                    const frequency = noteFrequencies[notePlayed];
+                    
+                    // Play the sound
+                    if (frequency) {
+                        playNote(frequency, 300);
+                        displayNote(notePlayed);
+                    }
                     
                     // Create vibration effect
                     (wrapper as any).style.setProperty('--vibration-origin', clickPosition + '%');
@@ -107,6 +209,46 @@
         border: 1px solid oklch(0.9 0 0);
         transition: background-color 0.3s ease, border-color 0.3s ease;
         overflow: hidden;
+    }
+
+    .note-display {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 4rem;
+        font-weight: bold;
+        color: oklch(0.3 0 0);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s ease;
+        z-index: 10;
+        text-shadow: 0 2px 8px oklch(0 0 0 / 0.2);
+    }
+
+    .note-display.show {
+        opacity: 0.8;
+        animation: notePopup 0.3s ease-out;
+    }
+
+    @keyframes notePopup {
+        0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0;
+        }
+        50% {
+            transform: translate(-50%, -50%) scale(1.1);
+            opacity: 1;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0.8;
+        }
+    }
+
+    :root[data-theme='dark'] .note-display {
+        color: oklch(0.9 0 0);
+        text-shadow: 0 2px 8px oklch(0 0 0 / 0.5);
     }
 
     :root[data-theme='dark'] .fretboard {
@@ -183,8 +325,22 @@
         flex-shrink: 0;
     }
 
+    .string-label.clickable {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .string-label.clickable:hover {
+        color: oklch(0.45 0.15 250);
+        transform: scale(1.1);
+    }
+
     :root[data-theme='dark'] .string-label {
         color: oklch(0.9 0 0);
+    }
+
+    :root[data-theme='dark'] .string-label.clickable:hover {
+        color: oklch(0.7 0.15 250);
     }
 
     .string {
