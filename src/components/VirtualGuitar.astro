@@ -79,22 +79,58 @@
 </section>
 
 <script>
+    import * as Tone from 'tone';
+
     if (typeof window !== 'undefined') {
+        let sampler: Tone.Sampler | null = null;
+        let isAudioInitialized = false;
+
+        // Initialize Tone.js sampler
+        async function initAudio() {
+            if (!isAudioInitialized) {
+                await Tone.start();
+                sampler = new Tone.Sampler({
+                    urls: {
+                        A2: "A2.mp3",
+                        A3: "A3.mp3",
+                        A4: "A4.mp3",
+                        C3: "C3.mp3",
+                        C4: "C4.mp3",
+                    },
+                    baseUrl: "https://tonejs.github.io/audio/salamander/",
+                    onload: () => {
+                        console.log("Guitar samples loaded");
+                    }
+                }).toDestination();
+                isAudioInitialized = true;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const wrappers = document.querySelectorAll('.string-wrapper');
             const stringLabels = document.querySelectorAll('.string-label.clickable');
             const noteDisplay = document.getElementById('noteDisplay');
             
-            const noteFrequencies: { [key: string]: number } = {
-                'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13, 'E': 329.63, 
-                'F': 349.23, 'F#': 369.99, 'G': 392.00, 'G#': 415.30, 'A': 440.00, 
-                'A#': 466.16, 'B': 493.88
-            };
-            
             const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
             
-
             const fretPositions = [15.25, 27.17, 38.56, 49.85, 58.17, 66.74, 74.64, 81.91, 88.61, 95.91, 100.00];
+            
+            // Map simple notes to octave-based notes for Tone.js
+            // Using available samples - Tone.js will pitch shift to play missing notes
+            const noteOctaveMap: { [key: string]: string } = {
+                'C': 'C3',
+                'C#': 'C#3',
+                'D': 'D3',
+                'D#': 'D#3',
+                'E': 'E3',
+                'F': 'F3',
+                'F#': 'F#3',
+                'G': 'G3',
+                'G#': 'G#3',
+                'A': 'A3',
+                'A#': 'A#3',
+                'B': 'B3',
+            };
             
             function getNote(openNote: string, fretNumber: number): string {
                 const noteIndex = notes.indexOf(openNote);
@@ -102,27 +138,13 @@
                 return notes[newNoteIndex];
             }
             
-            // Function to play note using Web Audio API
-            function playNote(frequency: number, duration: number = 300) {
-                const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                oscillator.frequency.value = frequency;
-                oscillator.type = 'triangle'; // Triangle wave sounds more guitar-like
-                
-                // ADSR envelope for more natural sound
-                const now = audioContext.currentTime;
-                gainNode.gain.setValueAtTime(0, now);
-                gainNode.gain.linearRampToValueAtTime(0.3, now + 0.01); // Attack
-                gainNode.gain.exponentialRampToValueAtTime(0.2, now + 0.05); // Decay
-                gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration / 1000); // Release
-                
-                oscillator.start(now);
-                oscillator.stop(now + duration / 1000);
+            // Function to play note using Tone.js
+            async function playNote(noteName: string) {
+                await initAudio();
+                if (sampler && sampler.loaded) {
+                    const noteWithOctave = noteOctaveMap[noteName] || 'C3';
+                    sampler.triggerAttackRelease(noteWithOctave, "0.5");
+                }
             }
             
             // Function to display note
@@ -139,13 +161,12 @@
             
             // String label click handlers
             stringLabels.forEach((label: any) => {
-                label.addEventListener('click', (e: any) => {
+                label.addEventListener('click', async (e: any) => {
                     e.stopPropagation();
                     const noteName = label.getAttribute('data-note');
-                    const frequency = noteFrequencies[noteName];
                     
-                    if (frequency) {
-                        playNote(frequency, 300);
+                    if (noteName) {
+                        await playNote(noteName);
                         displayNote(noteName);
                     }
                 });
@@ -153,38 +174,32 @@
             
             // String wrapper click handlers
             wrappers.forEach((wrapper: any) => {
-                wrapper.addEventListener('click', (e: any) => {
+                wrapper.addEventListener('click', async (e: any) => {
                     const string = wrapper.querySelector('.string') as any;
                     const rect = wrapper.getBoundingClientRect();
                     const clickX = e.clientX - rect.left;
                     const clickPosition = (clickX / rect.width) * 100;
  
-                    let fretNumber = 0; // Open string by default
+                    let fretNumber = 0;
                     
                     for (let i = 0; i < fretPositions.length; i++) {
                         if (clickPosition >= fretPositions[i]) {
-                            fretNumber = i + 1; // After fret line i means we're on fret i+1
+                            fretNumber = i + 1;
                         } else {
                             break;
                         }
                     }
                     
-                    // Get the open note from the wrapper
                     const openNote = wrapper.getAttribute('data-open-note');
                     const notePlayed = getNote(openNote, fretNumber);
-                    const frequency = noteFrequencies[notePlayed];
                     
-                    // Play the sound
-                    if (frequency) {
-                        playNote(frequency, 300);
-                        displayNote(notePlayed);
-                    }
+                    await playNote(notePlayed);
+                    displayNote(notePlayed);
                     
                     // Create vibration effect
                     (wrapper as any).style.setProperty('--vibration-origin', clickPosition + '%');
                     string.classList.add('vibrating');
                     
-                    // Remove the animation class after it completes
                     setTimeout(() => {
                         string.classList.remove('vibrating');
                     }, 800);
