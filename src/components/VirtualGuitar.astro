@@ -4,7 +4,6 @@
 
 <section class="guitar-section">
     <div class="fretboard">
-        <!-- Fret markers with even spacing -->
 <div class="fret-line" style="left: 8.25%;"></div>  <!-- 1st -->
 <div class="fret-line" style="left: 22.17%;"></div> <!-- 2nd -->
 <div class="fret-line" style="left: 33.56%;"></div> <!-- 3rd -->
@@ -16,6 +15,20 @@
 <div class="fret-line" style="left: 85.40%;"></div> <!-- 9th -->
 <div class="fret-line" style="left: 91.82%;"></div> <!-- 10th -->
 <div class="fret-line" style="left: 100.00%;"></div> <!-- 12th -->
+
+        <div class="fret-dots">
+            <!-- Fret 3 dot -->
+            <div class="fret-dot" style="left: 27.87%;"></div>
+            <!-- Fret 5 dot -->
+            <div class="fret-dot" style="left: 48.89%;"></div>
+            <!-- Fret 7 dot -->
+            <div class="fret-dot" style="left: 66.74%;"></div>
+            <!-- Fret 9 dot -->
+            <div class="fret-dot" style="left: 81.91%;"></div>
+            <!-- Fret 12 double dots -->
+            <div class="fret-dot double-top" style="left: 95.91%;"></div>
+            <div class="fret-dot double-bottom" style="left: 95.91%;"></div>
+        </div>
 
 
         
@@ -71,20 +84,17 @@
             const stringLabels = document.querySelectorAll('.string-label.clickable');
             const noteDisplay = document.getElementById('noteDisplay');
             
-            // Note frequencies (Hz) - Using middle octave for simplicity
             const noteFrequencies: { [key: string]: number } = {
                 'C': 261.63, 'C#': 277.18, 'D': 293.66, 'D#': 311.13, 'E': 329.63, 
                 'F': 349.23, 'F#': 369.99, 'G': 392.00, 'G#': 415.30, 'A': 440.00, 
                 'A#': 466.16, 'B': 493.88
             };
             
-            // Chromatic scale
             const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
             
-            // Fret positions (percentage) - These are the fret LINES
-            const fretPositions = [15.25, 27.17, 38.56, 49.85, 56.72, 62.63, 70.85, 78.42, 85.40, 91.82, 100.00];
+
+            const fretPositions = [15.25, 27.17, 38.56, 49.85, 58.17, 66.74, 74.64, 81.91, 88.61, 95.91, 100.00];
             
-            // Function to get note based on open string and fret number
             function getNote(openNote: string, fretNumber: number): string {
                 const noteIndex = notes.indexOf(openNote);
                 const newNoteIndex = (noteIndex + fretNumber) % 12;
@@ -273,6 +283,43 @@
         width: 2px;
         background: oklch(0.85 0 0);
         opacity: 0.4;
+    }
+
+    .fret-dots {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .fret-dot {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: oklch(0.75 0 0);
+        opacity: 0.5;
+        box-shadow: 0 1px 3px oklch(0 0 0 / 0.3);
+    }
+
+    .fret-dot.double-top {
+        top: 35%;
+        transform: translateY(-50%);
+    }
+
+    .fret-dot.double-bottom {
+        top: 65%;
+        transform: translateY(-50%);
+    }
+
+    :root[data-theme='dark'] .fret-dot {
+        background: oklch(0.4 0 0);
+        opacity: 0.6;
     }
 
 
