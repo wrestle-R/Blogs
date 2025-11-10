@@ -3,6 +3,7 @@
 ---
 
 <section class="guitar-section">
+    <h2 class="guitar-title">Virtual Guitar</h2>
     <div class="fretboard">
 <div class="fret-line" style="left: 8.25%;"></div>  <!-- 1st -->
 <div class="fret-line" style="left: 22.17%;"></div> <!-- 2nd -->
@@ -203,6 +204,25 @@
     .guitar-section {
         width: 100%;
         margin: 2rem 0;
+        display: block;
+    }
+
+    .guitar-title {
+        text-align: left;
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 1.5rem;
+        color: oklch(0.3 0 0);
+    }
+
+    :root[data-theme='dark'] .guitar-title {
+        color: oklch(0.9 0 0);
+    }
+
+    @media (max-width: 768px) {
+        .guitar-section {
+            display: none;
+        }
     }
 
     .fretboard {
