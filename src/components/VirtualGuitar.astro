@@ -23,31 +23,69 @@
         <div class="strings-container">
             <div class="string-row">
                 <span class="string-label">E</span>
-                <div class="string thickest"></div>
+                <div class="string-wrapper">
+                    <div class="string thickest" data-string="E4"></div>
+                </div>
             </div>
             <div class="string-row">
                 <span class="string-label">A</span>
-                <div class="string thick"></div>
+                <div class="string-wrapper">
+                    <div class="string thick" data-string="A3"></div>
+                </div>
             </div>
             <div class="string-row">
                 <span class="string-label">D</span>
-                <div class="string medium"></div>
+                <div class="string-wrapper">
+                    <div class="string medium" data-string="D3"></div>
+                </div>
             </div>
             <div class="string-row">
                 <span class="string-label">G</span>
-                <div class="string thin"></div>
+                <div class="string-wrapper">
+                    <div class="string thin" data-string="G2"></div>
+                </div>
             </div>
             <div class="string-row">
                 <span class="string-label">B</span>
-                <div class="string thinner"></div>
+                <div class="string-wrapper">
+                    <div class="string thinner" data-string="B2"></div>
+                </div>
             </div>
             <div class="string-row">
                 <span class="string-label">E</span>
-                <div class="string thinnest"></div>
+                <div class="string-wrapper">
+                    <div class="string thinnest" data-string="E2"></div>
+                </div>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+    if (typeof window !== 'undefined') {
+        document.addEventListener('DOMContentLoaded', () => {
+            const wrappers = document.querySelectorAll('.string-wrapper');
+            
+            wrappers.forEach((wrapper: any) => {
+                wrapper.addEventListener('click', (e: any) => {
+                    const string = wrapper.querySelector('.string') as any;
+                    const rect = string.getBoundingClientRect();
+                    const clickX = e.clientX - rect.left;
+                    const clickPosition = (clickX / rect.width) * 100;
+                    
+                    // Create vibration effect
+                    (wrapper as any).style.setProperty('--vibration-origin', clickPosition + '%');
+                    string.classList.add('vibrating');
+                    
+                    // Remove the animation class after it completes
+                    setTimeout(() => {
+                        string.classList.remove('vibrating');
+                    }, 800);
+                });
+            });
+        });
+    }
+</script>
 
 <style is:global>
     .guitar-section {
@@ -125,6 +163,17 @@
         width: 100%;
     }
 
+    .string-wrapper {
+        flex: 1;
+        min-width: 0;
+        overflow: visible;
+        position: relative;
+        padding: 12px 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+
     .string-label {
         font-size: 1.25rem;
         font-weight: bold;
@@ -149,6 +198,53 @@
         border-radius: 1px;
         box-shadow: 0 2px 4px oklch(0.2 0 0 / 0.2),
                     inset 0 1px 0 oklch(0.995 0 0 / 0.1);
+        cursor: pointer;
+        transition: filter 0.1s ease;
+        transform-origin: center;
+    }
+
+    .string:hover {
+        filter: brightness(1.1);
+    }
+
+    .string.vibrating {
+        animation: stringVibrate 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes stringVibrate {
+        0% {
+            transform: scaleY(1) translateY(0);
+            filter: brightness(1.4);
+        }
+        10% {
+            transform: scaleY(1.02) translateY(-2.5px);
+        }
+        20% {
+            transform: scaleY(1.02) translateY(2px);
+        }
+        30% {
+            transform: scaleY(1.015) translateY(-1.5px);
+        }
+        40% {
+            transform: scaleY(1.01) translateY(1px);
+        }
+        50% {
+            transform: scaleY(1.005) translateY(-0.8px);
+        }
+        60% {
+            transform: scaleY(1.002) translateY(0.5px);
+        }
+        70% {
+            transform: scaleY(1.001) translateY(-0.3px);
+            filter: brightness(1.1);
+        }
+        85% {
+            transform: scaleY(1) translateY(0.1px);
+        }
+        100% {
+            transform: scaleY(1) translateY(0);
+            filter: brightness(1);
+        }
     }
 
     :root[data-theme='dark'] .string {
