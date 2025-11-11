@@ -121,7 +121,8 @@
             
             const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
             
-            const fretPositions = [15.25, 27.17, 38.56, 49.85, 58.17, 66.74, 74.64, 81.91, 88.61, 95.91, 100.00];
+            // Fret positions: 0 = open string, fret 1 at 16.25%, rest calibrated accordingly
+            const fretPositions = [0, 16.25, 30.17, 41.56, 52.05, 61.72, 70.63, 78.85, 86.42, 93.40, 99.82];
             
             // Map simple notes to octave-based notes for Tone.js
             // Using available samples - Tone.js will pitch shift to play missing notes
