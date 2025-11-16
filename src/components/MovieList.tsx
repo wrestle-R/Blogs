@@ -35,7 +35,7 @@ const removeMyMovie = (movieId: string) => {
 
 export default function MovieList({ showSuggestions }: MovieListProps) {
   const [movies, setMovies] = useState<Movie[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<TMDBMovie[]>([]);
@@ -45,11 +45,10 @@ export default function MovieList({ showSuggestions }: MovieListProps) {
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (showSuggestions) {
-      loadMovies();
-    }
+    // Load movies in background without showing loading state
+    loadMovies();
     setMyMovies(getMyMovies());
-  }, [showSuggestions]);
+  }, []);
 
   useEffect(() => {
     const handleToggle = (event: CustomEvent) => {
@@ -101,8 +100,6 @@ export default function MovieList({ showSuggestions }: MovieListProps) {
       setMovies(fetchedMovies);
     } catch (error) {
       console.error('Error loading movies:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -179,21 +176,6 @@ export default function MovieList({ showSuggestions }: MovieListProps) {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground">Loading movies...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!visible) {
-    return null;
-  }
-
   return (
     <div className="space-y-6">
       <div className="relative" ref={searchContainerRef}>
@@ -256,7 +238,7 @@ export default function MovieList({ showSuggestions }: MovieListProps) {
         )}
       </div>
 
-      {movies.length === 0 ? (
+      {!visible && movies.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 border rounded-lg bg-muted/30">
           <svg className="w-12 h-12 text-muted-foreground/50 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
@@ -264,7 +246,7 @@ export default function MovieList({ showSuggestions }: MovieListProps) {
           <p className="text-muted-foreground font-medium">No movies yet</p>
           <p className="text-muted-foreground text-sm mt-1">Search above to add a movie</p>
         </div>
-      ) : (
+      ) : visible && (
         <div className="flex flex-col gap-3">
           {movies.map((movie) => {
             const canDelete = myMovies.has(movie.id);
