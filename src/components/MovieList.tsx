@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getMovies, addMovie, deleteMovie } from '@/lib/movies-db';
 import { getMoviePosterUrl, searchMovies } from '@/lib/tmdb';
 import { Input } from './ui/input';
@@ -37,10 +37,24 @@ export default function MovieList() {
   const [searchResults, setSearchResults] = useState<TMDBMovie[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [myMovies, setMyMovies] = useState<Set<string>>(new Set());
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadMovies();
     setMyMovies(getMyMovies());
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setSearchResults([]);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
@@ -75,6 +89,12 @@ export default function MovieList() {
   };
 
   const handleMovieSelect = async (tmdbMovie: TMDBMovie) => {
+    // Check if movie already exists
+    const alreadyExists = movies.some(m => m.tmdbId === tmdbMovie.id);
+    if (alreadyExists) {
+      return;
+    }
+
     setSearchQuery('');
     setSearchResults([]);
 
@@ -154,7 +174,7 @@ export default function MovieList() {
 
   return (
     <div className="space-y-6">
-      <div className="relative">
+      <div className="relative" ref={searchContainerRef}>
         <Input
           type="text"
           placeholder="Search for a movie to add..."
@@ -170,36 +190,46 @@ export default function MovieList() {
         
         {searchResults.length > 0 && (
           <div className="absolute z-10 w-full mt-2 border rounded-lg bg-background shadow-lg max-h-[400px] overflow-y-auto">
-            {searchResults.map((movie) => (
-              <button
-                key={movie.id}
-                onClick={() => handleMovieSelect(movie)}
-                className="w-full flex items-start gap-3 p-3 hover:bg-muted transition-colors border-b last:border-b-0"
-              >
-                {movie.poster_path ? (
-                  <img
-                    src={getMoviePosterUrl(movie.poster_path, 'w92') || ''}
-                    alt={movie.title}
-                    className="w-12 h-18 object-cover rounded flex-shrink-0"
-                  />
-                ) : (
-                  <div className="w-12 h-18 bg-muted rounded flex items-center justify-center flex-shrink-0">
-                    <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
-                    </svg>
+            {searchResults.map((movie) => {
+              const isAdded = movies.some(m => m.tmdbId === movie.id);
+              return (
+                <div
+                  key={movie.id}
+                  className="w-full flex items-start gap-3 p-3 border-b last:border-b-0"
+                >
+                  {movie.poster_path ? (
+                    <img
+                      src={getMoviePosterUrl(movie.poster_path, 'w92') || ''}
+                      alt={movie.title}
+                      className="w-12 h-18 object-cover rounded flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-12 h-18 bg-muted rounded flex items-center justify-center flex-shrink-0">
+                      <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                      </svg>
+                    </div>
+                  )}
+                  <div className="flex-1 text-left min-w-0">
+                    <h4 className="font-medium text-sm truncate">{movie.title}</h4>
+                    <p className="text-xs text-muted-foreground">
+                      {movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A'}
+                    </p>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                      {movie.overview}
+                    </p>
                   </div>
-                )}
-                <div className="flex-1 text-left min-w-0">
-                  <h4 className="font-medium text-sm truncate">{movie.title}</h4>
-                  <p className="text-xs text-muted-foreground">
-                    {movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A'}
-                  </p>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                    {movie.overview}
-                  </p>
+                  <Button
+                    size="sm"
+                    onClick={() => handleMovieSelect(movie)}
+                    disabled={isAdded}
+                    className="shrink-0"
+                  >
+                    {isAdded ? 'Added' : 'Add'}
+                  </Button>
                 </div>
-              </button>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
