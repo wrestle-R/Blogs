@@ -6,6 +6,10 @@ import { Button } from './ui/button';
 import type { Movie } from '@/types/movie';
 import type { TMDBMovie } from '@/types/movie';
 
+interface MovieListProps {
+  showSuggestions: boolean;
+}
+
 const MY_MOVIES_KEY = 'my-added-movies';
 
 const getMyMovies = (): Set<string> => {
@@ -29,7 +33,7 @@ const removeMyMovie = (movieId: string) => {
   localStorage.setItem(MY_MOVIES_KEY, JSON.stringify([...myMovies]));
 };
 
-export default function MovieList() {
+export default function MovieList({ showSuggestions }: MovieListProps) {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
@@ -37,11 +41,25 @@ export default function MovieList() {
   const [searchResults, setSearchResults] = useState<TMDBMovie[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [myMovies, setMyMovies] = useState<Set<string>>(new Set());
+  const [visible, setVisible] = useState(showSuggestions);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadMovies();
+    if (showSuggestions) {
+      loadMovies();
+    }
     setMyMovies(getMyMovies());
+  }, [showSuggestions]);
+
+  useEffect(() => {
+    const handleToggle = (event: CustomEvent) => {
+      setVisible(event.detail.show);
+    };
+
+    window.addEventListener('toggle-suggestions', handleToggle as EventListener);
+    return () => {
+      window.removeEventListener('toggle-suggestions', handleToggle as EventListener);
+    };
   }, []);
 
   useEffect(() => {
@@ -170,6 +188,10 @@ export default function MovieList() {
         </div>
       </div>
     );
+  }
+
+  if (!visible) {
+    return null;
   }
 
   return (

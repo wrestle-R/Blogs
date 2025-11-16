@@ -2,10 +2,137 @@
 import Layout from '@/layouts/Layout.astro';
 import PageHead from '@/components/PageHead.astro';
 import MovieList from '@/components/MovieList';
+import { Button } from '@/components/ui/button';
 ---
 
 <Layout class="max-w-4xl">
   <PageHead slot="head" title="Movies" description="Movie suggestions from the community" />
   
-  <MovieList client:load />
+  <div class="space-y-6">
+    <div class="space-y-8">
+      <div>
+        <h2 class="text-2xl font-bold mb-4">My Last 10 Watched Movies</h2>
+        <p class="text-muted-foreground text-sm mb-6">
+          So I've got my last ten watched movies lined up(will keep updating), and honestly, I don't feel like ranking them because I just feel every movie i watch is a masterpiece. Instead of forcing a tier list, I'd rather just write a line or a small paragraph about what I liked in each film and then place it into my own little genre category.
+        </p>
+
+        <div class="space-y-6">
+          <!-- Remember Me -->
+          <div class="border-l-4 border-primary pl-4">
+            <h3 class="font-semibold text-lg">Remember Me <span class="text-sm text-muted-foreground">(drama)</span></h3>
+            <p class="text-sm text-muted-foreground mt-2">
+              This is one of those movies which I could never say where it was going, like the whole thing it just kept moving in a direction i really didn't think it would go, SPOILER ALERT - I love the ending, i was very surprised when I saw people found the ending controversial or whatever but I just think it was great
+            </p>
+          </div>
+
+          <!-- Little Miss Sunshine -->
+          <div class="border-l-4 border-primary pl-4">
+            <h3 class="font-semibold text-lg">Little Miss Sunshine <span class="text-sm text-muted-foreground">(GOAT)</span></h3>
+            <p class="text-sm text-muted-foreground mt-2">
+              AMAZING Movie, no words and ez 10/10, Steve carell is amazing i have just seen 2 movies/shoes he has acted in the office and this and I have to say the range is amazing. Each and every character had something to contribute to the movie which is rare for a movie(since they have time constraints they don't develop all characters), tackling serious topic such as depression and all in not so serious tone was just amazing story telling
+            </p>
+          </div>
+
+          <!-- Steve -->
+          <div class="border-l-4 border-primary pl-4">
+            <h3 class="font-semibold text-lg">Steve <span class="text-sm text-muted-foreground">(drama)</span></h3>
+            <p class="text-sm text-muted-foreground mt-2">
+              Cillian murphyyy mann he better win an Oscar for this, a bit grim, a bit funny, a bit sad all folded into one. I think i would i couldn't rewatch it even if I wanted to, it's just that kinda movie that stays with you once you finish. The way they shot it from the crew's point of view was crazyy, the whole realistic feel of it was just straightup chilling.
+            </p>
+          </div>
+
+          <!-- Predestination -->
+          <div class="border-l-4 border-primary pl-4">
+            <h3 class="font-semibold text-lg">Predestination <span class="text-sm text-muted-foreground">(thriller)</span></h3>
+            <div class="text-sm text-muted-foreground mt-2 space-y-2">
+              <p>The Heck did i even watch, i have no idea, idk if I was a bit distracted or did i misunderstand it but this time travel shit is confusing asf SPOILER ALERT - So the guy is the father, mother, child and the thief is the robber what,</p>
+              <p>I remember watching a German show called 'The Dark' sort of reminds me of that, this is can only be described by me as "Good Kind of disturbing"</p>
+            </div>
+          </div>
+
+          <!-- Materialists -->
+          <div class="border-l-4 border-primary pl-4">
+            <h3 class="font-semibold text-lg">Materialists <span class="text-sm text-muted-foreground">(romcom)</span></h3>
+            <p class="text-sm text-muted-foreground mt-2">
+              baaaahh Rom-coms what's not to love, has everything that a rom-com should have, the whole idea of like making dating culture into a business is thoda disturbing but ig it's not that far from real life. But ig it suffers from something most romcoms suffer from "Predictability" but ig in this genre there isn't much originality to go around
+            </p>
+          </div>
+
+          <!-- Superman -->
+          <div class="border-l-4 border-primary pl-4">
+            <h3 class="font-semibold text-lg">Superman <span class="text-sm text-muted-foreground">(heroic)</span></h3>
+            <p class="text-sm text-muted-foreground mt-2">
+              Ahh yes Superman the eternal symbol of Hope, love it. I think everyone is too concerned with missing Henry Cavill(he d best) that they look too hard trying to find flaws in David(new one) but I think he did a good job in proving people wrong. And of course Crypto, absolute good boy. The whole war/genocide thing was kinda funny with how easily it triggered people.
+            </p>
+          </div>
+
+          <!-- Grownups -->
+          <div class="border-l-4 border-primary pl-4">
+            <h3 class="font-semibold text-lg">Grownups <span class="text-sm text-muted-foreground">(drama)</span></h3>
+            <p class="text-sm text-muted-foreground mt-2">
+              Coaaach Buzzer, pretty good but the question remains how the hell does Adam Sandler nail every role he plays be it a serious role, funny anything howww man must really be the goat, I love flashbacks wala movie the whole last scene SPOILER ALERT of him letting them win the last shot as cliche as it is, i love it everytime
+            </p>
+          </div>
+
+          <!-- F1 -->
+          <div class="border-l-4 border-primary pl-4">
+            <h3 class="font-semibold text-lg">F1 <span class="text-sm text-muted-foreground">(heroic)</span></h3>
+            <p class="text-sm text-muted-foreground mt-2">
+              Okay let me start off by saying I have almost zero F1(the real life car racing wala) but I liked it, the only other f1 culture i have been exposed to is the other movie Ford vs Ferrari which was just spectacular but yeah I liked it(this has started to all meaning because i have some childlike ability to look critically look at movies),but yeah bradd pitt and the Kate lady wala love story has to be the unnecessary thing in the movie i have ever seen, felt rushed and just weird. But I love Joshua pearce his acting was top notch hope to see him in future movies.
+            </p>
+          </div>
+
+          <!-- Thursday Murder Club -->
+          <div class="border-l-4 border-primary pl-4">
+            <h3 class="font-semibold text-lg">Thursday Murder Club <span class="text-sm text-muted-foreground">(thriller)</span></h3>
+            <p class="text-sm text-muted-foreground mt-2">
+              An interesting watch, definitely is a feel good movie, no two ways about it. As far as detective movies go, it's not the greatest but yeah credits where credit is due the story was goood, the whole storyline of the man with the silver knee and how they tied it into the current day wala story, good shit. Even the ending i really liked it, i sort of like that the whole romantic story being part of the story but not the main driving force of the story
+            </p>
+          </div>
+
+          <!-- How to train your dragon -->
+          <div class="border-l-4 border-primary pl-4">
+            <h3 class="font-semibold text-lg">How to train your dragon(live action) <span class="text-sm text-muted-foreground">(fantasy)</span></h3>
+            <p class="text-sm text-muted-foreground mt-2">
+              Belongs to rare genre of movies called Good live action movie remake of a classic movie, because this is a type of movies noone asks for and most of the time they do a crappy half-assed job with it. So yeah I really liked it it had a perfect combination such that it had enough of the original story what i like to call "the lore" and the perfect amount of something new(just anything to set it apart from the original), i personally thing they should stop remaking these remakes but when done right not the worst thing in the world
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t pt-6">
+      <div id="suggestions-section">
+        <h2 class="text-xl font-semibold mb-4">Enter Your movie suggestions</h2>
+      </div>
+    </div>
+
+    <MovieList client:load showSuggestions={true} />
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const suggestionsSection = document.getElementById('suggestions-section');
+      if (suggestionsSection) {
+        const button = document.createElement('button');
+        button.className = 'text-xs text-muted-foreground hover:text-foreground transition-colors mt-2';
+        button.textContent = 'View community suggestions';
+        button.id = 'toggle-suggestions';
+        
+        let showingSuggestions = true;
+        
+        button.addEventListener('click', () => {
+          showingSuggestions = !showingSuggestions;
+          button.textContent = showingSuggestions ? 'Hide community suggestions' : 'View community suggestions';
+          
+          const event = new CustomEvent('toggle-suggestions', { 
+            detail: { show: showingSuggestions } 
+          });
+          window.dispatchEvent(event);
+        });
+        
+        suggestionsSection.appendChild(button);
+      }
+    });
+  </script>
 </Layout>
