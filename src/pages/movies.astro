@@ -4,19 +4,8 @@ import PageHead from '@/components/PageHead.astro';
 import MovieList from '@/components/MovieList';
 ---
 
-<Layout class="max-w-6xl">
+<Layout class="max-w-4xl">
   <PageHead slot="head" title="Movies" description="Movie suggestions from the community" />
   
-  <section class="rounded-lg border bg-gradient-to-br from-background to-muted/20 p-8 mb-8">
-    <div class="flex flex-col space-y-1.5">
-      <h1 class="text-4xl leading-none font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-        Movie Odyssey
-      </h1>
-      <p class="text-muted-foreground">
-        A collection of movie suggestions from our community. Share your favorites and discover new ones.
-      </p>
-    </div>
-  </section>
-
   <MovieList client:load />
 </Layout>
