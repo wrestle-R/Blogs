@@ -3,99 +3,227 @@ import Layout from '@/layouts/Layout.astro';
 import PageHead from '@/components/PageHead.astro';
 import MovieList from '@/components/MovieList';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 ---
 
 <Layout class="max-w-4xl">
   <PageHead slot="head" title="Movies" description="Movie suggestions from the community" />
   
   <div class="space-y-6">
-    <div class="space-y-8">
+    <div class="space-y-6">
       <div>
         <h2 class="text-2xl font-bold mb-4">My Last 10 Watched Movies</h2>
         <p class="text-muted-foreground text-sm mb-6">
           So I've got my last ten watched movies lined up(will keep updating), and honestly, I don't feel like ranking them because I just feel every movie i watch is a masterpiece. Instead of forcing a tier list, I'd rather just write a line or a small paragraph about what I liked in each film and then place it into my own little genre category.
         </p>
 
-        <div class="space-y-6">
+        <div class="flex flex-col gap-3">
           <!-- Remember Me -->
-          <div class="border-l-4 border-primary pl-4">
-            <h3 class="font-semibold text-lg">Remember Me <span class="text-sm text-muted-foreground">(drama)</span></h3>
-            <p class="text-sm text-muted-foreground mt-2">
-              This is one of those movies which I could never say where it was going, like the whole thing it just kept moving in a direction i really didn't think it would go, SPOILER ALERT - I love the ending, i was very surprised when I saw people found the ending controversial or whatever but I just think it was great
-            </p>
+          <div class="group flex gap-3 rounded-lg border bg-card p-3 transition-all hover:shadow-md">
+            <div class="relative w-20 h-28 shrink-0 overflow-hidden rounded bg-muted">
+              <img
+                src="https://image.tmdb.org/t/p/w154/sAq5W47qPRfBLPHW03xIxnIj0�ḤE.jpg"
+                alt="Remember Me"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="flex-1 flex flex-col gap-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-semibold text-base leading-tight">Remember Me</h3>
+                <span class="inline-flex items-center rounded-full bg-gradient-to-r from-blue-500/20 to-blue-600/20 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-600/30">drama</span>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                This is one of those movies which I could never say where it was going, like the whole thing it just kept moving in a direction i really didn't think it would go, SPOILER ALERT - <button class="spoiler-btn inline text-xs px-1 bg-muted hover:bg-transparent transition-colors cursor-pointer" onclick="this.classList.toggle('revealed')">
+                  <span class="spoiler-text">I love the ending, i was very surprised when I saw people found the ending controversial or whatever but I just think it was great</span>
+                </button>
+              </p>
+            </div>
           </div>
 
           <!-- Little Miss Sunshine -->
-          <div class="border-l-4 border-primary pl-4">
-            <h3 class="font-semibold text-lg">Little Miss Sunshine <span class="text-sm text-muted-foreground">(GOAT)</span></h3>
-            <p class="text-sm text-muted-foreground mt-2">
-              AMAZING Movie, no words and ez 10/10, Steve carell is amazing i have just seen 2 movies/shoes he has acted in the office and this and I have to say the range is amazing. Each and every character had something to contribute to the movie which is rare for a movie(since they have time constraints they don't develop all characters), tackling serious topic such as depression and all in not so serious tone was just amazing story telling
-            </p>
+          <div class="group flex gap-3 rounded-lg border bg-card p-3 transition-all hover:shadow-md">
+            <div class="relative w-20 h-28 shrink-0 overflow-hidden rounded bg-muted">
+              <img
+                src="https://image.tmdb.org/t/p/w154/wKn7AJw730emlmzLSmJtzquwaeW.jpg"
+                alt="Little Miss Sunshine"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="flex-1 flex flex-col gap-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-semibold text-base leading-tight">Little Miss Sunshine</h3>
+                <span class="inline-flex items-center rounded-full bg-gradient-to-r from-yellow-400/30 to-amber-500/30 px-2.5 py-0.5 text-xs font-semibold text-yellow-700 dark:text-yellow-400 ring-1 ring-inset ring-yellow-600/40 shadow-sm">GOAT</span>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                AMAZING Movie, no words and ez 10/10, Steve carell is amazing i have just seen 2 movies/shoes he has acted in the office and this and I have to say the range is amazing. Each and every character had something to contribute to the movie which is rare for a movie(since they have time constraints they don't develop all characters), tackling serious topic such as depression and all in not so serious tone was just amazing story telling
+              </p>
+            </div>
           </div>
 
           <!-- Steve -->
-          <div class="border-l-4 border-primary pl-4">
-            <h3 class="font-semibold text-lg">Steve <span class="text-sm text-muted-foreground">(drama)</span></h3>
-            <p class="text-sm text-muted-foreground mt-2">
-              Cillian murphyyy mann he better win an Oscar for this, a bit grim, a bit funny, a bit sad all folded into one. I think i would i couldn't rewatch it even if I wanted to, it's just that kinda movie that stays with you once you finish. The way they shot it from the crew's point of view was crazyy, the whole realistic feel of it was just straightup chilling.
-            </p>
+          <div class="group flex gap-3 rounded-lg border bg-card p-3 transition-all hover:shadow-md">
+            <div class="relative w-20 h-28 shrink-0 overflow-hidden rounded bg-muted">
+              <img
+                src="https://image.tmdb.org/t/p/w154/2FqhI4H8mEU66juAeLS96f8CCqy.jpg"
+                alt="Steve"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="flex-1 flex flex-col gap-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-semibold text-base leading-tight">Steve</h3>
+                <span class="inline-flex items-center rounded-full bg-gradient-to-r from-blue-500/20 to-blue-600/20 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-600/30">drama</span>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                Cillian murphyyy mann he better win an Oscar for this, a bit grim, a bit funny, a bit sad all folded into one. I think i would i couldn't rewatch it even if I wanted to, it's just that kinda movie that stays with you once you finish. The way they shot it from the crew's point of view was crazyy, the whole realistic feel of it was just straightup chilling.
+              </p>
+            </div>
           </div>
 
           <!-- Predestination -->
-          <div class="border-l-4 border-primary pl-4">
-            <h3 class="font-semibold text-lg">Predestination <span class="text-sm text-muted-foreground">(thriller)</span></h3>
-            <div class="text-sm text-muted-foreground mt-2 space-y-2">
-              <p>The Heck did i even watch, i have no idea, idk if I was a bit distracted or did i misunderstand it but this time travel shit is confusing asf SPOILER ALERT - So the guy is the father, mother, child and the thief is the robber what,</p>
-              <p>I remember watching a German show called 'The Dark' sort of reminds me of that, this is can only be described by me as "Good Kind of disturbing"</p>
+          <div class="group flex gap-3 rounded-lg border bg-card p-3 transition-all hover:shadow-md">
+            <div class="relative w-20 h-28 shrink-0 overflow-hidden rounded bg-muted">
+              <img
+                src="https://image.tmdb.org/t/p/w154/7u26U4DzxXCCjkIlRs17LlHGbZm.jpg"
+                alt="Predestination"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="flex-1 flex flex-col gap-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-semibold text-base leading-tight">Predestination</h3>
+                <span class="inline-flex items-center rounded-full bg-gradient-to-r from-red-500/20 to-red-600/20 px-2.5 py-0.5 text-xs font-semibold text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/30">thriller</span>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                The Heck did i even watch, i have no idea, idk if I was a bit distracted or did i misunderstand it but this time travel shit is confusing asf SPOILER ALERT - <button class="spoiler-btn inline text-xs px-1 bg-muted hover:bg-transparent transition-colors cursor-pointer" onclick="this.classList.toggle('revealed')">
+                  <span class="spoiler-text">So the guy is the father, mother, child and the thief is the robber what,</span>
+                </button>
+                <br/>
+                I remember watching a German show called 'The Dark' sort of reminds me of that, this is can only be described by me as "Good Kind of disturbing"
+              </p>
             </div>
           </div>
 
           <!-- Materialists -->
-          <div class="border-l-4 border-primary pl-4">
-            <h3 class="font-semibold text-lg">Materialists <span class="text-sm text-muted-foreground">(romcom)</span></h3>
-            <p class="text-sm text-muted-foreground mt-2">
-              baaaahh Rom-coms what's not to love, has everything that a rom-com should have, the whole idea of like making dating culture into a business is thoda disturbing but ig it's not that far from real life. But ig it suffers from something most romcoms suffer from "Predictability" but ig in this genre there isn't much originality to go around
-            </p>
+          <div class="group flex gap-3 rounded-lg border bg-card p-3 transition-all hover:shadow-md">
+            <div class="relative w-20 h-28 shrink-0 overflow-hidden rounded bg-muted">
+              <img
+                src="https://image.tmdb.org/t/p/w154/9MXbwtLqgAEQKgWCqZvLbPpvbQ4.jpg"
+                alt="Materialists"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="flex-1 flex flex-col gap-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-semibold text-base leading-tight">Materialists</h3>
+                <span class="inline-flex items-center rounded-full bg-gradient-to-r from-pink-500/20 to-rose-500/20 px-2.5 py-0.5 text-xs font-semibold text-pink-700 dark:text-pink-400 ring-1 ring-inset ring-pink-600/30">romcom</span>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                baaaahh Rom-coms what's not to love, has everything that a rom-com should have, the whole idea of like making dating culture into a business is thoda disturbing but ig it's not that far from real life. But ig it suffers from something most romcoms suffer from "Predictability" but ig in this genre there isn't much originality to go around
+              </p>
+            </div>
           </div>
 
           <!-- Superman -->
-          <div class="border-l-4 border-primary pl-4">
-            <h3 class="font-semibold text-lg">Superman <span class="text-sm text-muted-foreground">(heroic)</span></h3>
-            <p class="text-sm text-muted-foreground mt-2">
-              Ahh yes Superman the eternal symbol of Hope, love it. I think everyone is too concerned with missing Henry Cavill(he d best) that they look too hard trying to find flaws in David(new one) but I think he did a good job in proving people wrong. And of course Crypto, absolute good boy. The whole war/genocide thing was kinda funny with how easily it triggered people.
-            </p>
+          <div class="group flex gap-3 rounded-lg border bg-card p-3 transition-all hover:shadow-md">
+            <div class="relative w-20 h-28 shrink-0 overflow-hidden rounded bg-muted">
+              <img
+                src="https://image.tmdb.org/t/p/w154/tf3JVaPySeJIban12cVUfaXnW9c.jpg"
+                alt="Superman"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="flex-1 flex flex-col gap-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-semibold text-base leading-tight">Superman</h3>
+                <span class="inline-flex items-center rounded-full bg-gradient-to-r from-indigo-500/20 to-blue-600/20 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:text-indigo-400 ring-1 ring-inset ring-indigo-600/30">heroic</span>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                Ahh yes Superman the eternal symbol of Hope, love it. I think everyone is too concerned with missing Henry Cavill(he d best) that they look too hard trying to find flaws in David(new one) but I think he did a good job in proving people wrong. And of course Crypto, absolute good boy. The whole war/genocide thing was kinda funny with how easily it triggered people.
+              </p>
+            </div>
           </div>
 
           <!-- Grownups -->
-          <div class="border-l-4 border-primary pl-4">
-            <h3 class="font-semibold text-lg">Grownups <span class="text-sm text-muted-foreground">(drama)</span></h3>
-            <p class="text-sm text-muted-foreground mt-2">
-              Coaaach Buzzer, pretty good but the question remains how the hell does Adam Sandler nail every role he plays be it a serious role, funny anything howww man must really be the goat, I love flashbacks wala movie the whole last scene SPOILER ALERT of him letting them win the last shot as cliche as it is, i love it everytime
-            </p>
+          <div class="group flex gap-3 rounded-lg border bg-card p-3 transition-all hover:shadow-md">
+            <div class="relative w-20 h-28 shrink-0 overflow-hidden rounded bg-muted">
+              <img
+                src="https://image.tmdb.org/t/p/w154/p7izLqAMIINsMFk8mQ1bY8MGkJl.jpg"
+                alt="Grownups"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="flex-1 flex flex-col gap-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-semibold text-base leading-tight">Grownups</h3>
+                <span class="inline-flex items-center rounded-full bg-gradient-to-r from-blue-500/20 to-blue-600/20 px-2.5 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-400 ring-1 ring-inset ring-blue-600/30">drama</span>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                Coaaach Buzzer, pretty good but the question remains how the hell does Adam Sandler nail every role he plays be it a serious role, funny anything howww man must really be the goat, I love flashbacks wala movie the whole last scene SPOILER ALERT - <button class="spoiler-btn inline text-xs px-1 bg-muted hover:bg-transparent transition-colors cursor-pointer" onclick="this.classList.toggle('revealed')">
+                  <span class="spoiler-text">of him letting them win the last shot as cliche as it is, i love it everytime</span>
+                </button>
+              </p>
+            </div>
           </div>
 
           <!-- F1 -->
-          <div class="border-l-4 border-primary pl-4">
-            <h3 class="font-semibold text-lg">F1 <span class="text-sm text-muted-foreground">(heroic)</span></h3>
-            <p class="text-sm text-muted-foreground mt-2">
-              Okay let me start off by saying I have almost zero F1(the real life car racing wala) but I liked it, the only other f1 culture i have been exposed to is the other movie Ford vs Ferrari which was just spectacular but yeah I liked it(this has started to all meaning because i have some childlike ability to look critically look at movies),but yeah bradd pitt and the Kate lady wala love story has to be the unnecessary thing in the movie i have ever seen, felt rushed and just weird. But I love Joshua pearce his acting was top notch hope to see him in future movies.
-            </p>
+          <div class="group flex gap-3 rounded-lg border bg-card p-3 transition-all hover:shadow-md">
+            <div class="relative w-20 h-28 shrink-0 overflow-hidden rounded bg-muted">
+              <img
+                src="https://image.tmdb.org/t/p/w154/nVVdWePF3vDUcGp9angKUTw4eTV.jpg"
+                alt="F1"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="flex-1 flex flex-col gap-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-semibold text-base leading-tight">F1</h3>
+                <span class="inline-flex items-center rounded-full bg-gradient-to-r from-indigo-500/20 to-blue-600/20 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:text-indigo-400 ring-1 ring-inset ring-indigo-600/30">heroic</span>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                Okay let me start off by saying I have almost zero F1(the real life car racing wala) but I liked it, the only other f1 culture i have been exposed to is the other movie Ford vs Ferrari which was just spectacular but yeah I liked it(this has started to all meaning because i have some childlike ability to look critically look at movies),but yeah bradd pitt and the Kate lady wala love story has to be the unnecessary thing in the movie i have ever seen, felt rushed and just weird. But I love Joshua pearce his acting was top notch hope to see him in future movies.
+              </p>
+            </div>
           </div>
 
           <!-- Thursday Murder Club -->
-          <div class="border-l-4 border-primary pl-4">
-            <h3 class="font-semibold text-lg">Thursday Murder Club <span class="text-sm text-muted-foreground">(thriller)</span></h3>
-            <p class="text-sm text-muted-foreground mt-2">
-              An interesting watch, definitely is a feel good movie, no two ways about it. As far as detective movies go, it's not the greatest but yeah credits where credit is due the story was goood, the whole storyline of the man with the silver knee and how they tied it into the current day wala story, good shit. Even the ending i really liked it, i sort of like that the whole romantic story being part of the story but not the main driving force of the story
-            </p>
+          <div class="group flex gap-3 rounded-lg border bg-card p-3 transition-all hover:shadow-md">
+            <div class="relative w-20 h-28 shrink-0 overflow-hidden rounded bg-muted">
+              <img
+                src="https://image.tmdb.org/t/p/w154/vj5P03WKHJzWmhXG36l6ZdTKtxm.jpg"
+                alt="Thursday Murder Club"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="flex-1 flex flex-col gap-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-semibold text-base leading-tight">Thursday Murder Club</h3>
+                <span class="inline-flex items-center rounded-full bg-gradient-to-r from-red-500/20 to-red-600/20 px-2.5 py-0.5 text-xs font-semibold text-red-700 dark:text-red-400 ring-1 ring-inset ring-red-600/30">thriller</span>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                An interesting watch, definitely is a feel good movie, no two ways about it. As far as detective movies go, it's not the greatest but yeah credits where credit is due the story was goood, the whole storyline of the man with the silver knee and how they tied it into the current day wala story, good shit. Even the ending i really liked it, i sort of like that the whole romantic story being part of the story but not the main driving force of the story
+              </p>
+            </div>
           </div>
 
           <!-- How to train your dragon -->
-          <div class="border-l-4 border-primary pl-4">
-            <h3 class="font-semibold text-lg">How to train your dragon(live action) <span class="text-sm text-muted-foreground">(fantasy)</span></h3>
-            <p class="text-sm text-muted-foreground mt-2">
-              Belongs to rare genre of movies called Good live action movie remake of a classic movie, because this is a type of movies noone asks for and most of the time they do a crappy half-assed job with it. So yeah I really liked it it had a perfect combination such that it had enough of the original story what i like to call "the lore" and the perfect amount of something new(just anything to set it apart from the original), i personally thing they should stop remaking these remakes but when done right not the worst thing in the world
-            </p>
+          <div class="group flex gap-3 rounded-lg border bg-card p-3 transition-all hover:shadow-md">
+            <div class="relative w-20 h-28 shrink-0 overflow-hidden rounded bg-muted">
+              <img
+                src="https://image.tmdb.org/t/p/w154/rlQHGQwJejJxe96Ch4PsMJVRLKN.jpg"
+                alt="How to train your dragon"
+                class="w-full h-full object-cover"
+              />
+            </div>
+            <div class="flex-1 flex flex-col gap-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="font-semibold text-base leading-tight">How to train your dragon(live action)</h3>
+                <span class="inline-flex items-center rounded-full bg-gradient-to-r from-purple-500/20 to-violet-600/20 px-2.5 py-0.5 text-xs font-semibold text-purple-700 dark:text-purple-400 ring-1 ring-inset ring-purple-600/30">fantasy</span>
+              </div>
+              <p class="text-xs text-muted-foreground">
+                Belongs to rare genre of movies called Good live action movie remake of a classic movie, because this is a type of movies noone asks for and most of the time they do a crappy half-assed job with it. So yeah I really liked it it had a perfect combination such that it had enough of the original story what i like to call "the lore" and the perfect amount of something new(just anything to set it apart from the original), i personally thing they should stop remaking these remakes but when done right not the worst thing in the world
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -109,6 +237,25 @@ import { Button } from '@/components/ui/button';
 
     <MovieList client:load showSuggestions={true} />
   </div>
+
+  <style>
+    .spoiler-btn .spoiler-text {
+      background-color: hsl(var(--muted));
+      color: transparent;
+      user-select: none;
+      border-radius: 0.25rem;
+    }
+    
+    .spoiler-btn.revealed .spoiler-text {
+      background-color: transparent;
+      color: hsl(var(--muted-foreground));
+      user-select: text;
+    }
+    
+    .spoiler-btn {
+      border-radius: 0.25rem;
+    }
+  </style>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
