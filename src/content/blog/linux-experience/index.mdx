@@ -10,35 +10,65 @@ draft: false
 
 I finally booted into my Linux system after a long road of waiting and swapping hard drives, and the biggest surprise was how primitive everything felt. I'd been used to WINDOWS and then for a brief time opinionated (pre-configured) distros like OMARCHY and CachyOS, so seeing a plain default Hyprland screen was quite a shock, it had no taskbar the super key didnt bring up the default apps and there was just a prompt of how to get into the terminal and some french text in the bottom saying "J remue le ciel, le jour, la nuit" which i now learnt means "I move the sky, the day, and the night"  I am not entirely sure if it is warning or a motivational thing, but it definetely adds to the mystery.
 
+<img src="/blogimages/linux-experience/hyprland_default.png" alt="Default Hyprland screen" style={{ width: '100%', height: 'auto', objectFit: 'cover', borderRadius: '0.5rem', margin: '1.5rem 0' }} />
+
 ## The Gears
 Before getting into the setup and the distro itself, here's some context about my Tech.
 
-**Laptop**
-- Dell Inspiron 16 2-in-1
-- 1TB storage
-- Intel i7-1360P (13th Gen, 16 cores)
-- 16GB RAM
-- 1920×1080 display
-- Integrated Intel Iris Xe Graphics
+<div style={{
+  display: 'grid',
+  gridTemplateColumns: '1fr',
+  gap: '1rem',
+  margin: '1.5rem 0'
+}}>
+  <div style={{
+    background: 'var(--muted)',
+    borderRadius: '0.5rem',
+    padding: '1.5rem',
+    borderLeft: '3px solid var(--primary)'
+  }}>
+    <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+      <li>Dell Inspiron 16 2-in-1</li>
+      <li>1TB storage</li>
+      <li>Intel i7-1360P (13th Gen, 16 cores)</li>
+      <li>16GB RAM</li>
+      <li>1920×1080 display</li>
+      <li>Integrated Intel Iris Xe Graphics</li>
+    </ul>
+  </div>
 
-**Mouse**
-- HP M120 — https://amzn.in/d/dpE5f5y
+  <div style={{
+    background: 'var(--muted)',
+    borderRadius: '0.5rem',
+    padding: '1.5rem',
+    borderLeft: '3px solid var(--primary)'
+  }}>
+    <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+      <li><strong>Mouse:</strong> HP M120 — <a href="https://amzn.in/d/dpE5f5y" target="_blank" rel="noopener noreferrer">Link</a></li>
+      <li><strong>Mousepad:</strong> Dyazo Worldap — <a href="https://amzn.in/d/4qUpGST" target="_blank" rel="noopener noreferrer">Link</a></li>
+      <li><strong>Headphones:</strong> <a href="https://amzn.in/d/gibz5qg" target="_blank" rel="noopener noreferrer">Link</a></li>
+    </ul>
+  </div>
 
-**Mousepad**
-- Dyazo Worldap — https://amzn.in/d/4qUpGST
-
-**SSD (External/Extra Drive)**
-- EVM Elite 1TB (2000MB/s) — https://amzn.in/d/29hLYYo
-
-**Headphones**
-- https://amzn.in/d/gibz5qg
+  <div style={{
+    background: 'var(--muted)',
+    borderRadius: '0.5rem',
+    padding: '1.5rem',
+    borderLeft: '3px solid var(--primary)'
+  }}>
+    <ul style={{ margin: 0, paddingLeft: '1.5rem' }}>
+      <li><strong>External SSD:</strong> EVM Elite 1TB (2000MB/s) — <a href="https://amzn.in/d/29hLYYo" target="_blank" rel="noopener noreferrer">Link</a></li>
+    </ul>
+  </div>
+</div>
 
 ## The First Step of the Journey
 I was introduced to Linux through my Internship, where i worked on an open-source project which was built entirely on Linux. Before that, my only exposure came from the classic Ubuntu GNOME experience and using WSL(Windows Sub-System for Linux) on Windows, so naturally i asked my friend Chris(have heard him talk about linux far too much), how I should start with Linux, and he immediately said Arch Linux was the way to go. I did what anyone would do watched a YouTube installation guide  and let's just say I quickly realised I wasn't ready to take on an Arch installation by myself. 
 
-So I went looking for something easier. I tried exploring Fedora, looked around at a few other distros, and the one that really caught my eye was Manjaro. It felt perfect for a minimal setup while still being practical. As soon as i had worked a little on my linux setup, i had falled in love with it, I think Romeiro can vouch for me when i say this but it was all i could talk about. Now coming from a windows user the amount of control i had on my screen was mind boggling to me.
+So I went looking for something easier. I tried exploring Fedora and a few other distros, even dipped into some opinionated(pre-configured)  ones like OMARCHY and CachyOS, but the one that really caught my eye was Manjaro. It felt perfect for a minimal setup while still being practical. As soon as i had worked a little on my linux setup, i had falled in love with it, I think Romeiro can vouch for me when i say this but it was all i could talk about. Now coming from a windows user the amount of control i had on my screen was mind boggling to me.
 
 When it came to development, I always felt Linux was far ahead of Windows, the simplicity of installing and updating dependencies is on a different level. Soon i was wacthing youtube tutorials on how to select the best distro for you, which then led me to Interviews of the great Linus Torwald. His whole approach to building software in a world where everyone is afraid of having their work copied was genuinely fascinating to me.
+
 
 ## The Second Step of the Journey
 And then came the Peak of my confidence(definetely not delusion), i had decided i am MAN enough to install Arch the hard way, so i opened up my phone to the docs and my other laptop to a installation guide and started following the steps biblically.
@@ -47,9 +77,19 @@ Then I reached the part where I had to choose a desktop environment. I had alrea
 
 And obviously i chose the 'ricing'(wrong option in hindsight) so now i found a very minimal and the smallest youtube video i could find of 45 minutes on youtube, which was another fullfledged guide which took me another 3-4 hours to setup and with that I had my entire setup ready, now i had spent my entire day working on installing it. 
 
-Then came the easy part - installing apps. With a single line in the terminal, I added my essentials: Zen as my browser, Spotify, VS Code, TickTick, and a bunch of other tools I needed. After the chaos of configuring Arch and Hyprland, this part felt almost relaxing.
+Then came the easy part - installing apps. With a single line in the terminal, I added my essentials: Zen as my browser, Spotify, VS Code, TickTick, Discord and a bunch of other tools I needed. After the chaos of configuring Arch and Hyprland, this part felt almost relaxing.
+
+<img src="/blogimages/linux-experience/my_desktop.png" alt="My configured Linux desktop" style={{ width: '100%', height: 'auto', objectFit: 'cover', borderRadius: '0.5rem', margin: '1.5rem 0' }} />
 
 ## Conclusion
 In the end, even though the entire process took hours of tinkering, breaking things, fixing them, and questioning my life choices, it was absolutely worth it. There's something incredibly rewarding about watching a fully configured desktop come to life, not as something handed to you, but as something you built piece by piece. It's work, obviously, but it's the kind of work that makes the final result feel entirely your own.
 
-And the journey isn't over. Linux has a way of reminding you that there's always more to learn, but i guess thats the fun of it all
+<div style={{
+  borderLeft: '4px solid var(--primary)',
+  paddingLeft: '1rem',
+  margin: '2rem 0',
+  fontStyle: 'italic',
+  color: 'var(--muted-foreground)'
+}}>
+  And the journey isn't over. Linux has a way of reminding you that there's always more to learn, but i guess thats the fun of it all
+</div>
