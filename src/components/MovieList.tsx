@@ -46,12 +46,21 @@ export default function MovieList({ showSuggestions, initialMovies = [] }: Movie
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Only load movies if not provided initially
-    if (initialMovies.length === 0) {
+    // Load movies if not provided initially or if state is empty
+    if (initialMovies.length === 0 && movies.length === 0) {
       loadMovies();
+    } else if (initialMovies.length > 0 && movies.length === 0) {
+      setMovies(initialMovies);
     }
     setMyMovies(getMyMovies());
   }, []);
+
+  // Ensure movies are loaded when component becomes visible
+  useEffect(() => {
+    if (visible && movies.length === 0) {
+      loadMovies();
+    }
+  }, [visible]);
 
   useEffect(() => {
     const handleToggle = (event: CustomEvent) => {

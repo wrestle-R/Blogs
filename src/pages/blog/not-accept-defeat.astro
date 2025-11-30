@@ -7,12 +7,13 @@ import Layout from '@/layouts/Layout.astro'
 import { parseAuthors } from '@/lib/data-utils'
 import { formatDate } from '@/lib/utils'
 import { Icon } from 'astro-icon/components'
-import { getEntry } from 'astro:content'
+import { getEntry, render } from 'astro:content'
 
 const post = await getEntry('blog', 'not-accept-defeat')
 if (!post) return Astro.redirect('/404')
 
 const authors = await parseAuthors(post.data.authors ?? [])
+const { Content } = await render(post)
 ---
 
 <Layout class='max-w-4xl'>
@@ -37,33 +38,7 @@ const authors = await parseAuthors(post.data.authors ?? [])
     </div>
 
     <article class="col-start-2 max-w-none prose dark:prose-invert">
-      <p>
-        Yeaah, sooo we didn't qualify in the top 40 of our college's internal round. I was so disappointed hearing the result, I remember storming off while the speech was still on, like my own personal act of rebellion, and somehow the only thing in my mind was, "Ahh maybe I should have gone to the chapel in the morning."
-      </p>
-      
-      <p>
-        I was so furious at our judge; I remember calling him fat and bald, and some other words I don't wish to say. And then it hit me-
-      </p>
-      
-      <blockquote>
-        "Am I so full of myself that I think the only way I could lose was if something went wrong or I was cheated?"
-      </blockquote>
-      
-      <p>
-        Truth be told, I think I was always a little like that, during football matches I have blamed the referees, the opposition for having overage players, and sometimes even my own teammates.
-      </p>
-      
-      <p class="uppercase text-lg font-bold tracking-wide my-4 bg-muted text-center rounded px-4 py-3">
-        How can I be so full of myself that I never take responsibility for my failures?
-      </p>
-      
-      <p>
-        Lil Dramatic? maybe but it really did hit harder than I expected it to.
-      </p>
-      
-      <p>
-        Anyways i think i can say lesson (hopefully) learned - maybe the world isn't conspiring against me next time. And maybe just maybe i should start taking responsibility for my actions.
-      </p>
+      <Content />
     </article>
 
     <div class="col-start-2 mt-12 mb-8">
