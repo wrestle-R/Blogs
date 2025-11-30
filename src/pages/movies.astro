@@ -360,25 +360,58 @@ try {
   </style>
 
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    const SUGGESTIONS_STATE_KEY = 'movie-suggestions-visible';
+    
+    function initializeSuggestionsToggle() {
       const suggestionsSection = document.getElementById('suggestions-section');
-      if (suggestionsSection) {
-        let showingSuggestions = false;
-        
-        suggestionsSection.addEventListener('click', () => {
-          showingSuggestions = !showingSuggestions;
-          
-          const span = suggestionsSection.querySelector('span');
-          if (span) {
-            span.textContent = showingSuggestions ? 'Hide suggestions' : 'Show suggestions';
-          }
-          
-          const event = new CustomEvent('toggle-suggestions', { 
-            detail: { show: showingSuggestions } 
-          });
-          window.dispatchEvent(event);
-        });
+      if (!suggestionsSection) return;
+      
+      // Remove any existing listeners by cloning the element
+      const newSection = suggestionsSection.cloneNode(true) as Element;
+      suggestionsSection.parentNode?.replaceChild(newSection, suggestionsSection);
+      
+      // Load the saved state from localStorage
+      let showingSuggestions = localStorage.getItem(SUGGESTIONS_STATE_KEY) === 'true';
+      
+      // Update button text to match saved state
+      const span = newSection.querySelector('span');
+      if (span) {
+        span.textContent = showingSuggestions ? 'Hide suggestions' : 'Show suggestions';
       }
-    });
+      
+      // Dispatch initial event to sync React component after a short delay
+      setTimeout(() => {
+        const initialEvent = new CustomEvent('toggle-suggestions', { 
+          detail: { show: showingSuggestions } 
+        });
+        window.dispatchEvent(initialEvent);
+      }, 100);
+      
+      newSection.addEventListener('click', () => {
+        showingSuggestions = !showingSuggestions;
+        
+        // Save state to localStorage
+        localStorage.setItem(SUGGESTIONS_STATE_KEY, String(showingSuggestions));
+        
+        if (span) {
+          span.textContent = showingSuggestions ? 'Hide suggestions' : 'Show suggestions';
+        }
+        
+        const event = new CustomEvent('toggle-suggestions', { 
+          detail: { show: showingSuggestions } 
+        });
+        window.dispatchEvent(event);
+      });
+    }
+    
+    // Initialize on load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeSuggestionsToggle);
+    } else {
+      initializeSuggestionsToggle();
+    }
+    
+    // Also initialize on Astro page transitions
+    document.addEventListener('astro:page-load', initializeSuggestionsToggle);
   </script>
 </Layout>

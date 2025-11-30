@@ -12,6 +12,7 @@ interface MovieListProps {
 }
 
 const MY_MOVIES_KEY = 'my-added-movies';
+const SUGGESTIONS_STATE_KEY = 'movie-suggestions-visible';
 
 const getMyMovies = (): Set<string> => {
   try {
@@ -42,7 +43,14 @@ export default function MovieList({ showSuggestions, initialMovies = [] }: Movie
   const [searchResults, setSearchResults] = useState<TMDBMovie[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [myMovies, setMyMovies] = useState<Set<string>>(new Set());
-  const [visible, setVisible] = useState(showSuggestions);
+  const [visible, setVisible] = useState(() => {
+    // Initialize from localStorage, fallback to prop
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(SUGGESTIONS_STATE_KEY);
+      return saved !== null ? saved === 'true' : showSuggestions;
+    }
+    return showSuggestions;
+  });
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
