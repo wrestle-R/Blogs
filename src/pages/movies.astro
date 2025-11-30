@@ -4,6 +4,16 @@ import PageHead from '@/components/PageHead.astro';
 import MovieList from '@/components/MovieList';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { getMovies } from '@/lib/movies-db';
+import type { Movie } from '@/types/movie';
+
+// Preload movies on the server
+let initialMovies: Movie[] = [];
+try {
+  initialMovies = await getMovies();
+} catch (error) {
+  console.error('Error preloading movies:', error);
+}
 ---
 
 <Layout>
@@ -31,12 +41,12 @@ import { Badge } from '@/components/ui/badge';
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
-            <span>Already Added suggestions</span>
+            <span>Show suggestions</span>
           </div>
         </div>
       </div>
       <div class="p-6">
-        <MovieList client:load showSuggestions={false} />
+        <MovieList client:load showSuggestions={false} initialMovies={initialMovies} />
       </div>
     </div>
 

@@ -8,6 +8,7 @@ import type { TMDBMovie } from '@/types/movie';
 
 interface MovieListProps {
   showSuggestions: boolean;
+  initialMovies?: Movie[];
 }
 
 const MY_MOVIES_KEY = 'my-added-movies';
@@ -33,8 +34,8 @@ const removeMyMovie = (movieId: string) => {
   localStorage.setItem(MY_MOVIES_KEY, JSON.stringify([...myMovies]));
 };
 
-export default function MovieList({ showSuggestions }: MovieListProps) {
-  const [movies, setMovies] = useState<Movie[]>([]);
+export default function MovieList({ showSuggestions, initialMovies = [] }: MovieListProps) {
+  const [movies, setMovies] = useState<Movie[]>(initialMovies);
   const [isLoading, setIsLoading] = useState(false);
   const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,8 +46,10 @@ export default function MovieList({ showSuggestions }: MovieListProps) {
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Load movies in background without showing loading state
-    loadMovies();
+    // Only load movies if not provided initially
+    if (initialMovies.length === 0) {
+      loadMovies();
+    }
     setMyMovies(getMyMovies());
   }, []);
 
