@@ -7,8 +7,8 @@ interface Props {
 }
 
 const {
-  title = "Join the Odyssey",
-  description = "Get new essays and stories delivered to your inbox. No spam, just thoughtful content.",
+  title = "Join the Journey",
+  description = "Get a notification when a new blog is published. No spam, I promise!",
   variant = 'default',
   position = 'bottom',
 } = Astro.props
@@ -103,11 +103,14 @@ const {
       button.classList.add('loading')
       
       try {
-        // Replace with your actual API endpoint
-        const response = await fetch('/api/newsletter', {
+        // Send email to backend to store in Cloudflare KV
+        const response = await fetch('https://blogsbackend.vidyoyo.workers.dev/api/newsletter/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: input.value })
+          body: JSON.stringify({ 
+            email: input.value,
+            subscribedAt: new Date().toISOString()
+          })
         })
         
         if (response.ok) {
