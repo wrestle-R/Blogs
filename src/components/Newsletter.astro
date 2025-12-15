@@ -1,0 +1,524 @@
+---
+interface Props {
+  title?: string
+  description?: string
+  variant?: 'default' | 'minimal' | 'card'
+  position?: 'top' | 'bottom' | 'inline'
+}
+
+const {
+  title = "Join the Odyssey",
+  description = "Get new essays and stories delivered to your inbox. No spam, just thoughtful content.",
+  variant = 'default',
+  position = 'bottom',
+} = Astro.props
+---
+
+<section class="newsletter-section" data-variant={variant}>
+  <div class="newsletter-container">
+    {variant === 'default' && (
+      <div class="newsletter-content">
+        <div class="newsletter-text">
+          <h3 class="newsletter-title">{title}</h3>
+          <p class="newsletter-description">{description}</p>
+        </div>
+        
+        <form class="newsletter-form" data-variant={variant}>
+          <div class="form-group">
+            <input
+              type="email"
+              placeholder="your@email.com"
+              required
+              class="newsletter-input"
+              aria-label="Email address"
+            />
+            <button type="submit" class="newsletter-button">
+              <span class="button-text">Subscribe</span>
+              <svg class="button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          </div>
+          <p class="form-help-text">We respect your privacy. Unsubscribe at any time.</p>
+        </form>
+      </div>
+    )}
+
+    {variant === 'minimal' && (
+      <div class="newsletter-minimal">
+        <h3 class="newsletter-title-minimal">{title}</h3>
+        <form class="newsletter-form-minimal" data-variant={variant}>
+          <input
+            type="email"
+            placeholder="Email address"
+            required
+            class="newsletter-input-minimal"
+            aria-label="Email address"
+          />
+          <button type="submit" class="newsletter-button-minimal">Subscribe</button>
+        </form>
+      </div>
+    )}
+
+    {variant === 'card' && (
+      <div class="newsletter-card">
+        <div class="card-gradient-bg"></div>
+        <div class="card-content">
+          <div class="card-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 class="card-title">{title}</h3>
+          <p class="card-description">{description}</p>
+          <form class="card-form" data-variant={variant}>
+            <input
+              type="email"
+              placeholder="your@email.com"
+              required
+              class="card-input"
+              aria-label="Email address"
+            />
+            <button type="submit" class="card-button">Subscribe Now</button>
+          </form>
+        </div>
+      </div>
+    )}
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll('.newsletter-form, .newsletter-form-minimal, .card-form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      
+      const input = form.querySelector('input[type="email"]') as HTMLInputElement
+      const button = form.querySelector('button[type="submit"]') as HTMLButtonElement
+      const originalText = button.textContent
+      
+      if (!input.value) return
+      
+      // Disable button during submission
+      button.disabled = true
+      button.classList.add('loading')
+      
+      try {
+        // Replace with your actual API endpoint
+        const response = await fetch('/api/newsletter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: input.value })
+        })
+        
+        if (response.ok) {
+          button.textContent = '✓ Subscribed!'
+          button.classList.add('success')
+          input.value = ''
+          
+          setTimeout(() => {
+            button.textContent = originalText
+            button.classList.remove('success')
+            button.disabled = false
+          }, 3000)
+        } else {
+          throw new Error('Subscription failed')
+        }
+      } catch (error) {
+        button.textContent = '✗ Try again'
+        button.classList.add('error')
+        
+        setTimeout(() => {
+          button.textContent = originalText
+          button.classList.remove('error')
+          button.disabled = false
+        }, 3000)
+      }
+    })
+  })
+</script>
+
+<style>
+  .newsletter-section {
+    width: 100%;
+  }
+
+  /* Default Variant */
+  .newsletter-section[data-variant='default'] {
+    margin: 2rem 0;
+  }
+
+  .newsletter-container {
+    width: 100%;
+  }
+
+  .newsletter-content {
+    border: 1px solid var(--border);
+    border-radius: 0.625rem;
+    padding: 2rem;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--background)) 0%,
+      hsl(var(--muted)) 100%
+    );
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .newsletter-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .newsletter-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    margin: 0;
+  }
+
+  .newsletter-description {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .newsletter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: row;
+  }
+
+  .newsletter-input {
+    flex: 1;
+    padding: 0.675rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.4rem;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+  }
+
+  .newsletter-input:focus {
+    outline: none;
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 2px hsl(var(--primary) / 0.1);
+  }
+
+  .newsletter-input::placeholder {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .newsletter-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.675rem 1.25rem;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border: none;
+    border-radius: 0.4rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .newsletter-button:hover:not(.loading):not(.success):not(.error) {
+    background-color: hsl(var(--primary) / 0.9);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px hsl(var(--primary) / 0.25);
+  }
+
+  .newsletter-button:active:not(.loading):not(.success):not(.error) {
+    transform: translateY(0);
+  }
+
+  .button-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .newsletter-button.loading {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .newsletter-button.success {
+    background-color: hsl(142 76% 36%);
+  }
+
+  .newsletter-button.error {
+    background-color: hsl(0 84% 60%);
+  }
+
+  .form-help-text {
+    font-size: 0.75rem;
+    color: hsl(var(--muted-foreground));
+    margin: 0;
+    text-align: center;
+  }
+
+  /* Minimal Variant */
+  .newsletter-section[data-variant='minimal'] {
+    margin: 1.5rem 0;
+  }
+
+  .newsletter-minimal {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .newsletter-title-minimal {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    margin: 0;
+  }
+
+  .newsletter-form-minimal {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .newsletter-input-minimal {
+    flex: 1;
+    min-width: 250px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+  }
+
+  .newsletter-input-minimal:focus {
+    outline: none;
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 2px hsl(var(--primary) / 0.1);
+  }
+
+  .newsletter-button-minimal {
+    padding: 0.75rem 1.75rem;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border: none;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .newsletter-button-minimal:hover:not(.loading):not(.success):not(.error) {
+    background-color: hsl(var(--primary) / 0.9);
+  }
+
+  .newsletter-button-minimal.success {
+    background-color: hsl(142 76% 36%);
+  }
+
+  .newsletter-button-minimal.error {
+    background-color: hsl(0 84% 60%);
+  }
+
+  /* Card Variant */
+  .newsletter-card {
+    position: relative;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    padding: 2rem 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .card-gradient-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--primary) / 0.05) 0%,
+      hsl(var(--muted)) 100%
+    );
+    pointer-events: none;
+  }
+
+  .card-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .card-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: hsl(var(--primary) / 0.1);
+    border-radius: 0.625rem;
+    color: hsl(var(--primary));
+  }
+
+  .card-icon svg {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  .card-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+    margin: 0;
+  }
+
+  .card-description {
+    color: hsl(var(--muted-foreground));
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 380px;
+  }
+
+  .card-form {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .card-input {
+    flex: 1;
+    max-width: 280px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.4rem;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+  }
+
+  .card-input:focus {
+    outline: none;
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 2px hsl(var(--primary) / 0.1);
+  }
+
+  .card-button {
+    padding: 0.75rem 1.5rem;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border: none;
+    border-radius: 0.4rem;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .card-button:hover:not(.loading):not(.success):not(.error) {
+    background-color: hsl(var(--primary) / 0.9);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px hsl(var(--primary) / 0.25);
+  }
+
+  .card-button:active:not(.loading):not(.success):not(.error) {
+    transform: translateY(0);
+  }
+
+  .card-button.success {
+    background-color: hsl(142 76% 36%);
+  }
+
+  .card-button.error {
+    background-color: hsl(0 84% 60%);
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .newsletter-content {
+      padding: 1.5rem;
+    }
+
+    .newsletter-title {
+      font-size: 1.25rem;
+    }
+
+    .form-group {
+      flex-direction: column;
+    }
+
+    .newsletter-button {
+      width: 100%;
+    }
+
+    .newsletter-form-minimal {
+      flex-direction: column;
+    }
+
+    .newsletter-input-minimal {
+      min-width: auto;
+    }
+
+    .newsletter-button-minimal {
+      width: 100%;
+    }
+
+    .card-content {
+      padding: 0;
+    }
+
+    .card-form {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .card-input {
+      max-width: 100%;
+      width: 100%;
+    }
+
+    .card-button {
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .newsletter-card {
+      padding: 1.5rem 1rem;
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+    }
+
+    .card-description {
+      font-size: 0.85rem;
+      max-width: 100%;
+    }
+  }
+</style>
