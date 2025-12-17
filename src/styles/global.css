@@ -102,6 +102,17 @@
   --ring: oklch(0.556 0 0);
 }
 
+/* Experimenting with greenish shades for selection colors */
+::selection {
+  background-color: #ccffcc; /* Light green */
+  color: #000000; /* Black */
+}
+
+[data-theme='dark'] ::selection {
+  background-color: #66ff99; /* Mint green */
+  color: #000000; /* Black */
+}
+
 @layer base {
   *,
   ::after,
