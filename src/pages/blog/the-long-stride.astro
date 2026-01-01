@@ -1,0 +1,83 @@
+---
+import Breadcrumbs from '@/components/Breadcrumbs.astro'
+import PostHead from '@/components/PostHead.astro'
+import { badgeVariants } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import Layout from '@/layouts/Layout.astro'
+import { parseAuthors } from '@/lib/data-utils'
+import { formatDate } from '@/lib/utils'
+import { Icon } from 'astro-icon/components'
+import { getEntry, render } from 'astro:content'
+
+const post = await getEntry('blog', 'the-long-stride')
+if (!post) return Astro.redirect('/404')
+
+const authors = await parseAuthors(post.data.authors ?? [])
+const { Content } = await render(post)
+---
+
+<Layout>
+  <PostHead slot="head" post={post} />
+
+  <section class="grid grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-8 pb-16">
+    <div class="col-start-2 pt-8 pb-6">
+      <div class="flex items-center gap-3 text-sm text-muted-foreground mb-6 pb-4 border-b border-border/40">
+        {authors.length > 0 && (
+          <a href={`/authors/${authors[0].id}`} class="flex items-center gap-1.5 transition-colors">
+            <Icon name="lucide:user" class="size-3.5" />
+            <span>{authors[0].name}</span>
+          </a>
+        )}
+        <span class="text-muted-foreground/40">•</span>
+        <div class="flex items-center">
+          <span>{formatDate(post.data.date)}</span>
+        </div>
+      </div>
+      
+      <h1 class="text-5xl font-bold text-foreground mb-4 tracking-tight">{post.data.title}</h1>
+    </div>
+
+    <article class="col-start-2 max-w-none prose dark:prose-invert prose-lg">
+      <Content />
+    </article>
+
+    <div class="col-start-2 mt-12 mb-8">
+      <a href="/blog">
+        <Button variant="outline" size="sm" className="gap-2">
+          <Icon name="lucide:arrow-left" class="size-4" />
+          Back to Blogs
+        </Button>
+      </a>
+    </div>
+  </section>
+
+  <Button
+    variant="outline"
+    size="icon"
+    className="group fixed right-8 bottom-8 z-50 hidden"
+    id="scroll-to-top"
+    title="Scroll to top"
+    aria-label="Scroll to top"
+  >
+    <Icon name="lucide:arrow-up" class="mx-auto size-4 transition-all " />
+  </Button>
+
+  <script>
+    document.addEventListener('astro:page-load', () => {
+      const scrollToTopButton = document.getElementById('scroll-to-top')
+      const footer = document.querySelector('footer')
+
+      if (scrollToTopButton && footer) {
+        scrollToTopButton.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        })
+
+        window.addEventListener('scroll', () => {
+          const footerRect = footer.getBoundingClientRect()
+          const isFooterVisible = footerRect.top <= window.innerHeight
+          scrollToTopButton.classList.toggle('hidden', window.scrollY <= 300 || isFooterVisible)
+        })
+      }
+    })
+  </script>
+</Layout>
