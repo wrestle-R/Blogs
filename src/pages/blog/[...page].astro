@@ -19,9 +19,6 @@ export async function getStaticPaths({
 
 const { page } = Astro.props
 
-const postsByYear = groupPostsByYear(page.data)
-const years = Object.keys(postsByYear).sort((a, b) => parseInt(b) - parseInt(a))
-
 const myPosts = page.data.filter((post: any) => post.data.authors?.includes('russel'))
 const myPostsByYear = groupPostsByYear(myPosts)
 const myYears = Object.keys(myPostsByYear).sort((a, b) => parseInt(b) - parseInt(a))
@@ -45,19 +42,8 @@ const collaboratorYears = Object.keys(collaboratorPostsByYear).sort((a, b) => pa
       <div class="flex gap-1 p-1" role="tablist">
         <button
           class="tab-button flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md transition-all hover:bg-background/60 data-[active=true]:bg-background data-[active=true]:shadow-sm"
-          data-tab="all"
-          data-active="true"
-          role="tab"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-          </svg>
-          All Posts
-        </button>
-        <button
-          class="tab-button flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-md transition-all hover:bg-background/60 data-[active=true]:bg-background data-[active=true]:shadow-sm"
           data-tab="mine"
-          data-active="false"
+          data-active="true"
           role="tab"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,26 +66,7 @@ const collaboratorYears = Object.keys(collaboratorPostsByYear).sort((a, b) => pa
     </div>
 
     <div class="p-6">
-      <div class="tab-content" data-tab-content="all" data-active="true">
-        <div class="flex min-h-[calc(100vh-24rem)] flex-col gap-y-8">
-          {
-            years.map((year) => (
-              <section class="flex flex-col gap-y-4">
-                <div class="font-medium">{year}</div>
-                <ul class="flex flex-col gap-4">
-                  {postsByYear[year].map((post) => (
-                    <li class="transform transition-all hover:scale-[1.01]">
-                      <BlogCard entry={post} />
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))
-          }
-        </div>
-      </div>
-
-      <div class="tab-content hidden" data-tab-content="mine" data-active="false">
+      <div class="tab-content" data-tab-content="mine" data-active="true">
         {myPosts.length > 0 ? (
           <div class="flex min-h-[calc(100vh-24rem)] flex-col gap-y-8">
             {
