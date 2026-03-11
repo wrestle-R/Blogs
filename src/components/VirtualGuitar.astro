@@ -87,6 +87,7 @@
 
         // Initialize and preload Tone.js sampler on page load
         function preloadAudio() {
+            if (samplerLoadedPromise) return;
             samplerLoadedPromise = new Promise((resolve) => {
                 sampler = new Tone.Sampler({
                     urls: {
@@ -115,7 +116,7 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('astro:page-load', () => {
             // Preload audio samples immediately on page load
             preloadAudio();
             const wrappers = document.querySelectorAll('.string-wrapper');

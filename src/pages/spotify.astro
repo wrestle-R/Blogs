@@ -172,9 +172,10 @@ import Layout from '../layouts/Layout.astro';
           <div class="flex gap-4 items-start flex-col sm:flex-row">
             <img 
               id="album-art" 
-              src="" 
+              src="/static/albumart.png" 
               alt="Album Art" 
               class="w-full sm:w-32 h-32 rounded-lg shadow-lg object-cover flex-shrink-0"
+              onerror="this.onerror=null;this.src='/static/albumart.png'"
             />
             
             <div class="flex-1 min-w-0">
@@ -246,9 +247,10 @@ import Layout from '../layouts/Layout.astro';
           <div class="flex gap-4 items-start flex-col sm:flex-row">
             <img 
               id="last-album-art" 
-              src="" 
+              src="/static/albumart.png" 
               alt="Album Art" 
               class="w-full sm:w-32 h-32 rounded-lg shadow-lg object-cover flex-shrink-0"
+              onerror="this.onerror=null;this.src='/static/albumart.png'"
             />
             
             <div class="flex-1 min-w-0">
@@ -568,7 +570,10 @@ import Layout from '../layouts/Layout.astro';
       const playedTime = document.getElementById('last-played-time');
       const spotifyLink = document.getElementById('last-spotify-link-title') as HTMLAnchorElement;
 
-      if (albumArt) albumArt.src = data.albumArt || '';
+      if (albumArt) {
+        albumArt.src = data.albumArt || '/static/albumart.png';
+        albumArt.onerror = function() { this.onerror=null; this.src='/static/albumart.png'; };
+      }
       if (songName) songName.textContent = data.name;
       if (artistName) artistName.textContent = data.artist;
       if (albumName) albumName.textContent = data.album;
@@ -676,7 +681,10 @@ import Layout from '../layouts/Layout.astro';
       const currentTime = document.getElementById('current-time');
       const totalTime = document.getElementById('total-time');
 
-      if (albumArt) albumArt.src = data.albumArt || '';
+      if (albumArt) {
+        albumArt.src = data.albumArt || '/static/albumart.png';
+        albumArt.onerror = function() { this.onerror=null; this.src='/static/albumart.png'; };
+      }
       if (songName) songName.textContent = data.name;
       if (artistName) artistName.textContent = data.artist;
       if (albumName) albumName.textContent = data.album;
@@ -748,7 +756,7 @@ import Layout from '../layouts/Layout.astro';
               class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/50 transition-all group cursor-pointer"
             >
               <span class="text-lg sm:text-xl font-bold text-muted-foreground/30 w-6 sm:w-8 flex-shrink-0">${index + 1}</span>
-              <img src="${track.albumArt}" alt="${track.name}" class="w-12 h-12 sm:w-14 sm:h-14 rounded-md shadow-md flex-shrink-0" />
+              <img src="${track.albumArt || '/static/albumart.png'}" alt="${track.name}" class="w-12 h-12 sm:w-14 sm:h-14 rounded-md shadow-md flex-shrink-0" onerror="this.onerror=null;this.src='/static/albumart.png'" />
               <div class="flex-1 min-w-0">
                 <h3 class="font-semibold text-sm sm:text-base truncate">${track.name}</h3>
                 <p class="text-xs sm:text-sm text-muted-foreground truncate">${track.artist}</p>
@@ -792,7 +800,7 @@ import Layout from '../layouts/Layout.astro';
               class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/50 transition-all group cursor-pointer"
             >
               <span class="text-lg sm:text-xl font-bold text-muted-foreground/30 w-6 sm:w-8 flex-shrink-0">${index + 1}</span>
-              <img src="${artist.image}" alt="${artist.name}" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-md object-cover flex-shrink-0" />
+              <img src="${artist.image || '/static/albumart.png'}" alt="${artist.name}" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-md object-cover flex-shrink-0" onerror="this.onerror=null;this.src='/static/albumart.png'" />
               <div class="flex-1 min-w-0">
                 <h3 class="font-semibold text-sm sm:text-base truncate">${artist.name}</h3>
                 <p class="text-xs sm:text-sm text-muted-foreground truncate">${artist.genres.slice(0, 2).join(', ') || 'No genres'}</p>
@@ -839,7 +847,7 @@ import Layout from '../layouts/Layout.astro';
               class="flex items-center gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors group cursor-pointer"
             >
               <span class="text-lg font-bold text-muted-foreground/30 w-6">${index + 1}</span>
-              <img src="${playlist.image || '/placeholder.png'}" alt="${playlist.name}" class="w-12 h-12 rounded shadow-sm" />
+              <img src="${playlist.image || '/static/albumart.png'}" alt="${playlist.name}" class="w-12 h-12 rounded shadow-sm" onerror="this.onerror=null;this.src='/static/albumart.png'" />
               <div class="flex-1 min-w-0">
                 <h3 class="text-sm font-semibold truncate">${playlist.name}</h3>
                 <p class="text-xs text-muted-foreground truncate">

@@ -28,6 +28,17 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
       >
         <div class="flex flex-col gap-2 px-4">
           <span class="text-lg font-medium">Table of Contents</span>
+          <ul class="flex list-none flex-col gap-y-2">
+            <li class="text-sm text-foreground/60">
+              <a
+                href="#"
+                class="marker:text-foreground/30 list-none underline decoration-transparent underline-offset-[3px] transition-colors duration-200 hover:decoration-inherit"
+                data-heading-link="intro-top"
+              >
+                Intro
+              </a>
+            </li>
+          </ul>
           {sections.map((section, index) => {
             const isFirstSubpost =
               section.type === 'subpost' &&
@@ -252,6 +263,14 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
       state.links.forEach((link) => {
         link.classList.remove('text-foreground')
       })
+
+      if (headingIds.length === 0) {
+        const introLink = document.querySelector(
+          '#toc-sidebar-container [data-heading-link="intro-top"]',
+        )
+        if (introLink) introLink.classList.add('text-foreground')
+        return
+      }
 
       headingIds.forEach((id) => {
         if (id) {

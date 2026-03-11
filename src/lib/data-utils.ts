@@ -240,6 +240,8 @@ export async function getPostReadingTime(postId: string): Promise<string> {
   const post = await getPostById(postId)
   if (!post) return readingTime(0)
 
+  if (post.data.minuteRead) return post.data.minuteRead
+
   const wordCount = calculateWordCountFromHtml(post.body)
   return readingTime(wordCount)
 }

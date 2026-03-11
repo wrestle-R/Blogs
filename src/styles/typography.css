@@ -93,7 +93,11 @@
     }
 
     :where(blockquote):not(:where(.not-prose, .not-prose *)) {
-      @apply [&_*]:text-muted-foreground text-sm my-5 border-l-2 pl-5 italic;
+      @apply border-l-4 border-primary/60 bg-muted/30 py-3 px-5 my-6 rounded-r-md italic text-foreground/80 shadow-sm relative;
+    }
+
+    :where(blockquote p):not(:where(.not-prose, .not-prose *)) {
+      @apply my-0 !text-foreground/80;
     }
 
     :where(hr):not(:where(.not-prose, .not-prose *)) {

@@ -30,11 +30,7 @@ import { render } from 'astro:content'
 export async function getStaticPaths() {
   const posts = await getAllPostsAndSubposts()
   
-  // Filter out posts that have custom pages
-  const customPages = ['sitcoms', 'voices-told-me-to-write', 'perfect-metaphor', 'not-accept-defeat', 'munnar-trip']
-  
   return posts
-    .filter(post => !customPages.includes(post.id))
     .map((post) => ({
       params: { id: post.id },
       props: post,
@@ -109,7 +105,7 @@ const tocSections = await getTOCSections(currentPostId)
         }
       </div>
       
-      <h1 class="text-2xl font-semibold mb-8 text-foreground">{post.data.title}</h1>
+      <h1 class="text-2xl font-semibold text-foreground">{post.data.title}</h1>
     </div>
 
     {
@@ -130,7 +126,7 @@ const tocSections = await getTOCSections(currentPostId)
       )
     }
 
-    <article class="prose col-start-2 max-w-none">
+    <article class="prose dark:prose-invert col-start-2 max-w-none">
       <Content />
     </article>
 
@@ -144,6 +140,15 @@ const tocSections = await getTOCSections(currentPostId)
         />
       )
     }
+
+    <div class="col-start-2 mt-12 mb-8">
+      <a href="/blog">
+        <Button variant="outline" size="sm" className="gap-2">
+          <Icon name="lucide:arrow-left" class="size-4" />
+          Back to Blogs
+        </Button>
+      </a>
+    </div>
   </section>
 
   <Button
