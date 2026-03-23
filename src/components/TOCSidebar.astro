@@ -31,7 +31,7 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
           <ul class="flex list-none flex-col gap-y-2">
             <li class="text-sm text-foreground/60">
               <a
-                href="#"
+                href="#intro-top"
                 class="marker:text-foreground/30 list-none underline decoration-transparent underline-offset-[3px] transition-colors duration-200 hover:decoration-inherit"
                 data-heading-link="intro-top"
               >
@@ -101,7 +101,7 @@ const parentId = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
                         <a
                           href={
                             section.subpostId === currentPostId
-                              ? '#'
+                              ? '#top'
                               : `/blog/${section.subpostId}`
                           }
                           class="marker:text-foreground/30 list-none underline decoration-transparent underline-offset-[3px] transition-colors duration-200 hover:decoration-inherit"

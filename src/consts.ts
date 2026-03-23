@@ -15,7 +15,7 @@ export const NAV_LINKS: SocialLink[] = [
   {
     href: '/blog',
     label: 'blog',
-  },  
+  },
   {
     href: '/songs',
     label: 'songs',
@@ -31,6 +31,10 @@ export const NAV_LINKS: SocialLink[] = [
   {
     href: '/collaborate',
     label: 'collaborate',
+  },
+  {
+    href: 'https://runny.russeldanielpaul.tech',
+    label: 'runny',
   },
   {
     href: 'https://russeldanielpaul.tech',

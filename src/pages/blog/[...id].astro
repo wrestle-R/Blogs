@@ -127,6 +127,20 @@ const tocSections = await getTOCSections(currentPostId)
     }
 
     <article class="prose dark:prose-invert col-start-2 max-w-none">
+      <div
+        id="intro-top"
+        aria-hidden="true"
+        class="block h-0 scroll-mt-32 xl:scroll-mt-20"
+      ></div>
+      {
+        isCurrentSubpost && (
+          <div
+            id="top"
+            aria-hidden="true"
+            class="block h-0 scroll-mt-32 xl:scroll-mt-20"
+          ></div>
+        )
+      }
       <Content />
     </article>
 
