@@ -48,6 +48,16 @@ export function getSiteLinks(currentUrl: URL) {
     runny: withManagedSubdomain(currentUrl, 'runny'),
   }
 }
+ 
+export function getNavHrefMap(currentUrl: URL) {
+  const siteLinks = getSiteLinks(currentUrl)
+
+  return {
+    blog: new URL('/blog', siteLinks.blog).href,
+    runny: siteLinks.runny.href,
+    website: siteLinks.website.href,
+  }
+}
 
 export function getCanonicalUrl(currentUrl: URL): URL {
   const canonicalUrl = new URL(currentUrl.toString())

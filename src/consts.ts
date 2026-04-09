@@ -11,6 +11,8 @@ export const SITE: Site = {
   postsPerPage: 5,
 }
 
+const PRIMARY_HOSTNAME = new URL(SITE.href).hostname
+
 export const NAV_LINKS: SocialLink[] = [
   {
     href: '/blog',
@@ -33,11 +35,11 @@ export const NAV_LINKS: SocialLink[] = [
     label: 'collaborate',
   },
   {
-    href: 'https://runny.russeldanielpaul.tech',
+    href: `https://runny.${PRIMARY_HOSTNAME}`,
     label: 'runny',
   },
   {
-    href: 'https://russeldanielpaul.tech',
+    href: `https://${PRIMARY_HOSTNAME}`,
     label: 'website',
   },
 ]

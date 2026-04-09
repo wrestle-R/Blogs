@@ -1,21 +1,21 @@
 ---
-import { getSiteLinks } from '@/lib/site'
+import { getNavHrefMap } from '@/lib/site'
 import Link from '@/components/Link.astro'
 import ThemeToggle from '@/components/ThemeToggle.astro'
 import { NAV_LINKS, SITE } from '@/consts'
 
-const siteLinks = getSiteLinks(Astro.url)
+const navHrefMap = getNavHrefMap(Astro.url)
 const navLinks = NAV_LINKS.map((item) => {
   if (item.label === 'blog') {
-    return { ...item, href: siteLinks.blog.href + '/blog' }
+    return { ...item, href: navHrefMap.blog }
   }
 
   if (item.label === 'website') {
-    return { ...item, href: siteLinks.website.href }
+    return { ...item, href: navHrefMap.website }
   }
 
   if (item.label === 'runny') {
-    return { ...item, href: siteLinks.runny.href }
+    return { ...item, href: navHrefMap.runny }
   }
 
   return item
@@ -38,6 +38,7 @@ const navLinks = NAV_LINKS.map((item) => {
             <Link
               href={item.href}
               external={item.href.startsWith('http')}
+              data-nav-label={item.label}
               class="relative px-4 py-2 text-sm font-medium text-foreground/60 hover:text-foreground capitalize transition-colors rounded-md hover:bg-muted/50 group"
             >
               <span class="relative z-10">{item.label}</span>
@@ -75,6 +76,7 @@ const navLinks = NAV_LINKS.map((item) => {
         <Link
           href={item.href}
           external={item.href.startsWith('http')}
+          data-nav-label={item.label}
           class="mobile-nav-link block px-4 py-3 text-base font-medium text-foreground/60 hover:text-foreground hover:bg-muted/50 rounded-md transition-all capitalize"
           style={`animation-delay: ${index * 50}ms`}
         >
@@ -89,7 +91,21 @@ const navLinks = NAV_LINKS.map((item) => {
 </header>
 
 <script>
+  import { getNavHrefMap } from '@/lib/site'
+
   document.addEventListener('astro:page-load', () => {
+    const dynamicNavHrefMap = getNavHrefMap(new URL(window.location.href))
+
+    Object.entries(dynamicNavHrefMap).forEach(([label, href]) => {
+      const links = document.querySelectorAll(`a[data-nav-label="${label}"]`)
+
+      links.forEach((link) => {
+        if (link instanceof HTMLAnchorElement) {
+          link.href = href
+        }
+      })
+    })
+
     const mobileMenuButton = document.getElementById('mobile-menu-button')
     const mobileMenu = document.getElementById('mobile-menu')
     const menuIcon = document.getElementById('menu-icon')
