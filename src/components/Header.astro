@@ -6,6 +6,10 @@ import { NAV_LINKS, SITE } from '@/consts'
 
 const siteLinks = getSiteLinks(Astro.url)
 const navLinks = NAV_LINKS.map((item) => {
+  if (item.label === 'blog') {
+    return { ...item, href: siteLinks.blog.href + '/blog' }
+  }
+
   if (item.label === 'website') {
     return { ...item, href: siteLinks.website.href }
   }
