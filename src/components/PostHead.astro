@@ -1,6 +1,7 @@
 ---
 import { SITE } from '@/consts'
 import { isSubpost } from '@/lib/data-utils'
+import { getAssetUrl, getCanonicalUrl } from '@/lib/site'
 import type { CollectionEntry } from 'astro:content'
 
 interface Props {
@@ -11,7 +12,8 @@ const { post } = Astro.props
 
 const title = post.data.title || SITE.title
 const description = post.data.description || SITE.description
-const image = new URL('/static/1200x630.png', Astro.site)
+const canonicalUrl = getCanonicalUrl(Astro.url)
+const image = getAssetUrl(Astro.url, '/static/1200x630.png')
 const author =
   post.data.authors && post.data.authors.length > 0
     ? post.data.authors.join(', ')
@@ -21,7 +23,7 @@ const author =
 <title>{`${title} | ${SITE.title}`}</title>
 <meta name="title" content={`${title} | ${SITE.title}`} />
 <meta name="description" content={description} />
-<link rel="canonical" href={SITE.href} />
+<link rel="canonical" href={canonicalUrl} />
 
 {isSubpost(post.id) && <meta name="robots" content="noindex" />}
 
@@ -30,14 +32,14 @@ const author =
 <meta
   property="og:image"
   content={post?.data?.image?.src
-    ? `${SITE.href}${post.data.image.src}`
+    ? new URL(post.data.image.src, Astro.url)
     : image}
 />
 <meta property="og:image:alt" content={title} />
 <meta property="og:type" content="website" />
 <meta property="og:locale" content={SITE.locale} />
 <meta property="og:site_name" content={SITE.title} />
-<meta property="og:url" content={Astro.url} />
+<meta property="og:url" content={canonicalUrl} />
 <meta property="og:author" content={author} />
 
 <meta name="twitter:title" content={title} />
@@ -45,7 +47,7 @@ const author =
 <meta
   property="twitter:image"
   content={post?.data?.image?.src
-    ? `${SITE.href}${post.data.image.src}`
+    ? new URL(post.data.image.src, Astro.url)
     : image}
 />
 <meta name="twitter:image:alt" content={title} />

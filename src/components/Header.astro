@@ -1,9 +1,21 @@
 ---
+import { getSiteLinks } from '@/lib/site'
 import Link from '@/components/Link.astro'
 import ThemeToggle from '@/components/ThemeToggle.astro'
 import { NAV_LINKS, SITE } from '@/consts'
-import { Image } from 'astro:assets'
-import logo from '../../public/static/logo.svg'
+
+const siteLinks = getSiteLinks(Astro.url)
+const navLinks = NAV_LINKS.map((item) => {
+  if (item.label === 'website') {
+    return { ...item, href: siteLinks.website.href }
+  }
+
+  if (item.label === 'runny') {
+    return { ...item, href: siteLinks.runny.href }
+  }
+
+  return item
+})
 ---
 
 <header class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -18,7 +30,7 @@ import logo from '../../public/static/logo.svg'
 
       <div class="flex items-center gap-3">
         <nav class="hidden md:flex items-center gap-1">
-          {NAV_LINKS.map((item) => (
+          {navLinks.map((item) => (
             <Link
               href={item.href}
               external={item.href.startsWith('http')}
@@ -55,7 +67,7 @@ import logo from '../../public/static/logo.svg'
     class="hidden md:hidden border-t bg-background/95 backdrop-blur"
   >
     <nav class="mx-auto max-w-4xl px-4 py-4 space-y-1">
-      {NAV_LINKS.map((item, index) => (
+      {navLinks.map((item, index) => (
         <Link
           href={item.href}
           external={item.href.startsWith('http')}
