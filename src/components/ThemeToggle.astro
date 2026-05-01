@@ -17,56 +17,142 @@ import { Icon } from 'astro-icon/components'
 
 <script is:inline data-astro-rerun>
   (() => {
-    const theme = (() => {
-      const stored = localStorage?.getItem('theme') ?? ''
-      if (['dark', 'light'].includes(stored)) return stored
-      return window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light'
-    })()
+    const THEME_KEY = 'theme'
+    const VALID_THEMES = new Set(['dark', 'light'])
 
-    document.documentElement.setAttribute('data-theme', theme)
-    window.localStorage.setItem('theme', theme)
+    const getCookieDomain = () => {
+      const host = window.location.hostname
+      if (!host || host === 'localhost' || host === '127.0.0.1' || host === '::1') return ''
+      if (host.endsWith('russeldanielpaul.tech')) return '.russeldanielpaul.tech'
+      return ''
+    }
+
+    const readThemeCookie = () => {
+      const cookie = document.cookie.split('; ').find((row) => row.startsWith(`${THEME_KEY}=`))
+      return cookie ? decodeURIComponent(cookie.split('=')[1]) : ''
+    }
+
+    const writeThemeCookie = (theme) => {
+      const maxAge = 60 * 60 * 24 * 365
+      const domain = getCookieDomain()
+      const domainPart = domain ? `; domain=${domain}` : ''
+      document.cookie = `${THEME_KEY}=${encodeURIComponent(theme)}; path=/; max-age=${maxAge}; samesite=lax${domainPart}`
+    }
+
+    const getPreferredTheme = () => {
+      const fromCookie = readThemeCookie()
+      if (VALID_THEMES.has(fromCookie)) return fromCookie
+
+      const fromStorage = window.localStorage.getItem(THEME_KEY) ?? ''
+      if (VALID_THEMES.has(fromStorage)) return fromStorage
+
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    }
+
+    const initialTheme = getPreferredTheme()
+    document.documentElement.setAttribute('data-theme', initialTheme)
+    window.localStorage.setItem(THEME_KEY, initialTheme)
+    writeThemeCookie(initialTheme)
   })()
 </script>
 
 <script>
-  function handleToggleClick() {
+  // @ts-nocheck
+  const THEME_KEY = 'theme'
+
+  function getCookieDomain() {
+    const host = window.location.hostname
+    if (!host || host === 'localhost' || host === '127.0.0.1' || host === '::1') return ''
+    if (host.endsWith('russeldanielpaul.tech')) return '.russeldanielpaul.tech'
+    return ''
+  }
+
+  function writeThemeCookie(theme) {
+    const maxAge = 60 * 60 * 24 * 365
+    const domain = getCookieDomain()
+    const domainPart = domain ? `; domain=${domain}` : ''
+    document.cookie = `${THEME_KEY}=${encodeURIComponent(theme)}; path=/; max-age=${maxAge}; samesite=lax${domainPart}`
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme)
+    localStorage.setItem(THEME_KEY, theme)
+    writeThemeCookie(theme)
+  }
+
+  function isEditableTarget(target) {
+    if (!(target instanceof HTMLElement)) return false
+    const tag = target.tagName.toLowerCase()
+    return target.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select'
+  }
+
+  function toggleTheme(sourceEl = null) {
     const element = document.documentElement
     const currentTheme = element.getAttribute('data-theme')
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark'
 
-    element.classList.add('[&_*]:transition-none')
-    element.setAttribute('data-theme', newTheme)
-    window.getComputedStyle(element).getPropertyValue('opacity')
+    const supportsViewTransition = typeof document.startViewTransition === 'function'
 
-    requestAnimationFrame(() => {
-      element.classList.remove('[&_*]:transition-none')
+    if (!supportsViewTransition || !sourceEl || !(sourceEl instanceof HTMLElement)) {
+      applyTheme(newTheme)
+      return
+    }
+
+    const rect = sourceEl.getBoundingClientRect()
+    const x = rect.left + rect.width / 2
+    const y = rect.top + rect.height / 2
+    const maxX = Math.max(x, window.innerWidth - x)
+    const maxY = Math.max(y, window.innerHeight - y)
+    const endRadius = Math.hypot(maxX, maxY)
+
+    element.classList.add('theme-transition')
+    const transition = document.startViewTransition(() => {
+      applyTheme(newTheme)
     })
 
-    localStorage.setItem('theme', newTheme)
+    transition.finished.finally(() => {
+      element.classList.remove('theme-transition')
+    })
+
+    transition.ready.then(() => {
+      element.animate(
+        {
+          clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`],
+        },
+        {
+          duration: 880,
+          easing: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          pseudoElement: '::view-transition-new(root)',
+        }
+      )
+    })
+  }
+
+  function handleToggleClick(event) {
+    toggleTheme(event.currentTarget)
+  }
+
+  function handleThemeKeydown(event) {
+    if (event.repeat) return
+    if (event.key.toLowerCase() !== 'd') return
+    if (isEditableTarget(event.target)) return
+    event.preventDefault()
+    toggleTheme(document.getElementById('theme-toggle'))
   }
 
   function initThemeToggle() {
-    document
-      .getElementById('theme-toggle')
-      ?.addEventListener('click', handleToggleClick)
+    const toggleBtn = document.getElementById('theme-toggle')
+    toggleBtn?.addEventListener('click', handleToggleClick)
+
+    window.removeEventListener('keydown', handleThemeKeydown)
+    window.addEventListener('keydown', handleThemeKeydown)
   }
 
   initThemeToggle()
 
   document.addEventListener('astro:after-swap', () => {
-    const storedTheme = localStorage.getItem('theme') || 'light'
-    const element = document.documentElement
-
-    element.classList.add('[&_*]:transition-none')
-    window.getComputedStyle(element).getPropertyValue('opacity')
-    element.setAttribute('data-theme', storedTheme)
-
-    requestAnimationFrame(() => {
-      element.classList.remove('[&_*]:transition-none')
-    })
-
+    const storedTheme = localStorage.getItem(THEME_KEY) || 'light'
+    applyTheme(storedTheme)
     initThemeToggle()
   })
 </script>
