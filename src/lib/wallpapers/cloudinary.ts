@@ -1,11 +1,14 @@
 export interface CloudinaryListResource {
   public_id?: string
+  publicId?: string
   secure_url?: string
+  url?: string
   width?: number
   height?: number
   format?: string
   bytes?: number
   created_at?: string
+  createdAt?: string
 }
 
 export interface CloudinaryListPayload {
@@ -31,15 +34,19 @@ export function buildCloudinaryTagListUrl(cloudName: string, tag: string): strin
 }
 
 function isValidResource(resource: CloudinaryListResource): resource is Required<CloudinaryListResource> {
+  const publicId = resource.public_id ?? resource.publicId
+  const secureUrl = resource.secure_url ?? resource.url
+  const createdAt = resource.created_at ?? resource.createdAt
+
   return (
-    typeof resource.public_id === 'string' &&
-    typeof resource.secure_url === 'string' &&
+    typeof publicId === 'string' &&
+    typeof secureUrl === 'string' &&
     typeof resource.width === 'number' &&
     typeof resource.height === 'number' &&
     typeof resource.format === 'string' &&
     typeof resource.bytes === 'number' &&
-    typeof resource.created_at === 'string' &&
-    Number.isFinite(Date.parse(resource.created_at))
+    typeof createdAt === 'string' &&
+    Number.isFinite(Date.parse(createdAt))
   )
 }
 
@@ -49,13 +56,13 @@ export function normalizeCloudinaryList(payload: CloudinaryListPayload): Wallpap
   return resources
     .filter(isValidResource)
     .map((resource) => ({
-      publicId: resource.public_id,
-      url: resource.secure_url,
+      publicId: resource.public_id ?? resource.publicId ?? '',
+      url: resource.secure_url ?? resource.url ?? '',
       width: resource.width,
       height: resource.height,
       format: resource.format,
       bytes: resource.bytes,
-      createdAt: resource.created_at,
+      createdAt: resource.created_at ?? resource.createdAt ?? new Date(0).toISOString(),
     }))
     .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
 }

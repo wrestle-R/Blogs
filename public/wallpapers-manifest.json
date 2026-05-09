@@ -1,0 +1,95 @@
+{
+  "updatedAt": "2026-05-09T16:39:27Z",
+  "resources": [
+    {
+      "publicId": "blogs/wallpapers/spiderman2",
+      "url": "https://res.cloudinary.com/dvti0xrsg/image/upload/v1778344695/blogs/wallpapers/spiderman2.png",
+      "width": 1920,
+      "height": 1200,
+      "format": "png",
+      "bytes": 1811526,
+      "createdAt": "2026-05-09T16:38:15Z"
+    },
+    {
+      "publicId": "blogs/wallpapers/spiderman",
+      "url": "https://res.cloudinary.com/dvti0xrsg/image/upload/v1778344688/blogs/wallpapers/spiderman.png",
+      "width": 1920,
+      "height": 1200,
+      "format": "png",
+      "bytes": 2989058,
+      "createdAt": "2026-05-09T16:38:08Z"
+    },
+    {
+      "publicId": "blogs/wallpapers/landscape",
+      "url": "https://res.cloudinary.com/dvti0xrsg/image/upload/v1778344679/blogs/wallpapers/landscape.jpg",
+      "width": 1920,
+      "height": 1200,
+      "format": "jpg",
+      "bytes": 185813,
+      "createdAt": "2026-05-09T16:37:59Z"
+    },
+    {
+      "publicId": "blogs/wallpapers/january",
+      "url": "https://res.cloudinary.com/dvti0xrsg/image/upload/v1778344676/blogs/wallpapers/january.png",
+      "width": 1920,
+      "height": 1200,
+      "format": "png",
+      "bytes": 2482090,
+      "createdAt": "2026-05-09T16:37:56Z"
+    },
+    {
+      "publicId": "blogs/wallpapers/deer",
+      "url": "https://res.cloudinary.com/dvti0xrsg/image/upload/v1778344662/blogs/wallpapers/deer.png",
+      "width": 1920,
+      "height": 1200,
+      "format": "png",
+      "bytes": 311605,
+      "createdAt": "2026-05-09T16:37:42Z"
+    },
+    {
+      "publicId": "blogs/wallpapers/darkmountains",
+      "url": "https://res.cloudinary.com/dvti0xrsg/image/upload/v1778344658/blogs/wallpapers/darkmountains.jpg",
+      "width": 1920,
+      "height": 1200,
+      "format": "jpg",
+      "bytes": 61585,
+      "createdAt": "2026-05-09T16:37:38Z"
+    },
+    {
+      "publicId": "blogs/wallpapers/blackpearl1",
+      "url": "https://res.cloudinary.com/dvti0xrsg/image/upload/v1778344654/blogs/wallpapers/blackpearl1.png",
+      "width": 1920,
+      "height": 1200,
+      "format": "png",
+      "bytes": 3468957,
+      "createdAt": "2026-05-09T16:37:34Z"
+    },
+    {
+      "publicId": "blogs/wallpapers/blackpearl",
+      "url": "https://res.cloudinary.com/dvti0xrsg/image/upload/v1778344641/blogs/wallpapers/blackpearl.png",
+      "width": 1920,
+      "height": 1200,
+      "format": "png",
+      "bytes": 2718025,
+      "createdAt": "2026-05-09T16:37:21Z"
+    },
+    {
+      "publicId": "blogs/wallpapers/42-195",
+      "url": "https://res.cloudinary.com/dvti0xrsg/image/upload/v1778344630/blogs/wallpapers/42-195.png",
+      "width": 1920,
+      "height": 1200,
+      "format": "png",
+      "bytes": 117938,
+      "createdAt": "2026-05-09T16:37:10Z"
+    },
+    {
+      "publicId": "blogs/wallpapers/forwardisapace",
+      "url": "https://res.cloudinary.com/dvti0xrsg/image/upload/v1778344627/blogs/wallpapers/forwardisapace.png",
+      "width": 1920,
+      "height": 1200,
+      "format": "png",
+      "bytes": 80013,
+      "createdAt": "2026-05-09T16:37:07Z"
+    }
+  ]
+}

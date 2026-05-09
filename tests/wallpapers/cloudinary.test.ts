@@ -44,7 +44,7 @@ describe('cloudinary helpers', () => {
     const normalized = normalizeCloudinaryList({
       resources: [
         {
-          foo: 'bar',
+          public_id: 'only-public-id-no-url',
         },
       ],
     })
