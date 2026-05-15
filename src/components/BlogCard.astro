@@ -82,10 +82,14 @@ const runblogApiBaseUrl =
         <span>{formattedDate}</span>
         <Separator orientation="vertical" className="h-4!" />
         <span>{readTime}</span>
-        <Separator orientation="vertical" className="h-4!" />
-        <span class="flex items-center gap-1">
+        <Separator
+          orientation="vertical"
+          className="h-4! hidden"
+          data-blog-view-separator
+        />
+        <span class="hidden items-center gap-1" data-blog-view-meta>
           <Icon name="lucide:eye" class="size-3" />
-          <span data-blog-view-count>-- views</span>
+          <span data-blog-view-count></span>
         </span>
         {
           subpostCount > 0 && (
@@ -144,7 +148,7 @@ const runblogApiBaseUrl =
       })
 
       try {
-        const response = await fetch(`${baseUrl}/api/blog/views?${params}`, {
+        const response = await fetch(`${baseUrl}/api/blogs/views?${params}`, {
           method: 'GET',
           headers: {
             Accept: 'application/json',
@@ -168,14 +172,21 @@ const runblogApiBaseUrl =
           const slug = card.dataset.postSlug?.trim() || ''
           if (!slug) return
 
+          if (!viewMap.has(slug)) return
+
           const count = viewMap.get(slug) ?? 0
           const countNode = card.querySelector('[data-blog-view-count]')
+          const countMetaNode = card.querySelector('[data-blog-view-meta]')
+          const separatorNode = card.querySelector('[data-blog-view-separator]')
           if (!countNode) return
 
           countNode.textContent = `${count} view${count === 1 ? '' : 's'}`
+          countMetaNode?.classList.remove('hidden')
+          countMetaNode?.classList.add('flex')
+          separatorNode?.classList.remove('hidden')
         })
       } catch {
-        // Keep placeholder on network failure.
+        // Keep views hidden on network failure.
       }
     }
 

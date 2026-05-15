@@ -113,7 +113,7 @@ const runblogApiBaseUrl =
         const section = form.closest('.newsletter-section')
         const baseUrl = section?.getAttribute('data-newsletter-api-base') || 'https://runny.russel.is-a.dev'
 
-        const response = await fetch(`${baseUrl}/api/newsletter/subscribe`, {
+        const response = await fetch(`${baseUrl}/api/blogs/newsletter/subscribe`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 

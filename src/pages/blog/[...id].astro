@@ -209,7 +209,7 @@ const viewTrackTitle = isCurrentSubpost
       if (localStorage.getItem(localStorageKey) === '1') return
 
       try {
-        const response = await fetch(`${baseUrl}/api/blog/views/track`, {
+        const response = await fetch(`${baseUrl}/api/blogs/views/track`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

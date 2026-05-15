@@ -1,8 +1,6 @@
 ---
 import '@/styles/global.css'
 import '@/styles/typography.css'
-import Analytics from '@vercel/analytics/astro'
-import { inject } from '@vercel/analytics';
 import Footer from '@/components/Footer.astro'
 import Head from '@/components/Head.astro'
 import { SITE } from '@/consts'
@@ -39,7 +37,6 @@ const { class: className } = Astro.props
       <slot />
     </main>
     <Footer />
-    <Analytics/>
     <script is:inline>
       (() => {
         const attributionLine = "Copied from Russel's Blog";
