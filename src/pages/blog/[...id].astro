@@ -57,10 +57,23 @@ const combinedReadingTime =
     : null
 
 const tocSections = await getTOCSections(currentPostId)
+const runblogApiBaseUrl =
+  import.meta.env.PUBLIC_RUNBLOG_API_BASE_URL || 'https://runny.russel.is-a.dev'
+const viewTrackSlug = isCurrentSubpost ? getParentId(currentPostId) : currentPostId
+const viewTrackTitle = isCurrentSubpost
+  ? parentPost?.data.title || post.data.title
+  : post.data.title
 ---
 
 <Layout>
   <PostHead slot="head" post={post} />
+  <div
+    id="blog-view-tracker"
+    class="hidden"
+    data-slug={viewTrackSlug}
+    data-title={viewTrackTitle}
+    data-views-api-base={runblogApiBaseUrl}
+  ></div>
   {
     (hasChildPosts || isCurrentSubpost) && (
       <SubpostsHeader
@@ -180,7 +193,41 @@ const tocSections = await getTOCSections(currentPostId)
   </Button>
 
   <script>
+    const trackBlogView = async () => {
+      const tracker = document.getElementById('blog-view-tracker')
+      if (!tracker) return
+
+      const slug = tracker.getAttribute('data-slug')?.trim() || ''
+      const title = tracker.getAttribute('data-title')?.trim() || ''
+      const baseUrl =
+        tracker.getAttribute('data-views-api-base') ||
+        'https://runny.russel.is-a.dev'
+
+      if (!slug || !title) return
+
+      const localStorageKey = `blogs:viewed:${slug}`
+      if (localStorage.getItem(localStorageKey) === '1') return
+
+      try {
+        const response = await fetch(`${baseUrl}/api/blog/views/track`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ slug, title }),
+        })
+
+        if (response.ok) {
+          localStorage.setItem(localStorageKey, '1')
+        }
+      } catch {
+        // Ignore track failures; page rendering should not be affected.
+      }
+    }
+
     document.addEventListener('astro:page-load', () => {
+      trackBlogView()
+
       const scrollToTopButton = document.getElementById('scroll-to-top')
       const footer = document.querySelector('footer')
 
