@@ -12,9 +12,16 @@ const {
   variant = 'default',
   position = 'bottom',
 } = Astro.props
+
+const runblogApiBaseUrl =
+  import.meta.env.PUBLIC_RUNBLOG_API_BASE_URL || 'https://runny.russel.is-a.dev'
 ---
 
-<section class="newsletter-section" data-variant={variant}>
+<section
+  class="newsletter-section"
+  data-variant={variant}
+  data-newsletter-api-base={runblogApiBaseUrl}
+>
   <div class="newsletter-container">
     {variant === 'default' && (
       <div class="newsletter-content">
@@ -103,13 +110,16 @@ const {
       button.classList.add('loading')
       
       try {
-        // Send email to backend to store in Cloudflare KV
-        const response = await fetch('https://blogsbackend.vidyoyo.workers.dev/api/newsletter/subscribe', {
+        const section = form.closest('.newsletter-section')
+        const baseUrl = section?.getAttribute('data-newsletter-api-base') || 'https://runny.russel.is-a.dev'
+
+        const response = await fetch(`${baseUrl}/api/newsletter/subscribe`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             email: input.value,
-            subscribedAt: new Date().toISOString()
+            subscribedAt: new Date().toISOString(),
+            source: 'blogs'
           })
         })
         

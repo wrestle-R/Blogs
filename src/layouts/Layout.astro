@@ -40,5 +40,41 @@ const { class: className } = Astro.props
     </main>
     <Footer />
     <Analytics/>
+    <script is:inline>
+      (() => {
+        const attributionLine = "Copied from Russel's Blog";
+
+        const getTextControlSelection = (target) => {
+          if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
+            return '';
+          }
+
+          const start = target.selectionStart ?? 0;
+          const end = target.selectionEnd ?? 0;
+
+          if (end <= start) {
+            return '';
+          }
+
+          return target.value.slice(start, end);
+        };
+
+        document.addEventListener('copy', (event) => {
+          const fromControl = getTextControlSelection(event.target);
+          const selectedText = (fromControl || window.getSelection()?.toString() || '').trim();
+
+          if (!selectedText || !event.clipboardData) {
+            return;
+          }
+
+          const textWithAttribution = selectedText.endsWith(attributionLine)
+            ? selectedText
+            : `${selectedText}\n\n${attributionLine}`;
+
+          event.preventDefault();
+          event.clipboardData.setData('text/plain', textWithAttribution);
+        });
+      })();
+    </script>
   </body>
 </html>
