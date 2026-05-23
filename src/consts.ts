@@ -14,26 +14,26 @@ export const SITE: Site = {
 const PRIMARY_HOSTNAME = new URL(SITE.href).hostname
 
 export const NAV_LINKS: SocialLink[] = [
-  {
-    href: '/blog',
-    label: 'blog',
-  },
-  {
-    href: '/songs',
-    label: 'songs',
-  },
+  // {
+  //   href: '/blog',
+  //   label: 'blog',
+  // },
+  // {
+  //   href: '/songs',
+  //   label: 'songs',
+  // },
   // {
   //   href: '/movies',
   //   label: 'movies'
   // },
-  {
-    href: '/authors',
-    label: 'authors',
-  },
-  {
-    href: '/collaborate',
-    label: 'collaborate',
-  },
+  // {
+  //   href: '/authors',
+  //   label: 'authors',
+  // },
+  // {
+  //   href: '/collaborate',
+  //   label: 'collaborate',
+  // },
   {
     href: `https://runny.${PRIMARY_HOSTNAME}`,
     label: 'runny',
