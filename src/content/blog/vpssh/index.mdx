@@ -1,0 +1,174 @@
+---
+title: 'VPssh'
+description: |
+  If someone had asked me 6 months ago what a VPS(Virtual Private Server) or SSH(Secure Shell) meant, I would've almost certainly thought it was the abbreviation for some disease.
+date: 2026-06-08
+tags: ['tech']
+authors: ['russel']
+draft: false
+---
+
+If someone had asked me 6 months ago what a VPS(Virtual Private Server) or SSH(Secure Shell) meant, I would've almost certainly thought it was the abbreviation for some disease. Today I have a reasonably working idea of what they are, and somehow that doesn't provide any more comfort.
+
+Initially, I thought of writing this blog as a tutorial, but I think it's better as a collection of things I wish someone had told me before I started.
+
+<div class="vpssh-theme-image">
+  <img class="vpssh-intro-light" src="/blogimages/vpSSH/Intro_light.png" alt="SSH connection to a VPS shown in a terminal" />
+  <img class="vpssh-intro-dark" src="/blogimages/vpSSH/Intro_dark.png" alt="SSH connection to a VPS shown in a dark terminal" />
+</div>
+
+## Why a VPS?
+
+The most common analogy you'll hear after asking someone what the difference is goes something like this:
+
+<div class="vpssh-callout">
+  <p>"Shared hosting is like renting a room in an apartment with a lot of facilities already provided for you (think CI/CD pipelines, managed deployments), whereas VPS hosting is like renting an entire unfurnished apartment. You get your own isolated environment."</p>
+</div>
+
+Now, similarly to an apartment, a VPS is still part of a larger building (the physical server running many virtual machines), which means it still shares some underlying hardware with other VPS instances. So it's less like owning an entire apartment building and more like having your own apartment inside a very large building where everyone shares the same foundation, electricity, and plumbing.
+
+More importantly, I think this analogy accidentally makes people believe that more control is always better. Always? Hell nah. For your use case? Maybe.
+
+**Vercel** → When you want to deploy a frontend/Next.js application and forget hosting exists (a single git push is usually all it needs). **Render** → When you need a reliable backend or full-stack deployment, especially at startup-friendly prices. Sometimes a ₹200/month Hostinger plan running a PHP script is all you need.
+
+Now coming to the why.
+
+A VPS only starts making sense when your application has requirements that managed platforms aren't designed around. In my case, that requirement was MQTT. The moment you need long-running services, background workers, brokers, or infrastructure that doesn't neatly fit into a platform's deployment model, a VPS starts becoming a very viable option.
+
+Since I needed to run Mosquitto (an open-source MQTT broker), a VPS made the most sense. While public MQTT brokers are great for testing and experimentation, they're generally not something you'd want to rely on in production. I needed full control over authentication, topics, permissions, reliability, and network access, so a VPS ended up being the best option.
+
+## Exposure
+
+The password login was being a little dodgy and honestly I wasn't a huge fan of typing it every single time either, so I switched over to SSH key authentication using OpenSSH.
+
+The process was surprisingly simple:
+
+1. Generate an SSH key pair.
+2. Copy the public key to the server.
+3. Verify that key-based login works.
+4. Disable password authentication.
+
+While setting up key-based authentication, I ended up reading through a bunch of SSH documentation and random forum posts just to make sure I wasn't about to lock myself out of my own server.
+
+Somewhere in the middle of that, I came across authentication logs and ran:
+
+`sudo grep "Failed password" /var/log/auth.log`
+
+I was expecting maybe one or two failed attempts. Instead, I got hundreds. A quick trip to ChatGPT later, and I was staring at login attempts from random IP addresses all over the world. A few of them traced back to Russia, which definitely did not help my stress levels. And this is where the apartment analogy completely falls apart. When you rent an apartment, thousands of Russians don't show up every day trying random keys in your front door.
+
+Naturally, I started panicking and called the CEO. He laughed for a solid few seconds before explaining that what I was seeing wasn't some sophisticated attack targeted at me. It was just the background noise of the internet. The moment a public IP address exists, automated bots start scanning it. They don't know who you are, what you're hosting, or whether your server is important. They're just trying every door they can find and hoping one of them is unlocked.
+
+With his help, I tightened things up a little. We configured UFW (Uncomplicated Firewall) to allow only the ports we actually needed and restricted SSH access to a whitelist of trusted IP addresses. In total, only six IP addresses were allowed to SSH into the server, including my home network, the office network, the CEO's home network, and a few other trusted locations. That was probably my first real lesson in security. The goal isn't to become impossible to attack. It's to make your server just annoying enough that the bots decide to bother someone else instead.
+
+## The Deployment
+
+At some point, it was finally time to move actual applications onto the VPS. Up until then, most of my time had been spent configuring things, reading documentation(Vibing), and occasionally convincing myself that I understood what was happening.
+
+The first thing I needed to do was get the repositories onto the server. This was also the point where security started feeling a lot more real.
+
+I hadn't even logged into GitHub from the VPS yet when the realization hit me. The moment I authenticated that machine with GitHub, it would have access to our repositories. None of my private repositories are particularly impressive or worth stealing, but it still felt weird. I had spent all this time securing access to the server, and now I was about to give the server access to GitHub.
+
+Thankfully, GitHub organization deployment keys are an absolute godsend. Instead of throwing my personal credentials onto the server and hoping for the best, I spent some time experimenting with deployment keys and organization permissions until I found something that felt a lot more sensible. The server got exactly the access it needed and nothing more.
+
+Once the repositories were on the machine, the next challenge was figuring out how everything was actually supposed to coexist. The IoT Dashboard needed to be hosted on the VPS, but so did the company's main website. Initially, I assumed there had to be some pseudo second server involved somewhere because the idea of multiple websites living happily on the same machine felt ridiculous.
+
+There wasn't.
+
+At the time, my deployment process was fairly straightforward. I would pull the latest code onto the VPS, build a Docker image directly on the server itself, and then start the container from that image. It wasn't the fanciest setup in the world, but it worked, and more importantly, it forced me to understand what was actually happening during deployment instead of hiding everything behind a platform.
+
+The part that completely confused me was how multiple domains were supposed to work. After spending an <a href="https://medium.com/@chiemekaifemegbulem/mastering-nginx-effortlessly-hosting-multiple-domains-on-a-single-server-a4578150e60e" target="_blank" rel="noopener noreferrer">evening reading blogs</a> about Nginx reverse proxies and virtual hosts, I realized that a single VPS could happily serve multiple domains without much trouble. The concept itself was honestly baffling to me at first.
+
+One domain could point to the dashboard.
+
+Another could point to the company website.
+
+Another could point to an API.
+
+And somehow Nginx would quietly route everything to the correct container.
+
+The VPS is basically the building, and Nginx is the receptionist deciding where visitors need to go.
+
+Once that clicked, a lot of the architecture suddenly started making sense.
+
+The final piece of the puzzle was Docker. By this point, the dashboard had grown into four separate Docker images, while the main company website lived in its own container. The first time I saw everything come up properly and talk to each other on the same machine, it felt oddly satisfying.
+
+## Conclusion
+
+This whole experience was basically a reminder that most things aren't nearly as complicated as they look from the outside.
+
+There's a quote I really like:
+
+<blockquote class="vpssh-pull-quote">
+  <p>"Every piece of technology looks impossibly complicated right up until the moment it becomes part of your daily routine. And then one day you catch yourself explaining it to someone else."</p>
+</blockquote>
+
+I don't think I'm quite at the explaining-it-to-someone-else stage yet, but six months ago VPSs, SSH, Docker, and Nginx all felt like things only "real engineers" understood. Now they're just tools I happen to use.
+
+I still break things fairly regularly, but at least now I usually know why they're broken(also i no longer think VPS and SSH are diseases).
+
+<p class="vpssh-ending-link">That's progress.</p>
+
+<style is:global>{`
+  .vpssh-callout {
+    margin: 1rem 0 1.5rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--card) 88%, var(--muted) 12%) 0%,
+      color-mix(in srgb, var(--card) 96%, transparent) 100%
+    );
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--foreground) 6%, transparent);
+  }
+
+  .vpssh-theme-image {
+    margin: 1.5rem 0;
+  }
+
+  .vpssh-theme-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0.75rem;
+  }
+
+  .vpssh-theme-image .vpssh-intro-dark {
+    display: none;
+  }
+
+  [data-theme='dark'] .vpssh-theme-image .vpssh-intro-light {
+    display: none;
+  }
+
+  [data-theme='dark'] .vpssh-theme-image .vpssh-intro-dark {
+    display: block;
+  }
+
+  .vpssh-callout p {
+    margin: 0;
+    font-style: italic;
+  }
+
+  .vpssh-pull-quote {
+    margin: 1rem 0 1.5rem;
+    padding: 0.95rem 1.1rem;
+    border-left: 4px solid var(--primary);
+    border-radius: 0.6rem;
+    background: color-mix(in srgb, var(--muted) 72%, transparent);
+  }
+
+  .vpssh-pull-quote p {
+    margin: 0;
+    font-style: italic;
+    letter-spacing: 0.01em;
+  }
+
+  .vpssh-ending-link {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--muted-foreground);
+    font-size: 0.95rem;
+    font-style: italic;
+  }
+`}</style>
