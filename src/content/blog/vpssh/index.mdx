@@ -1,5 +1,5 @@
 ---
-title: 'VPssh'
+title: 'vpSSH'
 description: |
   If someone had asked me 6 months ago what a VPS(Virtual Private Server) or SSH(Secure Shell) meant, I would've almost certainly thought it was the abbreviation for some disease.
 date: 2026-06-08
@@ -55,6 +55,11 @@ Somewhere in the middle of that, I came across authentication logs and ran:
 `sudo grep "Failed password" /var/log/auth.log`
 
 I was expecting maybe one or two failed attempts. Instead, I got hundreds. A quick trip to ChatGPT later, and I was staring at login attempts from random IP addresses all over the world. A few of them traced back to Russia, which definitely did not help my stress levels. And this is where the apartment analogy completely falls apart. When you rent an apartment, thousands of Russians don't show up every day trying random keys in your front door.
+
+<div class="vpssh-theme-image">
+  <img class="vpssh-russia-light" src="/blogimages/vpSSH/Russia_light.png" alt="SSH login attempts from IP addresses around the world shown on a light map" />
+  <img class="vpssh-russia-dark" src="/blogimages/vpSSH/Russia_dark.png" alt="SSH login attempts from IP addresses around the world shown on a dark map" />
+</div>
 
 Naturally, I started panicking and called the CEO. He laughed for a solid few seconds before explaining that what I was seeing wasn't some sophisticated attack targeted at me. It was just the background noise of the internet. The moment a public IP address exists, automated bots start scanning it. They don't know who you are, what you're hosting, or whether your server is important. They're just trying every door they can find and hoping one of them is unlocked.
 
@@ -133,15 +138,18 @@ I still break things fairly regularly, but at least now I usually know why they'
     border-radius: 0.75rem;
   }
 
-  .vpssh-theme-image .vpssh-intro-dark {
+  .vpssh-theme-image .vpssh-intro-dark,
+  .vpssh-theme-image .vpssh-russia-dark {
     display: none;
   }
 
-  [data-theme='dark'] .vpssh-theme-image .vpssh-intro-light {
+  [data-theme='dark'] .vpssh-theme-image .vpssh-intro-light,
+  [data-theme='dark'] .vpssh-theme-image .vpssh-russia-light {
     display: none;
   }
 
-  [data-theme='dark'] .vpssh-theme-image .vpssh-intro-dark {
+  [data-theme='dark'] .vpssh-theme-image .vpssh-intro-dark,
+  [data-theme='dark'] .vpssh-theme-image .vpssh-russia-dark {
     display: block;
   }
 
