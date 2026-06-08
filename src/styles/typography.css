@@ -27,7 +27,7 @@
 
 @layer components {
   .prose {
-    @apply text-foreground text-[16px] leading-[1.7];
+    @apply text-foreground text-[16px] leading-[1.7] text-justify;
 
     :where(p):not(:where(.not-prose, .not-prose *)) {
       @apply text-foreground/80 my-4;
@@ -35,6 +35,7 @@
 
     :where(h1, h2, h3, h4, h5, h6):not(:where(.not-prose, .not-prose *)) {
       @apply text-foreground scroll-mt-32 font-normal xl:scroll-mt-20;
+      text-align: left;
     }
 
     :first-child:not(:where(.not-prose, .not-prose *)) {
