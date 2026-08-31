@@ -1,0 +1,397 @@
+---
+const recipes = [
+  {
+    id: 'chicken-garlic-bread',
+    number: '01',
+    title: 'Chicken Garlic Bread',
+    image: '/blogimages/Yhprum/chicken-garlic-bread.png',
+    alt: 'Slices of golden chicken garlic bread topped with chilli flakes',
+    caption: 'The finished chicken garlic bread',
+    ingredients: [
+      'Boneless chicken',
+      'Bread',
+      'Garlic',
+      'Butter',
+      'Cheese',
+      'Oregano',
+      'Black pepper',
+      'Salt',
+    ],
+    method: [
+      `First, cut the chicken into small sized pieces about an inch sized pieces.`,
+      `Season the chicken with salt, pepper and oregano. Heat some oil in a pan and cook the chicken until it feels cooked.`,
+      `Now this is the important part u need to mix the garlic and butter okay which sort of makes soemthing called garlic butter, it tastes sorta pungent. Depending on how small you cut the garlic the butter will be of good consistency.`,
+      `Take your bread and spread the garlic butter over it add the chicken adn then a top layer of cheese. I think you can make out from the recipe this is less of a scientific and more of a vibe based cooking.`,
+    ],
+  },
+  {
+    id: 'chicken-pasta',
+    number: '02',
+    title: 'Chicken Pasta',
+    image: '/blogimages/Yhprum/chicken-pasta.png',
+    alt: 'A plate of chicken pasta with mixed pasta shapes and sauce',
+    caption: 'Chicken pasta, ready to eat',
+    ingredients: [
+      'Pasta',
+      'Boneless chicken',
+      'Garlic',
+      'Onion',
+      'Cheese',
+      'Chilli flakes',
+      'Oregano',
+      'Black pepper',
+      'Salt',
+      'Oil',
+    ],
+    method: [
+      `Boil the pasta in salted water. The amount of salt is entirely dependent on how confident you are feeling that day.`,
+      `Secondly Add some chopped onion and garlic and let them cook together. Then add tomato and pasta sauce and let the whole thing sit there for a while looking like you actually know what you're doing Add the chicken into pieces and season it with salt, pepper, chilli flakes and oregano. Cook it in a pan with butter until it feels cooked.`,
+      `Finally, throw in the pasta and mix everything together.`,
+      `If it looks good, congratulations.<br />If it doesn't, add more cheese.`,
+    ],
+  },
+  {
+    id: 'french-toast',
+    number: '03',
+    title: 'French Toast',
+    image: '/blogimages/Yhprum/chicken-pasta-sauce.png',
+    alt: 'Chicken pieces cooking in a creamy sauce in a pan',
+    caption: 'Chicken cooking in a creamy sauce',
+    ingredients: [
+      'Bread: a few slices',
+      'Eggs',
+      'Milk',
+      'Sugar',
+      'Vanilla essence',
+      'Cinnamon',
+      'Butter',
+      'A pinch of salt',
+      'Honey or whatever topping you have lying around',
+    ],
+    method: [
+      `Crack the eggs into a bowl, add milk, sugar and whisk everything together, this is the most important part where the consistency needs to be as uniform as possible.`,
+      `Dip the bread into the mixture. Make sure both sides get coated, but don't leave it there long enough for the bread starts to disintegrate.`,
+      `Heat a pan, add some butter, and put the bread on it. Cook both sides till they feel good and remove and enjoy. DO NOT FORGET SHARE IT WITH THE PEOPLE IN YOUR HOUSE.`,
+      `This one is also probably the easiest recipe here, which on a completely unrelated note also happens to be my best food.`,
+    ],
+  },
+]
+---
+
+<section class="recipe-grid" data-recipe-grid aria-label="Recipes">
+  <div class="recipe-grid__intro">
+    <span class="recipe-grid__eyebrow">The fourth meal</span>
+  </div>
+
+  <div class="recipe-grid__cards">
+    {recipes.map((recipe) => (
+      <article class="recipe-card" data-recipe-card data-recipe-id={recipe.id}>
+        <button
+          type="button"
+          class="recipe-card__trigger"
+          data-recipe-trigger
+          aria-expanded="false"
+          aria-controls={`${recipe.id}-details`}
+        >
+          <span class="recipe-card__image-wrap">
+            <img src={recipe.image} alt={recipe.alt} class="recipe-card__image" loading="lazy" />
+            <span class="recipe-card__number">{recipe.number}</span>
+          </span>
+          <span class="recipe-card__image-caption">{recipe.caption}</span>
+          <span class="recipe-card__meta">
+            <span class="recipe-card__title">{recipe.title}</span>
+          </span>
+        </button>
+
+        <div class="recipe-card__details" id={`${recipe.id}-details`} data-recipe-details hidden>
+          <div class="recipe-card__details-heading">
+            <span class="recipe-card__eyebrow">Recipe {recipe.number}</span>
+            <button type="button" class="recipe-card__close" data-recipe-close aria-label={`Close ${recipe.title}`}>
+              Close <span aria-hidden="true">×</span>
+            </button>
+          </div>
+
+          <div class="recipe-card__content">
+            <div>
+              <h3>{recipe.title}</h3>
+              <h4>Ingredients</h4>
+              <ul>
+                {recipe.ingredients.map((ingredient) => <li>{ingredient}</li>)}
+              </ul>
+            </div>
+            <div>
+              <h4>Method</h4>
+              {recipe.method.map((paragraph) => <p set:html={paragraph}></p>)}
+            </div>
+          </div>
+        </div>
+      </article>
+    ))}
+  </div>
+</section>
+
+<script>
+  const initialiseRecipeGrids = () => {
+    document.querySelectorAll<HTMLElement>('[data-recipe-grid]').forEach((grid) => {
+      if (grid.dataset.initialised === 'true') return
+      grid.dataset.initialised = 'true'
+
+      const cards = Array.from(grid.querySelectorAll<HTMLElement>('[data-recipe-card]'))
+      const closeGrid = () => {
+        grid.dataset.open = 'false'
+        cards.forEach((card) => {
+          card.removeAttribute('data-selected')
+          card.removeAttribute('data-dismissed')
+          const trigger = card.querySelector<HTMLButtonElement>('[data-recipe-trigger]')
+          const details = card.querySelector<HTMLElement>('[data-recipe-details]')
+          trigger?.setAttribute('aria-expanded', 'false')
+          if (details) details.hidden = true
+        })
+      }
+
+      cards.forEach((card) => {
+        const trigger = card.querySelector<HTMLButtonElement>('[data-recipe-trigger]')
+        const close = card.querySelector<HTMLButtonElement>('[data-recipe-close]')
+
+        trigger?.addEventListener('click', () => {
+          const isSelected = card.hasAttribute('data-selected')
+          if (isSelected) {
+            closeGrid()
+            return
+          }
+
+          grid.dataset.open = 'true'
+          cards.forEach((otherCard) => {
+            const otherTrigger = otherCard.querySelector<HTMLButtonElement>('[data-recipe-trigger]')
+            const otherDetails = otherCard.querySelector<HTMLElement>('[data-recipe-details]')
+            const selected = otherCard === card
+            otherCard.toggleAttribute('data-selected', selected)
+            otherCard.toggleAttribute('data-dismissed', !selected)
+            otherTrigger?.setAttribute('aria-expanded', String(selected))
+            if (otherDetails) otherDetails.hidden = !selected
+          })
+        })
+
+        close?.addEventListener('click', (event) => {
+          event.stopPropagation()
+          closeGrid()
+          trigger?.focus()
+        })
+      })
+
+      grid.dataset.open = 'false'
+    })
+  }
+
+  document.addEventListener('astro:page-load', initialiseRecipeGrids)
+  initialiseRecipeGrids()
+</script>
+
+<style>
+  .recipe-grid {
+    --recipe-ink: var(--foreground);
+    --recipe-muted: var(--muted-foreground);
+    --recipe-surface: color-mix(in srgb, var(--card) 92%, var(--muted) 8%);
+    margin: 2.75rem 0 3.5rem;
+  }
+
+  .recipe-grid__intro {
+    margin-bottom: 1rem;
+    color: var(--recipe-muted);
+  }
+
+  .recipe-grid__eyebrow {
+    color: var(--recipe-muted);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .recipe-grid__cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+    transition: grid-template-columns 520ms cubic-bezier(0.22, 1, 0.36, 1), gap 520ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .recipe-grid__cards:has(.recipe-card[data-selected]) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .recipe-card {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--border) 74%, transparent);
+    border-radius: 0.9rem;
+    background: var(--recipe-surface);
+    transition: opacity 420ms ease, transform 520ms cubic-bezier(0.22, 1, 0.36, 1), max-height 520ms cubic-bezier(0.22, 1, 0.36, 1), border-color 300ms ease;
+  }
+
+  .recipe-card[data-dismissed] {
+    max-height: 0;
+    border-color: transparent;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.94) translateY(0.5rem);
+  }
+
+  .recipe-card__trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    text-align: left;
+  }
+
+  .recipe-card__trigger:focus-visible,
+  .recipe-card__close:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -3px;
+  }
+
+  .recipe-card__image-wrap {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--muted);
+  }
+
+  .recipe-card__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1), filter 400ms ease;
+  }
+
+  .recipe-card__trigger:hover .recipe-card__image {
+    filter: saturate(1.06);
+    transform: scale(1.045);
+  }
+
+  .recipe-card__number {
+    position: absolute;
+    top: 0.7rem;
+    left: 0.7rem;
+    padding: 0.25rem 0.4rem;
+    color: white;
+    background: rgb(0 0 0 / 0.55);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    backdrop-filter: blur(8px);
+  }
+
+  .recipe-card__meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.35rem 0.95rem 1rem;
+  }
+
+  .recipe-card__image-caption {
+    display: block;
+    padding: 0.65rem 0.95rem 0;
+    color: var(--recipe-muted);
+    font-size: 0.78rem;
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .recipe-card__title {
+    font-size: 0.98rem;
+    font-weight: 550;
+  }
+
+  .recipe-card__details {
+    padding: 0 1rem 1.2rem;
+  }
+
+  .recipe-card__details-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 0 1rem;
+    border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  }
+
+  .recipe-card__close {
+    padding: 0.2rem 0;
+    border: 0;
+    color: var(--recipe-muted);
+    background: transparent;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .recipe-card__close:hover {
+    color: var(--recipe-ink);
+  }
+
+  .recipe-card__content {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: clamp(1.25rem, 5vw, 4rem);
+  }
+
+  .recipe-card__content h3 {
+    margin: 0 0 1.2rem;
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+  }
+
+  .recipe-card__content h4 {
+    margin: 0 0 0.65rem;
+    color: var(--recipe-muted);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+  }
+
+  .recipe-card__content ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    color: color-mix(in srgb, var(--recipe-ink) 76%, transparent);
+    font-size: 0.91rem;
+    line-height: 1.65;
+  }
+
+  .recipe-card__content p {
+    margin: 0 0 0.8rem;
+    color: color-mix(in srgb, var(--recipe-ink) 78%, transparent);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 640px) {
+    .recipe-grid__cards {
+      grid-template-columns: 1fr;
+    }
+
+    .recipe-card__content {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .recipe-grid__cards,
+    .recipe-card,
+    .recipe-card__image {
+      transition-duration: 1ms;
+    }
+  }
+</style>
