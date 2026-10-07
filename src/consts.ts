@@ -4,14 +4,14 @@ export const SITE: Site = {
   title: 'Blogs',
   description:
     'Personal blog and thoughts from Russel Daniel Paul and friends.',
-  href: 'https://russeldanielpaul.tech',
+  href: 'https://blogs.russeldanielpaul.is-a.dev',
   author: 'Russel Daniel Paul',
   locale: 'en-US',
   featuredPostCount: 2,
   postsPerPage: 5,
 }
 
-const PRIMARY_HOSTNAME = new URL(SITE.href).hostname
+const PRIMARY_HOSTNAME = 'russeldanielpaul.is-a.dev'
 
 export const NAV_LINKS: SocialLink[] = [
   // {

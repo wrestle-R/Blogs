@@ -1,18 +1,20 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import PageHead from '../components/PageHead.astro';
 ---
 
 <Layout >
+  <PageHead slot="head" title="Spotify" description="What I'm listening to on Spotify." />
   <div class="container mx-auto px-4 py-8 max-w-4xl">
     <div class="mb-8 text-center space-y-4">
       <h1 class="text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
         What I'm Vibing To
       </h1>
       <p class="text-base text-muted-foreground">Live from my Spotify feed</p>
-      
+
       <!-- Navigation to Songs Page -->
-      <a 
-        href="/songs" 
+      <a
+        href="/songs"
         class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 hover:scale-105 transition-all font-medium text-sm shadow-sm hover:shadow-md"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -21,7 +23,7 @@ import Layout from '../layouts/Layout.astro';
         <span>Add a song you like</span>
       </a>
     </div>
-    
+
     <div id="loading-section" class="space-y-6 min-h-[800px]">
       <!-- Now Playing Skeleton -->
       <div class="rounded-lg border bg-card overflow-hidden">
@@ -30,14 +32,14 @@ import Layout from '../layouts/Layout.astro';
             <div class="w-5 h-5 bg-muted animate-pulse rounded"></div>
             <div class="h-6 w-32 bg-muted animate-pulse rounded"></div>
           </div>
-          
+
           <div class="flex gap-4 items-start flex-col sm:flex-row">
             <div class="w-full sm:w-32 h-32 bg-muted animate-pulse rounded-lg flex-shrink-0 relative overflow-hidden flex items-center justify-center">
               <svg class="w-16 h-16 text-muted-foreground/20" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
               </svg>
             </div>
-            
+
             <div class="flex-1 min-w-0 w-full space-y-3">
               <div class="flex items-center gap-2">
                 <div class="h-8 flex-1 bg-muted animate-pulse rounded"></div>
@@ -45,7 +47,7 @@ import Layout from '../layouts/Layout.astro';
               </div>
               <div class="h-5 w-3/4 bg-muted animate-pulse rounded"></div>
               <div class="h-4 w-1/2 bg-muted animate-pulse rounded"></div>
-              
+
               <div class="mt-4 space-y-2">
                 <div class="flex items-center gap-3">
                   <div class="h-3 w-10 bg-muted animate-pulse rounded"></div>
@@ -84,7 +86,7 @@ import Layout from '../layouts/Layout.astro';
             </div>
             <div class="w-5 h-5 bg-muted animate-pulse rounded-full flex-shrink-0"></div>
           </div>
-          
+
           <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg skeleton-item">
             <div class="w-6 sm:w-8 h-6 bg-muted animate-pulse rounded flex-shrink-0"></div>
             <div class="w-12 h-12 sm:w-14 sm:h-14 bg-muted animate-pulse rounded-md flex-shrink-0 relative overflow-hidden flex items-center justify-center">
@@ -98,7 +100,7 @@ import Layout from '../layouts/Layout.astro';
             </div>
             <div class="w-5 h-5 bg-muted animate-pulse rounded-full flex-shrink-0"></div>
           </div>
-          
+
           <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg skeleton-item">
             <div class="w-6 sm:w-8 h-6 bg-muted animate-pulse rounded flex-shrink-0"></div>
             <div class="w-12 h-12 sm:w-14 sm:h-14 bg-muted animate-pulse rounded-md flex-shrink-0 relative overflow-hidden flex items-center justify-center">
@@ -144,11 +146,11 @@ import Layout from '../layouts/Layout.astro';
       </div>
     </div>
 
-    <div id="error-section" class="hidden mb-6">
+    <div id="error-section" class="hidden mb-6" role="alert">
       <div class="bg-destructive/10 border border-destructive/20 rounded-lg p-4 text-center">
         <h2 class="text-lg font-semibold mb-1">Error</h2>
         <p id="error-message" class="text-sm text-muted-foreground mb-3"></p>
-        <button 
+        <button
           id="retry-button"
           class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:opacity-90 transition-opacity"
         >
@@ -167,24 +169,24 @@ import Layout from '../layouts/Layout.astro';
             </svg>
             <span id="section-title-text">Now Playing</span>
           </h2>
-        
+
         <div id="now-playing-card" class="hidden">
           <div class="flex gap-4 items-start flex-col sm:flex-row">
-            <img 
-              id="album-art" 
-              src="/static/albumart.png" 
-              alt="Album Art" 
+            <img
+              id="album-art"
+              src="/static/albumart.png"
+              alt="Album Art"
               class="w-full sm:w-32 h-32 rounded-lg shadow-lg object-cover flex-shrink-0"
               onerror="this.onerror=null;this.src='/static/albumart.png'"
             />
-            
+
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-2">
                 <h3 id="song-name" class="text-2xl font-bold flex-1 break-words"></h3>
-                <a 
-                  id="spotify-link-title" 
-                  href="" 
-                  target="_blank" 
+                <a
+                  id="spotify-link-title"
+                  href=""
+                  target="_blank"
                   rel="noopener noreferrer"
                   class="p-2 hover:bg-primary/10 rounded-full transition-colors flex-shrink-0"
                   title="Open in Spotify"
@@ -196,7 +198,7 @@ import Layout from '../layouts/Layout.astro';
               </div>
               <p id="artist-name" class="text-base text-muted-foreground mb-1 break-words"></p>
               <p id="album-name" class="text-sm text-muted-foreground/70 break-words"></p>
-              
+
               <div class="mt-4 space-y-3">
                 <div class="flex items-center gap-3 text-xs">
                   <span id="current-time" class="text-muted-foreground font-medium min-w-[2.5rem]">0:00</span>
@@ -205,12 +207,12 @@ import Layout from '../layouts/Layout.astro';
                   </div>
                   <span id="total-time" class="text-muted-foreground font-medium min-w-[2.5rem]">0:00</span>
                 </div>
-                
+
                 <!-- Audio Player Controls -->
                 <div id="now-playing-player" class="hidden">
                   <div class="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                    <button 
-                      id="now-play-pause-btn" 
+                    <button
+                      id="now-play-pause-btn"
                       class="w-9 h-9 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors flex-shrink-0"
                       title="Play preview"
                     >
@@ -222,12 +224,12 @@ import Layout from '../layouts/Layout.astro';
                       </svg>
                     </button>
                     <div class="flex-1 min-w-0">
-                      <input 
-                        id="now-audio-seek" 
-                        type="range" 
-                        min="0" 
-                        max="100" 
-                        value="0" 
+                      <input
+                        id="now-audio-seek"
+                        type="range"
+                        min="0"
+                        max="100"
+                        value="0"
                         class="w-full h-1.5 bg-muted rounded-full appearance-none cursor-pointer audio-seek-slider"
                       />
                       <div class="flex items-center justify-between text-xs text-muted-foreground mt-1">
@@ -245,21 +247,21 @@ import Layout from '../layouts/Layout.astro';
 
         <div id="last-played-card" class="hidden">
           <div class="flex gap-4 items-start flex-col sm:flex-row">
-            <img 
-              id="last-album-art" 
-              src="/static/albumart.png" 
-              alt="Album Art" 
+            <img
+              id="last-album-art"
+              src="/static/albumart.png"
+              alt="Album Art"
               class="w-full sm:w-32 h-32 rounded-lg shadow-lg object-cover flex-shrink-0"
               onerror="this.onerror=null;this.src='/static/albumart.png'"
             />
-            
+
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-2">
                 <h3 id="last-song-name" class="text-2xl font-bold flex-1 break-words"></h3>
-                <a 
-                  id="last-spotify-link-title" 
-                  href="" 
-                  target="_blank" 
+                <a
+                  id="last-spotify-link-title"
+                  href=""
+                  target="_blank"
                   rel="noopener noreferrer"
                   class="p-2 hover:bg-primary/10 rounded-full transition-colors flex-shrink-0"
                   title="Open in Spotify"
@@ -272,12 +274,12 @@ import Layout from '../layouts/Layout.astro';
               <p id="last-artist-name" class="text-base text-muted-foreground mb-1 break-words"></p>
               <p id="last-album-name" class="text-sm text-muted-foreground/70 break-words"></p>
               <p id="last-played-time" class="text-xs text-muted-foreground/60 mt-3 font-medium"></p>
-              
+
               <!-- Audio Player Controls -->
               <div id="last-played-player" class="hidden mt-4">
                 <div class="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
-                  <button 
-                    id="last-play-pause-btn" 
+                  <button
+                    id="last-play-pause-btn"
                     class="w-9 h-9 flex items-center justify-center rounded-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors flex-shrink-0"
                     title="Play preview"
                   >
@@ -289,12 +291,12 @@ import Layout from '../layouts/Layout.astro';
                     </svg>
                   </button>
                   <div class="flex-1 min-w-0">
-                    <input 
-                      id="last-audio-seek" 
-                      type="range" 
-                      min="0" 
-                      max="100" 
-                      value="0" 
+                    <input
+                      id="last-audio-seek"
+                      type="range"
+                      min="0"
+                      max="100"
+                      value="0"
                       class="w-full h-1.5 bg-muted rounded-full appearance-none cursor-pointer audio-seek-slider"
                     />
                     <div class="flex items-center justify-between text-xs text-muted-foreground mt-1">
@@ -365,8 +367,24 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <script>
-  const API_BASE_URL = 'https://blogsbackend.vidyoyo.workers.dev';
-  
+  import { fetchSpotify, escapeSpotifyHtml } from '../lib/spotify-api';
+  const apiErrors = new Map<string, string>();
+
+  const requestMusic = async (endpoint: string) => {
+    const key = endpoint.split('?')[0];
+    try {
+      const data = await fetchSpotify(endpoint);
+      apiErrors.delete(key);
+      if (apiErrors.size === 0) document.getElementById('error-section')?.classList.add('hidden');
+      return data;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Spotify music is temporarily unavailable.';
+      apiErrors.set(key, message);
+      showError(message);
+      throw error;
+    }
+  };
+
   const formatTime = (ms: number) => {
     const minutes = Math.floor(ms / 60000);
     const seconds = Math.floor((ms % 60000) / 1000);
@@ -399,7 +417,7 @@ import Layout from '../layouts/Layout.astro';
       this.seekSlider = document.getElementById(`${prefix}-audio-seek`) as HTMLInputElement;
       this.currentTimeEl = document.getElementById(`${prefix}-audio-current`) as HTMLElement;
       this.durationEl = document.getElementById(`${prefix}-audio-duration`) as HTMLElement;
-      
+
       // Handle different ID patterns for the container
       if (prefix === 'now') {
         this.playerContainer = document.getElementById('now-playing-player') as HTMLElement;
@@ -439,7 +457,7 @@ import Layout from '../layouts/Layout.astro';
         if (!isNaN(this.audio.duration)) {
           const progress = (this.audio.currentTime / this.audio.duration) * 100;
           this.seekSlider.value = progress.toString();
-          
+
           if (this.currentTimeEl) {
             this.currentTimeEl.textContent = formatAudioTime(this.audio.currentTime);
           }
@@ -460,21 +478,24 @@ import Layout from '../layouts/Layout.astro';
     }
 
     async loadPreview(previewUrl: string | null) {
+      if (this.previewUrl === previewUrl) return;
+      this.reset();
       this.previewUrl = previewUrl;
-      
+
       if (previewUrl) {
         this.audio.src = previewUrl;
         this.audio.load();
         this.playerContainer?.classList.remove('hidden');
       } else {
+        this.audio.removeAttribute('src');
+        this.audio.load();
         this.playerContainer?.classList.add('hidden');
       }
     }
 
     play() {
       if (this.previewUrl) {
-        this.audio.play();
-        this.showPauseIcon();
+        this.audio.play().then(() => this.showPauseIcon()).catch(() => this.showPlayIcon());
       }
     }
 
@@ -506,6 +527,28 @@ import Layout from '../layouts/Layout.astro';
   // Global audio player instances
   let nowPlayingPlayer: AudioPlayer | null = null;
   let lastPlayedPlayer: AudioPlayer | null = null;
+  let playback: { progress: number; duration: number; received: number } | null = null;
+
+  const loadSongPreview = async (player: AudioPlayer, song: { id?: string; previewUrl?: string | null }) => {
+    let previewUrl = song.previewUrl || null;
+    if (!previewUrl && song.id) {
+      try {
+        previewUrl = (await fetchSpotify(`preview/${song.id}`)).preview_url || null;
+      } catch (error) {
+        console.error('Error fetching preview URL:', error);
+      }
+    }
+    await player.loadPreview(previewUrl);
+  };
+
+  const updateProgress = () => {
+    if (!playback || document.hidden) return;
+    const progress = Math.min(playback.duration, playback.progress + performance.now() - playback.received);
+    const bar = document.getElementById('progress-bar');
+    if (bar) bar.style.width = `${playback.duration ? progress / playback.duration * 100 : 0}%`;
+    const time = document.getElementById('current-time');
+    if (time) time.textContent = formatTime(progress);
+  };
 
   const hideLoading = () => {
     document.getElementById('loading-section')?.classList.add('hidden');
@@ -522,16 +565,16 @@ import Layout from '../layouts/Layout.astro';
     const loadingSection = document.getElementById('loading-section');
     const contentSection = document.getElementById('content-section');
     const errorSection = document.getElementById('error-section');
-    
+
     if (loadingSection) {
       loadingSection.style.opacity = '0';
       setTimeout(() => {
         loadingSection.classList.add('hidden');
       }, 300);
     }
-    
-    errorSection?.classList.add('hidden');
-    
+
+    errorSection?.classList.toggle('hidden', apiErrors.size === 0);
+
     if (contentSection) {
       contentSection.classList.remove('hidden');
       setTimeout(() => {
@@ -542,15 +585,12 @@ import Layout from '../layouts/Layout.astro';
 
   const loadLastPlayed = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/last-played`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch last played');
-      }
-
-      const data = await response.json();
+      const data = await requestMusic('last-played');
+      playback = null;
+      document.getElementById('now-playing-section')?.classList.remove('hidden');
 
       if (!data.name) {
+        await lastPlayedPlayer?.loadPreview(null);
         document.getElementById('last-played-card')?.classList.add('hidden');
         document.getElementById('not-playing-card')?.classList.remove('hidden');
         updateSectionHeader('Nothing Playing', 'music');
@@ -559,7 +599,7 @@ import Layout from '../layouts/Layout.astro';
 
       document.getElementById('not-playing-card')?.classList.add('hidden');
       document.getElementById('last-played-card')?.classList.remove('hidden');
-      
+
       // Update section header to "Last Played"
       updateSectionHeader('Last Played', 'clock');
 
@@ -601,42 +641,20 @@ import Layout from '../layouts/Layout.astro';
         playedTime.textContent = timeAgo;
       }
 
-      // Load audio preview
-      if (lastPlayedPlayer) {
-        if (data.previewUrl) {
-          await lastPlayedPlayer.loadPreview(data.previewUrl);
-        } else if (data.songUrl) {
-          // Extract track ID from Spotify URL and fetch preview
-          const trackIdMatch = data.songUrl.match(/track\/([a-zA-Z0-9]+)/);
-          if (trackIdMatch) {
-            const trackId = trackIdMatch[1];
-            try {
-              const previewResponse = await fetch(`${API_BASE_URL}/api/preview/${trackId}`);
-              const previewData = await previewResponse.json();
-              
-              if (previewData.preview_url) {
-                await lastPlayedPlayer.loadPreview(previewData.preview_url);
-              }
-            } catch (error) {
-              console.error('Error fetching preview URL:', error);
-            }
-          }
-        }
-      }
+      if (lastPlayedPlayer) await loadSongPreview(lastPlayedPlayer, data);
     } catch (error) {
       console.error('Error loading last played:', error);
-      document.getElementById('last-played-card')?.classList.add('hidden');
-      document.getElementById('not-playing-card')?.classList.remove('hidden');
-      updateSectionHeader('Nothing Playing', 'music');
+      lastPlayedPlayer?.pause();
+      document.getElementById('now-playing-section')?.classList.add('hidden');
     }
   };
 
   const updateSectionHeader = (title: string, iconType: 'play' | 'clock' | 'music') => {
     const titleText = document.getElementById('section-title-text');
     const icon = document.getElementById('section-icon');
-    
+
     if (titleText) titleText.textContent = title;
-    
+
     if (icon) {
       if (iconType === 'play') {
         icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
@@ -650,15 +668,14 @@ import Layout from '../layouts/Layout.astro';
 
   const updateNowPlaying = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/now-playing`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch now playing');
-      }
-
-      const data = await response.json();
+      const data = await requestMusic('now-playing');
+      document.getElementById('now-playing-section')?.classList.remove('hidden');
+      apiErrors.delete('last-played');
+      if (apiErrors.size === 0) document.getElementById('error-section')?.classList.add('hidden');
 
       if (!data.isPlaying || !data.name) {
+        playback = null;
+        nowPlayingPlayer?.pause();
         // If nothing is playing, fetch last played song
         document.getElementById('now-playing-card')?.classList.add('hidden');
         await loadLastPlayed();
@@ -667,8 +684,10 @@ import Layout from '../layouts/Layout.astro';
 
       document.getElementById('not-playing-card')?.classList.add('hidden');
       document.getElementById('last-played-card')?.classList.add('hidden');
+      lastPlayedPlayer?.pause();
       document.getElementById('now-playing-card')?.classList.remove('hidden');
-      
+      playback = { progress: data.progress || 0, duration: data.duration || 0, received: performance.now() };
+
       // Update section header to "Now Playing"
       updateSectionHeader('Now Playing', 'play');
 
@@ -690,37 +709,18 @@ import Layout from '../layouts/Layout.astro';
       if (albumName) albumName.textContent = data.album;
       if (spotifyLink) spotifyLink.href = data.songUrl;
 
-      const progress = (data.progress / data.duration) * 100;
+      const progress = data.duration ? (data.progress / data.duration) * 100 : 0;
       if (progressBar) progressBar.style.width = `${progress}%`;
       if (currentTime) currentTime.textContent = formatTime(data.progress);
       if (totalTime) totalTime.textContent = formatTime(data.duration);
 
-      // Load audio preview
-      if (nowPlayingPlayer) {
-        if (data.previewUrl) {
-          await nowPlayingPlayer.loadPreview(data.previewUrl);
-        } else if (data.songUrl) {
-          // Extract track ID from Spotify URL and fetch preview
-          const trackIdMatch = data.songUrl.match(/track\/([a-zA-Z0-9]+)/);
-          if (trackIdMatch) {
-            const trackId = trackIdMatch[1];
-            try {
-              const previewResponse = await fetch(`${API_BASE_URL}/api/preview/${trackId}`);
-              const previewData = await previewResponse.json();
-              
-              if (previewData.preview_url) {
-                await nowPlayingPlayer.loadPreview(previewData.preview_url);
-              }
-            } catch (error) {
-              console.error('Error fetching preview URL:', error);
-            }
-          }
-        }
-      }
+      if (nowPlayingPlayer) await loadSongPreview(nowPlayingPlayer, data);
     } catch (error) {
       console.error('Error updating now playing:', error);
-      document.getElementById('now-playing-card')?.classList.add('hidden');
-      await loadLastPlayed();
+      playback = null;
+      nowPlayingPlayer?.pause();
+      lastPlayedPlayer?.pause();
+      document.getElementById('now-playing-section')?.classList.add('hidden');
     }
   };
 
@@ -729,18 +729,12 @@ import Layout from '../layouts/Layout.astro';
       // Determine limit based on screen size
       const isMobile = window.innerWidth < 768;
       const limit = isMobile ? 5 : 10;
-      
-      const response = await fetch(`${API_BASE_URL}/api/top-tracks?limit=${limit}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch top tracks');
-      }
-      
-      const data = await response.json();
-      
+
+      const data = await requestMusic(`top-tracks?limit=${limit}`);
+
       if (data.tracks && data.tracks.length > 0) {
         const tracksList = document.getElementById('top-tracks-list');
-        
+
         if (tracksList) {
           tracksList.innerHTML = data.tracks.map((track: {
             albumArt: string;
@@ -749,24 +743,24 @@ import Layout from '../layouts/Layout.astro';
             songUrl: string;
             popularity: number;
           }, index: number) => `
-            <a 
-              href="${track.songUrl}" 
-              target="_blank" 
+            <a
+              href="${escapeSpotifyHtml(track.songUrl)}"
+              target="_blank"
               rel="noopener noreferrer"
               class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/50 transition-all group cursor-pointer"
             >
               <span class="text-lg sm:text-xl font-bold text-muted-foreground/30 w-6 sm:w-8 flex-shrink-0">${index + 1}</span>
-              <img src="${track.albumArt || '/static/albumart.png'}" alt="${track.name}" class="w-12 h-12 sm:w-14 sm:h-14 rounded-md shadow-md flex-shrink-0" onerror="this.onerror=null;this.src='/static/albumart.png'" />
+              <img src="${escapeSpotifyHtml(track.albumArt || '/static/albumart.png')}" alt="${escapeSpotifyHtml(track.name)}" class="w-12 h-12 sm:w-14 sm:h-14 rounded-md shadow-md flex-shrink-0" onerror="this.onerror=null;this.src='/static/albumart.png'" />
               <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-sm sm:text-base truncate">${track.name}</h3>
-                <p class="text-xs sm:text-sm text-muted-foreground truncate">${track.artist}</p>
+                <h3 class="font-semibold text-sm sm:text-base truncate">${escapeSpotifyHtml(track.name)}</h3>
+                <p class="text-xs sm:text-sm text-muted-foreground truncate">${escapeSpotifyHtml(track.artist)}</p>
               </div>
-              <div class="hidden md:flex items-center gap-2">
+              ${Number.isFinite(track.popularity) ? `<div class="hidden md:flex items-center gap-2">
                 <div class="w-16 lg:w-20 bg-muted rounded-full h-1.5 overflow-hidden">
                   <div class="bg-primary h-full transition-all" style="width: ${track.popularity}%"></div>
                 </div>
                 <span class="text-xs text-muted-foreground font-medium w-8">${track.popularity}%</span>
-              </div>
+              </div>` : ''}
             </a>
           `).join('');
         }
@@ -774,43 +768,39 @@ import Layout from '../layouts/Layout.astro';
     } catch (error) {
       console.error('Error loading top tracks:', error);
     }
-  };  const loadTopArtists = async () => {
+  };
+
+  const loadTopArtists = async () => {
     try {
       // Determine limit based on screen size
       const isMobile = window.innerWidth < 768;
       const limit = isMobile ? 5 : 10;
-      
-      const response = await fetch(`${API_BASE_URL}/api/top-artists?limit=${limit}`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch top artists');
-      }
-      
-      const data = await response.json();
-      
+
+      const data = await requestMusic(`top-artists?limit=${limit}`);
+
       if (data.artists && data.artists.length > 0) {
         const artistsList = document.getElementById('top-artists-list');
-        
+
         if (artistsList) {
           artistsList.innerHTML = data.artists.map((artist: any, index: number) => `
-            <a 
-              href="${artist.url}" 
-              target="_blank" 
+            <a
+              href="${escapeSpotifyHtml(artist.url)}"
+              target="_blank"
               rel="noopener noreferrer"
               class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg hover:bg-muted/50 transition-all group cursor-pointer"
             >
               <span class="text-lg sm:text-xl font-bold text-muted-foreground/30 w-6 sm:w-8 flex-shrink-0">${index + 1}</span>
-              <img src="${artist.image || '/static/albumart.png'}" alt="${artist.name}" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-md object-cover flex-shrink-0" onerror="this.onerror=null;this.src='/static/albumart.png'" />
+              <img src="${escapeSpotifyHtml(artist.image || '/static/albumart.png')}" alt="${escapeSpotifyHtml(artist.name)}" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-md object-cover flex-shrink-0" onerror="this.onerror=null;this.src='/static/albumart.png'" />
               <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-sm sm:text-base truncate">${artist.name}</h3>
-                <p class="text-xs sm:text-sm text-muted-foreground truncate">${artist.genres.slice(0, 2).join(', ') || 'No genres'}</p>
+                <h3 class="font-semibold text-sm sm:text-base truncate">${escapeSpotifyHtml(artist.name)}</h3>
+                <p class="text-xs sm:text-sm text-muted-foreground truncate">${escapeSpotifyHtml((artist.genres || []).slice(0, 2).join(', ') || 'No genres')}</p>
               </div>
-              <div class="hidden md:flex items-center gap-2">
+              ${Number.isFinite(artist.popularity) ? `<div class="hidden md:flex items-center gap-2">
                   <div class="w-16 lg:w-20 bg-muted rounded-full h-1.5 overflow-hidden">
                     <div class="bg-primary h-full transition-all" style="width: ${artist.popularity}%"></div>
                   </div>
                   <span class="text-xs text-muted-foreground font-medium w-8">${artist.popularity}%</span>
-              </div>
+              </div>` : ''}
             </a>
           `).join('');
         }
@@ -818,17 +808,15 @@ import Layout from '../layouts/Layout.astro';
     } catch (error) {
       console.error('Error fetching top artists:', error);
     }
-  };  const loadPlaylists = async () => {
+  };
+
+  const loadPlaylists = async () => {
     try {
       // Determine limit based on screen size
       const isMobile = window.innerWidth < 768;
       const limit = isMobile ? 5 : 10;
-      
-      const response = await fetch(`${API_BASE_URL}/api/playlists`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch playlists');
-      }
-      const data = await response.json();
+
+      const data = await requestMusic('playlists');
       if (data.playlists && data.playlists.length > 0) {
         const playlistsList = document.getElementById('playlists-list');
         if (playlistsList) {
@@ -840,16 +828,16 @@ import Layout from '../layouts/Layout.astro';
             isPublic: boolean;
             url: string;
           }, index: number) => `
-            <a 
-              href="${playlist.url}" 
-              target="_blank" 
+            <a
+              href="${escapeSpotifyHtml(playlist.url)}"
+              target="_blank"
               rel="noopener noreferrer"
               class="flex items-center gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors group cursor-pointer"
             >
               <span class="text-lg font-bold text-muted-foreground/30 w-6">${index + 1}</span>
-              <img src="${playlist.image || '/static/albumart.png'}" alt="${playlist.name}" class="w-12 h-12 rounded shadow-sm" onerror="this.onerror=null;this.src='/static/albumart.png'" />
+              <img src="${escapeSpotifyHtml(playlist.image || '/static/albumart.png')}" alt="${escapeSpotifyHtml(playlist.name)}" class="w-12 h-12 rounded shadow-sm" onerror="this.onerror=null;this.src='/static/albumart.png'" />
               <div class="flex-1 min-w-0">
-                <h3 class="text-sm font-semibold truncate">${playlist.name}</h3>
+                <h3 class="text-sm font-semibold truncate">${escapeSpotifyHtml(playlist.name)}</h3>
                 <p class="text-xs text-muted-foreground truncate">
                   ${playlist.trackCount} tracks${playlist.isCollaborative ? ' • Collaborative' : ''}${!playlist.isPublic ? ' • Private' : ''}
                 </p>
@@ -878,6 +866,7 @@ import Layout from '../layouts/Layout.astro';
   };
 
   let updateInterval: ReturnType<typeof setInterval> | undefined;
+  let progressInterval: ReturnType<typeof setInterval> | undefined;
   let lastScreenSize: 'mobile' | 'desktop' | null = null;
 
   // Function to detect screen size change
@@ -935,15 +924,18 @@ import Layout from '../layouts/Layout.astro';
     window.addEventListener('resize', handleResize);
 
     // Load data immediately
+    apiErrors.clear();
     loadAllData();
 
     // Clear any existing interval
     if (updateInterval) {
       clearInterval(updateInterval);
     }
-    
-    // Update now playing every second for more dynamic updates
-    updateInterval = setInterval(updateNowPlaying, 1000);
+
+    // Poll Spotify only while this page is visible; progress is updated locally.
+    updateInterval = setInterval(() => { if (!document.hidden) void updateNowPlaying(); }, 15000);
+    if (progressInterval) clearInterval(progressInterval);
+    progressInterval = setInterval(updateProgress, 1000);
   });
 
   // Clean up interval on page unload
@@ -952,6 +944,11 @@ import Layout from '../layouts/Layout.astro';
       clearInterval(updateInterval);
     }
     window.removeEventListener('resize', handleResize);
+    if (progressInterval) clearInterval(progressInterval);
+    playback = null;
+    nowPlayingPlayer?.pause();
+    lastPlayedPlayer?.pause();
+    apiErrors.clear();
   });
 </script>
 
@@ -1011,7 +1008,7 @@ import Layout from '../layouts/Layout.astro';
   .animate-pulse {
     animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
-  
+
   /* Stagger animation for skeleton items */
   .skeleton-item:nth-child(1) .animate-pulse { animation-delay: 0s; }
   .skeleton-item:nth-child(2) .animate-pulse { animation-delay: 0.1s; }
@@ -1025,13 +1022,13 @@ import Layout from '../layouts/Layout.astro';
     appearance: none;
     background: transparent;
   }
-  
+
   .audio-seek-slider::-webkit-slider-track {
     background: hsl(var(--muted));
     border-radius: 9999px;
     height: 6px;
   }
-  
+
   .audio-seek-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
@@ -1043,17 +1040,17 @@ import Layout from '../layouts/Layout.astro';
     margin-top: -4px;
     transition: transform 0.2s;
   }
-  
+
   .audio-seek-slider::-webkit-slider-thumb:hover {
     transform: scale(1.2);
   }
-  
+
   .audio-seek-slider::-moz-range-track {
     background: hsl(var(--muted));
     border-radius: 9999px;
     height: 6px;
   }
-  
+
   .audio-seek-slider::-moz-range-thumb {
     width: 14px;
     height: 14px;
@@ -1063,7 +1060,7 @@ import Layout from '../layouts/Layout.astro';
     border: none;
     transition: transform 0.2s;
   }
-  
+
   .audio-seek-slider::-moz-range-thumb:hover {
     transform: scale(1.2);
   }

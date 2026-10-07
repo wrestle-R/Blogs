@@ -23,7 +23,7 @@ import { Icon } from 'astro-icon/components'
     const getCookieDomain = () => {
       const host = window.location.hostname
       if (!host || host === 'localhost' || host === '127.0.0.1' || host === '::1') return ''
-      if (host.endsWith('russeldanielpaul.tech')) return '.russeldanielpaul.tech'
+      if (host === 'russeldanielpaul.is-a.dev' || host.endsWith('.russeldanielpaul.is-a.dev')) return '.russeldanielpaul.is-a.dev'
       return ''
     }
 
@@ -63,7 +63,7 @@ import { Icon } from 'astro-icon/components'
   function getCookieDomain() {
     const host = window.location.hostname
     if (!host || host === 'localhost' || host === '127.0.0.1' || host === '::1') return ''
-    if (host.endsWith('russeldanielpaul.tech')) return '.russeldanielpaul.tech'
+    if (host === 'russeldanielpaul.is-a.dev' || host.endsWith('.russeldanielpaul.is-a.dev')) return '.russeldanielpaul.is-a.dev'
     return ''
   }
 
