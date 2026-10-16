@@ -1,0 +1,146 @@
+<aside class="constellation-preview" aria-labelledby="constellation-title">
+  <a
+    class="constellation-link"
+    href="https://russels-constellation.vercel.app/"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <div class="constellation-art">
+      <img
+        src="/music/constellation.webp"
+        alt="Colored song stars connected into artist constellations"
+        width="960"
+        height="640"
+        loading="lazy"
+        decoding="async"
+      />
+      <span class="constellation-open" aria-hidden="true">↗</span>
+    </div>
+    <div class="constellation-copy">
+      <p class="constellation-eyebrow">MY MUSIC, MAPPED</p>
+      <h2 id="constellation-title">Russel’s constellation</h2>
+      <p class="constellation-description">
+        A little universe of songs, artists and the genres between them.
+      </p>
+      <span class="constellation-cta"
+        >Explore the constellation <span aria-hidden="true">↗</span></span
+      >
+    </div>
+  </a>
+</aside>
+<style>
+  .constellation-preview {
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--background);
+    overflow: hidden;
+    align-self: start;
+  }
+  .constellation-link {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    color: inherit;
+    text-decoration: none;
+  }
+  .constellation-art {
+    position: relative;
+    min-height: 150px;
+    background: #090e0c;
+    overflow: hidden;
+  }
+  .constellation-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .constellation-open {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: #111c16d9;
+    color: #a8f0c1;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+  }
+  .constellation-copy {
+    padding: 17px;
+  }
+  .constellation-eyebrow {
+    color: var(--muted-foreground);
+    font: 10px/1.4 var(--font-mono, monospace);
+    letter-spacing: 0.13em;
+    margin: 0 0 7px;
+  }
+  h2 {
+    font-size: 17px;
+    font-weight: 650;
+    line-height: 1.25;
+    letter-spacing: -0.4px;
+    margin: 0;
+  }
+  .constellation-description {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+    margin: 10px 0 16px;
+  }
+  .constellation-cta {
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    gap: 9px;
+    align-items: center;
+  }
+  .constellation-cta span {
+    transition: transform 0.2s;
+  }
+  a:hover .constellation-cta span {
+    transform: translate(2px, -2px);
+  }
+  a:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: -4px;
+    border-radius: 12px;
+  }
+  @media (min-width: 1100px) {
+    .constellation-preview {
+      position: sticky;
+      top: 100px;
+      order: 2;
+    }
+    .constellation-link {
+      display: block;
+    }
+    .constellation-art {
+      aspect-ratio: 3/2;
+      min-height: 0;
+    }
+    .constellation-copy {
+      padding: 22px;
+    }
+    h2 {
+      font-size: 22px;
+    }
+  }
+  @media (max-width: 380px) {
+    .constellation-link {
+      grid-template-columns: 85px minmax(0, 1fr);
+    }
+    .constellation-copy {
+      padding: 14px;
+    }
+    .constellation-description {
+      margin: 8px 0 12px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .constellation-cta span {
+      transition: none;
+    }
+  }
+</style>

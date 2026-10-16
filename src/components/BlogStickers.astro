@@ -1,0 +1,153 @@
+---
+interface Props {
+  variant: 'home' | 'music'
+}
+const { variant } = Astro.props
+const stickers =
+  variant === 'home'
+    ? [
+        {
+          image: 'blog-notebook',
+          label: 'Browse my writing',
+          href: '/blog',
+          rotation: '-9deg',
+        },
+        {
+          image: 'running-shoe',
+          label: 'Follow my runs',
+          href: 'https://runny.russel.is-a.dev',
+          rotation: '9deg',
+        },
+      ]
+    : [
+        {
+          image: 'headphones',
+          label: 'Explore my music constellation',
+          href: 'https://russels-constellation.vercel.app/',
+          rotation: '-12deg',
+        },
+        {
+          image: 'guitar',
+          label: 'Play the virtual guitar',
+          href: '/#guitar',
+          rotation: '10deg',
+        },
+      ]
+---
+
+<aside
+  class:list={['blog-stickers', `blog-stickers--${variant}`]}
+  aria-label="A little more about me"
+>
+  {
+    stickers.map((sticker) => (
+      <a
+        class:list={[
+          'blog-sticker',
+          { 'blog-sticker--desktop': sticker.image === 'guitar' },
+        ]}
+        href={sticker.href}
+        aria-label={sticker.label}
+        title={sticker.label}
+        style={`--sticker-angle:${sticker.rotation}`}
+        target={sticker.href.startsWith('https:') ? '_blank' : undefined}
+        rel={
+          sticker.href.startsWith('https:') ? 'noopener noreferrer' : undefined
+        }
+      >
+        <img
+          src={`/charms/${sticker.image}.webp`}
+          alt=""
+          width="180"
+          height="180"
+          loading="lazy"
+          decoding="async"
+          draggable="false"
+        />
+      </a>
+    ))
+  }
+</aside>
+<style>
+  .blog-stickers {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 18px;
+    padding: 0 22px 14px;
+  }
+  .blog-sticker {
+    display: block;
+    width: 74px;
+    height: 72px;
+    transform: rotate(var(--sticker-angle));
+    transition:
+      transform 0.2s ease,
+      filter 0.2s ease;
+    filter: drop-shadow(0 7px 7px #0002);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .blog-sticker img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .blog-sticker:hover,
+  .blog-sticker:focus-visible {
+    transform: rotate(0) translateY(-4px) scale(1.06);
+  }
+  .blog-sticker:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 4px;
+    border-radius: 10px;
+  }
+  .blog-stickers--music {
+    justify-content: center;
+    padding: 4px 0 0;
+  }
+  .blog-stickers--music .blog-sticker {
+    width: 65px;
+    height: 66px;
+  }
+  @media (min-width: 1280px) {
+    .blog-stickers {
+      position: absolute;
+      inset: 0;
+      padding: 0;
+      pointer-events: none;
+    }
+    .blog-sticker {
+      position: absolute;
+      pointer-events: auto;
+      width: 122px;
+      height: 130px;
+      top: 25px;
+      left: -135px;
+    }
+    .blog-sticker:last-child {
+      left: auto;
+      right: -135px;
+      top: 45px;
+    }
+    .blog-stickers--music .blog-sticker {
+      width: 100px;
+      height: 116px;
+      left: 0;
+      top: 0;
+    }
+    .blog-stickers--music .blog-sticker:last-child {
+      left: auto;
+      right: 0;
+    }
+  }
+  @media (max-width: 768px) {
+    .blog-sticker--desktop {
+      display: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .blog-sticker {
+      transition: none;
+    }
+  }
+</style>

@@ -1,12 +1,14 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PageHead from '../components/PageHead.astro';
+import ConstellationPreview from '../components/ConstellationPreview.astro';
+import BlogStickers from '../components/BlogStickers.astro';
 ---
 
 <Layout >
   <PageHead slot="head" title="Spotify" description="What I'm listening to on Spotify." />
-  <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <div class="mb-8 text-center space-y-4">
+  <div class="container mx-auto px-0 sm:px-4 py-8 max-w-6xl">
+    <div class="mb-8 text-center space-y-4 relative">
       <h1 class="text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
         What I'm Vibing To
       </h1>
@@ -22,8 +24,12 @@ import PageHead from '../components/PageHead.astro';
         </svg>
         <span>Add a song you like</span>
       </a>
+      <BlogStickers variant="music" />
     </div>
 
+    <div class="music-layout">
+      <ConstellationPreview />
+      <div class="music-dashboard">
     <div id="loading-section" class="space-y-6 min-h-[800px]">
       <!-- Now Playing Skeleton -->
       <div class="rounded-lg border bg-card overflow-hidden">
@@ -62,7 +68,7 @@ import PageHead from '../components/PageHead.astro';
 
       <!-- Tabs Skeleton -->
       <div class="rounded-lg border bg-card">
-        <div class="flex items-center justify-between p-4 border-b bg-muted/30">
+        <div class="flex flex-wrap gap-3 items-center justify-between p-4 border-b bg-muted/30">
           <div class="h-6 w-28 bg-muted animate-pulse rounded"></div>
           <div class="flex gap-1 p-1 bg-muted rounded-md">
             <div class="h-8 w-20 bg-muted-foreground/20 animate-pulse rounded"></div>
@@ -242,7 +248,8 @@ import PageHead from '../components/PageHead.astro';
               </div>
             </div>
           </div>
-          <audio id="now-audio-element" preload="auto"></audio>
+          <audio id="now-audio-element" preload="none"></audio>
+          <div id="now-spotify-embed" class="hidden mt-4"></div>
         </div>
 
         <div id="last-played-card" class="hidden">
@@ -308,7 +315,8 @@ import PageHead from '../components/PageHead.astro';
               </div>
             </div>
           </div>
-          <audio id="last-audio-element" preload="auto"></audio>
+          <audio id="last-audio-element" preload="none"></audio>
+          <div id="last-spotify-embed" class="hidden mt-4"></div>
         </div>
 
         <div id="not-playing-card" class="hidden text-center py-12">
@@ -321,7 +329,7 @@ import PageHead from '../components/PageHead.astro';
       </div>
 
       <div class="rounded-lg border bg-card">
-        <div class="flex items-center justify-between p-4 border-b bg-muted/30">
+        <div class="flex flex-wrap gap-3 items-center justify-between p-4 border-b bg-muted/30">
           <h2 class="text-lg font-semibold">My Music</h2>
           <div class="flex gap-1 p-1 bg-muted rounded-md" role="tablist">
             <button
@@ -361,6 +369,8 @@ import PageHead from '../components/PageHead.astro';
             <div id="playlists-list" class="space-y-2"></div>
           </div>
         </div>
+      </div>
+    </div>
       </div>
     </div>
   </div>
@@ -408,9 +418,13 @@ import PageHead from '../components/PageHead.astro';
     private durationEl: HTMLElement;
     private playerContainer: HTMLElement;
     private previewUrl: string | null = null;
+    private trackId = '';
+    private trackName = '';
+    private embedContainer: HTMLElement;
 
     constructor(prefix: 'now' | 'last') {
       this.audio = document.getElementById(`${prefix}-audio-element`) as HTMLAudioElement;
+      this.embedContainer = document.getElementById(`${prefix}-spotify-embed`) as HTMLElement;
       this.playPauseBtn = document.getElementById(`${prefix}-play-pause-btn`) as HTMLButtonElement;
       this.playIcon = document.getElementById(`${prefix}-play-icon`) as HTMLElement;
       this.pauseIcon = document.getElementById(`${prefix}-pause-icon`) as HTMLElement;
@@ -473,15 +487,41 @@ import PageHead from '../components/PageHead.astro';
       });
 
       this.audio?.addEventListener('error', () => {
-        console.error('Audio playback error');
+        this.showSpotifyPlayer();
       });
     }
 
-    async loadPreview(previewUrl: string | null) {
-      if (this.previewUrl === previewUrl) return;
+    private showSpotifyPlayer() {
+      this.playerContainer?.classList.add('hidden');
+      this.audio.pause();
+      this.showPlayIcon();
+      if (!/^[A-Za-z0-9]{22}$/.test(this.trackId)) return;
+      if (this.embedContainer.dataset.trackId !== this.trackId) {
+        const frame = document.createElement('iframe');
+        frame.src = `https://open.spotify.com/embed/track/${this.trackId}?theme=0`;
+        frame.title = `Play ${this.trackName || 'this song'} on Spotify`;
+        frame.width = '100%';
+        frame.height = '152';
+        frame.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+        frame.allowFullscreen = true;
+        frame.loading = 'lazy';
+        frame.style.cssText = 'display:block;border:0;border-radius:12px';
+        this.embedContainer.replaceChildren(frame);
+        this.embedContainer.dataset.trackId = this.trackId;
+      }
+      this.embedContainer.classList.remove('hidden');
+    }
+
+    async loadPreview(previewUrl: string | null, song?: { id?: string; name?: string }) {
+      const trackId = song?.id || '';
+      if (this.previewUrl === previewUrl && this.trackId === trackId) return;
       this.reset();
       this.previewUrl = previewUrl;
-
+      this.trackId = trackId;
+      this.trackName = song?.name || '';
+      this.embedContainer.replaceChildren();
+      delete this.embedContainer.dataset.trackId;
+      this.embedContainer.classList.add('hidden');
       if (previewUrl) {
         this.audio.src = previewUrl;
         this.audio.load();
@@ -490,12 +530,25 @@ import PageHead from '../components/PageHead.astro';
         this.audio.removeAttribute('src');
         this.audio.load();
         this.playerContainer?.classList.add('hidden');
+        this.showSpotifyPlayer();
       }
+    }
+
+    stop() {
+      this.pause();
+      this.trackId = '';
+      this.previewUrl = null;
+      this.embedContainer.replaceChildren();
+      delete this.embedContainer.dataset.trackId;
+      this.embedContainer.classList.add('hidden');
+      this.audio.removeAttribute('src');
+      this.audio.load();
+      this.playerContainer?.classList.add('hidden');
     }
 
     play() {
       if (this.previewUrl) {
-        this.audio.play().then(() => this.showPauseIcon()).catch(() => this.showPlayIcon());
+        this.audio.play().then(() => this.showPauseIcon()).catch(() => this.showSpotifyPlayer());
       }
     }
 
@@ -529,16 +582,16 @@ import PageHead from '../components/PageHead.astro';
   let lastPlayedPlayer: AudioPlayer | null = null;
   let playback: { progress: number; duration: number; received: number } | null = null;
 
-  const loadSongPreview = async (player: AudioPlayer, song: { id?: string; previewUrl?: string | null }) => {
+  const loadSongPreview = async (player: AudioPlayer, song: { id?: string; name?: string; previewUrl?: string | null }) => {
     let previewUrl = song.previewUrl || null;
-    if (!previewUrl && song.id) {
+    if (song.previewUrl === undefined && song.id) {
       try {
         previewUrl = (await fetchSpotify(`preview/${song.id}`)).preview_url || null;
       } catch (error) {
         console.error('Error fetching preview URL:', error);
       }
     }
-    await player.loadPreview(previewUrl);
+    await player.loadPreview(previewUrl, song);
   };
 
   const updateProgress = () => {
@@ -644,7 +697,7 @@ import PageHead from '../components/PageHead.astro';
       if (lastPlayedPlayer) await loadSongPreview(lastPlayedPlayer, data);
     } catch (error) {
       console.error('Error loading last played:', error);
-      lastPlayedPlayer?.pause();
+      lastPlayedPlayer?.stop();
       document.getElementById('now-playing-section')?.classList.add('hidden');
     }
   };
@@ -675,7 +728,7 @@ import PageHead from '../components/PageHead.astro';
 
       if (!data.isPlaying || !data.name) {
         playback = null;
-        nowPlayingPlayer?.pause();
+        nowPlayingPlayer?.stop();
         // If nothing is playing, fetch last played song
         document.getElementById('now-playing-card')?.classList.add('hidden');
         await loadLastPlayed();
@@ -684,7 +737,7 @@ import PageHead from '../components/PageHead.astro';
 
       document.getElementById('not-playing-card')?.classList.add('hidden');
       document.getElementById('last-played-card')?.classList.add('hidden');
-      lastPlayedPlayer?.pause();
+      lastPlayedPlayer?.stop();
       document.getElementById('now-playing-card')?.classList.remove('hidden');
       playback = { progress: data.progress || 0, duration: data.duration || 0, received: performance.now() };
 
@@ -718,8 +771,8 @@ import PageHead from '../components/PageHead.astro';
     } catch (error) {
       console.error('Error updating now playing:', error);
       playback = null;
-      nowPlayingPlayer?.pause();
-      lastPlayedPlayer?.pause();
+      nowPlayingPlayer?.stop();
+      lastPlayedPlayer?.stop();
       document.getElementById('now-playing-section')?.classList.add('hidden');
     }
   };
@@ -946,13 +999,16 @@ import PageHead from '../components/PageHead.astro';
     window.removeEventListener('resize', handleResize);
     if (progressInterval) clearInterval(progressInterval);
     playback = null;
-    nowPlayingPlayer?.pause();
-    lastPlayedPlayer?.pause();
+    nowPlayingPlayer?.stop();
+    lastPlayedPlayer?.stop();
     apiErrors.clear();
   });
 </script>
 
 <style>
+  .music-layout { display:grid; gap:24px; align-items:start; }
+  .music-dashboard { min-width:0; }
+  @media(min-width:1100px) { .music-layout { grid-template-columns:minmax(0,1fr) 300px; } .music-dashboard { order:1; } }
   #loading-section {
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
