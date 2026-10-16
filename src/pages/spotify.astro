@@ -1,14 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import PageHead from '../components/PageHead.astro';
-import ConstellationPreview from '../components/ConstellationPreview.astro';
-import BlogStickers from '../components/BlogStickers.astro';
 ---
 
 <Layout >
   <PageHead slot="head" title="Spotify" description="What I'm listening to on Spotify." />
-  <div class="container mx-auto px-0 sm:px-4 py-8 max-w-6xl">
-    <div class="mb-8 text-center space-y-4 relative">
+  <div class="spotify-page container mx-auto px-4 py-8 max-w-4xl">
+    <div class="spotify-sky" aria-hidden="true"></div>
+    <div class="mb-8 text-center space-y-4">
       <h1 class="text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
         What I'm Vibing To
       </h1>
@@ -24,12 +23,8 @@ import BlogStickers from '../components/BlogStickers.astro';
         </svg>
         <span>Add a song you like</span>
       </a>
-      <BlogStickers variant="music" />
     </div>
 
-    <div class="music-layout">
-      <ConstellationPreview />
-      <div class="music-dashboard">
     <div id="loading-section" class="space-y-6 min-h-[800px]">
       <!-- Now Playing Skeleton -->
       <div class="rounded-lg border bg-card overflow-hidden">
@@ -369,8 +364,6 @@ import BlogStickers from '../components/BlogStickers.astro';
             <div id="playlists-list" class="space-y-2"></div>
           </div>
         </div>
-      </div>
-    </div>
       </div>
     </div>
   </div>
@@ -1006,9 +999,26 @@ import BlogStickers from '../components/BlogStickers.astro';
 </script>
 
 <style>
-  .music-layout { display:grid; gap:24px; align-items:start; }
-  .music-dashboard { min-width:0; }
-  @media(min-width:1100px) { .music-layout { grid-template-columns:minmax(0,1fr) 300px; } .music-dashboard { order:1; } }
+  .spotify-page {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .spotify-sky {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: url('/music/constellation-sky.webp') center / cover no-repeat;
+    filter: invert(1) hue-rotate(180deg);
+    opacity: 0.18;
+    mask-image: radial-gradient(ellipse at center, black 20%, transparent 85%);
+  }
+
+  :global([data-theme='dark']) .spotify-sky {
+    filter: none;
+    opacity: 0.35;
+  }
   #loading-section {
     opacity: 1;
     transition: opacity 0.3s ease-in-out;
