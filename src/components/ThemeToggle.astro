@@ -1,19 +1,9 @@
 ---
-import { Button } from '@/components/ui/button'
-import { Icon } from 'astro-icon/components'
+interface Props { sticker?: boolean }
 ---
-
-<Button
-  id="theme-toggle"
-  variant="ghost"
-  size="icon"
-  title="Toggle theme"
-  className="-my-2 -me-2 size-8"
->
-  <Icon name="lucide:sun" class="size-4 dark:hidden" />
-  <Icon name="lucide:moon" class="absolute hidden size-4 dark:block" />
-  <span class="sr-only">Toggle theme</span>
-</Button>
+<button id="theme-toggle" type="button" class="theme-switch" data-theme-switch role="switch" aria-checked="true" aria-label="Lights" title="Turn the lights off">
+  <span class="theme-switch__plate" aria-hidden="true"><span class="theme-switch__socket"><span class="theme-switch__rocker"><span class="theme-switch__light"></span></span></span></span>
+</button>
 
 <script is:inline data-astro-rerun>
   (() => {
@@ -53,6 +43,7 @@ import { Icon } from 'astro-icon/components'
     document.documentElement.setAttribute('data-theme', initialTheme)
     window.localStorage.setItem(THEME_KEY, initialTheme)
     writeThemeCookie(initialTheme)
+    document.getElementById('theme-toggle')?.setAttribute('aria-checked', String(initialTheme === 'light'))
   })()
 </script>
 
@@ -78,6 +69,9 @@ import { Icon } from 'astro-icon/components'
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem(THEME_KEY, theme)
     writeThemeCookie(theme)
+    const button = document.getElementById('theme-toggle')
+    button?.setAttribute('aria-checked', String(theme === 'light'))
+    button?.setAttribute('title', theme === 'dark' ? 'Turn the lights on' : 'Turn the lights off')
   }
 
   function isEditableTarget(target) {
@@ -91,41 +85,35 @@ import { Icon } from 'astro-icon/components'
     const currentTheme = element.getAttribute('data-theme')
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark'
 
-    const supportsViewTransition = typeof document.startViewTransition === 'function'
+    const supportsViewTransition = typeof document.startViewTransition === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     if (!supportsViewTransition || !sourceEl || !(sourceEl instanceof HTMLElement)) {
       applyTheme(newTheme)
       return
     }
 
+    if (element.classList.contains('theme-transition')) return
     const rect = sourceEl.getBoundingClientRect()
     const x = rect.left + rect.width / 2
     const y = rect.top + rect.height / 2
-    const maxX = Math.max(x, window.innerWidth - x)
-    const maxY = Math.max(y, window.innerHeight - y)
-    const endRadius = Math.hypot(maxX, maxY)
-
+    const endRadius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))
+    element.style.setProperty('--theme-transition-x', `${x}px`)
+    element.style.setProperty('--theme-transition-y', `${y}px`)
+    element.style.setProperty('--theme-transition-radius', `${endRadius}px`)
     element.classList.add('theme-transition')
-    const transition = document.startViewTransition(() => {
-      applyTheme(newTheme)
-    })
-
-    transition.finished.finally(() => {
+    const cleanup = () => {
       element.classList.remove('theme-transition')
-    })
-
-    transition.ready.then(() => {
-      element.animate(
-        {
-          clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`],
-        },
-        {
-          duration: 960,
-          easing: 'cubic-bezier(0.55, 0, 0.8, 1)',
-          pseudoElement: '::view-transition-new(root)',
-        }
-      )
-    })
+      element.style.removeProperty('--theme-transition-x')
+      element.style.removeProperty('--theme-transition-y')
+      element.style.removeProperty('--theme-transition-radius')
+    }
+    try {
+      const transition = document.startViewTransition(() => applyTheme(newTheme))
+      transition.finished.then(cleanup, cleanup)
+    } catch {
+      cleanup()
+      applyTheme(newTheme)
+    }
   }
 
   function handleToggleClick(event) {
@@ -142,7 +130,9 @@ import { Icon } from 'astro-icon/components'
 
   function initThemeToggle() {
     const toggleBtn = document.getElementById('theme-toggle')
+    toggleBtn?.removeEventListener('click', handleToggleClick)
     toggleBtn?.addEventListener('click', handleToggleClick)
+    applyTheme(document.documentElement.getAttribute('data-theme') || 'light')
 
     window.removeEventListener('keydown', handleThemeKeydown)
     window.addEventListener('keydown', handleThemeKeydown)

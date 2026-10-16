@@ -70,6 +70,14 @@ export default defineConfig({
     icon(),
   ],
   vite: {
+    server: {
+      proxy: {
+        '/api/blogs/spotify': {
+          target: 'https://runny.russel.is-a.dev',
+          changeOrigin: true,
+        },
+      },
+    },
     plugins: [tailwindcss()],
   },
   server: {

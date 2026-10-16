@@ -1,11 +1,8 @@
 ---
 import BlogCard from '@/components/BlogCard.astro'
-import Link from '@/components/Link.astro'
 import Newsletter from '@/components/Newsletter.astro'
 import PageHead from '@/components/PageHead.astro'
 import VirtualGuitar from '@/components/VirtualGuitar.astro'
-import BlogStickers from '@/components/BlogStickers.astro'
-import { buttonVariants } from '@/components/ui/button'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getAllPosts } from '@/lib/data-utils'
@@ -42,15 +39,15 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
   </a>
   
   <div class="endurance-copy flex flex-col space-y-1.5 p-5 sm:p-8">
+    <span class="mobile-sticker-slot mobile-sticker-slot--float mobile-music-slot" data-mobile-sticker-slot="music" aria-hidden="true"></span>
     <h3 class="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-3xl font-bold leading-none text-transparent sm:text-4xl">en·dur·ance</h3>
     <p class="text-muted-foreground text-sm">
       /ɛnˈdjʊərəns/ • <span class="font-medium">noun</span>
     </p>
     <p class="text-muted-foreground">
-      the quiet ability to keep going, through effort, fatigue, and time, especially when stopping would be easier.
+      the ability to keep going when you're tired and would rather stop.
     </p>
   </div>
-  <BlogStickers variant="home" />
 </section>
 
 <script>
@@ -212,6 +209,10 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
   @media (max-width: 639px) {
     .endurance-panel:has(#now-playing-badge:not(.hidden)) .endurance-copy { padding-top:3.6rem; }
   }
+  @media (max-width: 1199px) {
+    .endurance-copy { display: flow-root; }
+    .endurance-copy h3 { font-size: clamp(1.25rem, 5.8vw, 2rem); }
+  }
   /* Scrolling animation for long song names */
   .scrolling-text {
     animation: scroll-text 15s linear infinite;
@@ -232,15 +233,14 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
   }
 </style>
 
+  <div class="sticker-spot" data-sticker-spot="middle" aria-hidden="true"></div>
   <div id="guitar"><VirtualGuitar /></div>
 
 
   <section class="flex flex-col gap-y-6">
     <div class="flex items-center justify-between">
       <h2 class="text-3xl font-bold">Latest Posts</h2>
-      <Link href="/blog" class={buttonVariants({ variant: 'outline', size: 'sm' })}>
-        View All
-      </Link>
+      <span class="mobile-sticker-slot" data-mobile-sticker-slot="about" aria-hidden="true"></span>
     </div>
 
     <div class="rounded-lg border bg-card" data-tabs-container>
@@ -286,7 +286,7 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
               <svg class="w-12 h-12 text-muted-foreground/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
               </svg>
-              <p class="text-muted-foreground">No posts from you yet. Time to write!</p>
+              <p class="text-muted-foreground">I haven't posted anything here yet.</p>
             </div>
           )}
         </div>
@@ -305,8 +305,8 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
               <svg class="w-12 h-12 text-muted-foreground/50 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
               </svg>
-              <p class="text-muted-foreground mb-2">No collaborator posts yet.</p>
-              <p class="text-sm text-muted-foreground">Invite friends to join your odyssey!</p>
+              <p class="text-muted-foreground mb-2">No guest posts here yet.</p>
+              <p class="text-sm text-muted-foreground">Posts from friends will show up here.</p>
             </div>
           )}
         </div>
@@ -314,6 +314,7 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
     </div>
   </section>
 
+  <div class="sticker-spot sticker-spot--interests" data-sticker-spot="interests" aria-hidden="true"></div>
   <Newsletter variant="default" position="bottom" />
 
 </Layout>

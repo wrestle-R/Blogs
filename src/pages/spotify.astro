@@ -5,24 +5,24 @@ import PageHead from '../components/PageHead.astro';
 
 <Layout >
   <PageHead slot="head" title="Spotify" description="What I'm listening to on Spotify." />
-  <div class="spotify-page container mx-auto px-4 py-8 max-w-4xl">
-    <div class="spotify-sky" aria-hidden="true"></div>
+  <div class="spotify-page container mx-auto px-0 py-6 sm:px-4 sm:py-8 max-w-4xl">
     <div class="mb-8 text-center space-y-4">
       <h1 class="text-4xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
         What I'm Vibing To
       </h1>
       <p class="text-base text-muted-foreground">Live from my Spotify feed</p>
 
+      <div class="mobile-music-links">
+      <span class="mobile-sticker-slot" data-mobile-sticker-slot="constellation" aria-hidden="true"></span>
       <!-- Navigation to Songs Page -->
       <a
         href="/songs"
-        class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 hover:scale-105 transition-all font-medium text-sm shadow-sm hover:shadow-md"
+        class="sticker-link mx-auto"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        <span>Add a song you like</span>
+        <img src="/charms/guitar.webp" alt="" width="76" height="64" draggable="false" />
+        <span class="sticker-link__label">Add a song</span>
       </a>
+      </div>
     </div>
 
     <div id="loading-section" class="space-y-6 min-h-[800px]">
@@ -172,7 +172,7 @@ import PageHead from '../components/PageHead.astro';
           </h2>
 
         <div id="now-playing-card" class="hidden">
-          <div class="flex gap-4 items-start flex-col sm:flex-row">
+          <div class="track-summary flex gap-4 items-start flex-col sm:flex-row">
             <img
               id="album-art"
               src="/static/albumart.png"
@@ -248,7 +248,7 @@ import PageHead from '../components/PageHead.astro';
         </div>
 
         <div id="last-played-card" class="hidden">
-          <div class="flex gap-4 items-start flex-col sm:flex-row">
+          <div class="track-summary flex gap-4 items-start flex-col sm:flex-row">
             <img
               id="last-album-art"
               src="/static/albumart.png"
@@ -275,7 +275,6 @@ import PageHead from '../components/PageHead.astro';
               </div>
               <p id="last-artist-name" class="text-base text-muted-foreground mb-1 break-words"></p>
               <p id="last-album-name" class="text-sm text-muted-foreground/70 break-words"></p>
-              <p id="last-played-time" class="text-xs text-muted-foreground/60 mt-3 font-medium"></p>
 
               <!-- Audio Player Controls -->
               <div id="last-played-player" class="hidden mt-4">
@@ -310,6 +309,7 @@ import PageHead from '../components/PageHead.astro';
               </div>
             </div>
           </div>
+          <p id="last-played-time" class="text-xs text-muted-foreground mt-3 font-medium"></p>
           <audio id="last-audio-element" preload="none"></audio>
           <div id="last-spotify-embed" class="hidden mt-4"></div>
         </div>
@@ -322,6 +322,8 @@ import PageHead from '../components/PageHead.astro';
         </div>
         </div>
       </div>
+
+      <div class="sticker-spot" data-sticker-spot="middle" aria-hidden="true"></div>
 
       <div class="rounded-lg border bg-card">
         <div class="flex flex-wrap gap-3 items-center justify-between p-4 border-b bg-muted/30">
@@ -414,8 +416,10 @@ import PageHead from '../components/PageHead.astro';
     private trackId = '';
     private trackName = '';
     private embedContainer: HTMLElement;
+    private card: HTMLElement;
 
     constructor(prefix: 'now' | 'last') {
+      this.card = document.getElementById(prefix === 'now' ? 'now-playing-card' : 'last-played-card') as HTMLElement;
       this.audio = document.getElementById(`${prefix}-audio-element`) as HTMLAudioElement;
       this.embedContainer = document.getElementById(`${prefix}-spotify-embed`) as HTMLElement;
       this.playPauseBtn = document.getElementById(`${prefix}-play-pause-btn`) as HTMLButtonElement;
@@ -502,6 +506,7 @@ import PageHead from '../components/PageHead.astro';
         this.embedContainer.replaceChildren(frame);
         this.embedContainer.dataset.trackId = this.trackId;
       }
+      this.card.dataset.player = 'spotify';
       this.embedContainer.classList.remove('hidden');
     }
 
@@ -509,6 +514,7 @@ import PageHead from '../components/PageHead.astro';
       const trackId = song?.id || '';
       if (this.previewUrl === previewUrl && this.trackId === trackId) return;
       this.reset();
+      delete this.card.dataset.player;
       this.previewUrl = previewUrl;
       this.trackId = trackId;
       this.trackName = song?.name || '';
@@ -529,6 +535,7 @@ import PageHead from '../components/PageHead.astro';
 
     stop() {
       this.pause();
+      delete this.card.dataset.player;
       this.trackId = '';
       this.previewUrl = null;
       this.embedContainer.replaceChildren();
@@ -999,25 +1006,16 @@ import PageHead from '../components/PageHead.astro';
 </script>
 
 <style>
-  .spotify-page {
-    position: relative;
-    isolation: isolate;
+  #now-playing-card[data-player='spotify'] .track-summary,
+  #last-played-card[data-player='spotify'] .track-summary {
+    display: none;
   }
-
-  .spotify-sky {
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background: url('/music/constellation-sky.webp') center / cover no-repeat;
-    filter: invert(1) hue-rotate(180deg);
-    opacity: 0.18;
-    mask-image: radial-gradient(ellipse at center, black 20%, transparent 85%);
+  #now-playing-card[data-player='spotify'] #now-spotify-embed,
+  #last-played-card[data-player='spotify'] #last-spotify-embed {
+    margin-top: 0;
   }
-
-  :global([data-theme='dark']) .spotify-sky {
-    filter: none;
-    opacity: 0.35;
+  #last-played-card[data-player='spotify'] #last-played-time {
+    margin: 0 0 12px;
   }
   #loading-section {
     opacity: 1;

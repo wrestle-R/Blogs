@@ -1,0 +1,64 @@
+---
+import ThemeToggle from './ThemeToggle.astro'
+import HeadphonesSticker from './HeadphonesSticker.astro'
+import '@/styles/sticker-navigation.css'
+
+const local = ['localhost', '127.0.0.1'].includes(Astro.url.hostname)
+const items = [
+  { id: 'home', order: 1, label: Astro.url.pathname === '/' ? 'Home' : 'Back to blogs', href: '/', image: 'home' },
+  { id: 'music', order: 3, label: 'Music', href: '/spotify', image: 'headphones' },
+  { id: 'portfolio', order: 4, label: 'Back to portfolio', href: local ? 'http://localhost:5173' : 'https://russeldanielpaul.is-a.dev', image: 'dell-laptop' },
+  { id: 'runny', order: 5, label: 'Runny', href: 'https://runny.russel.is-a.dev', image: 'running-shoe' },
+  { id: 'minecraft', order: 7, label: 'Minecraft', href: local ? 'http://localhost:5173/minecraft' : 'https://minecraft.russel.is-a.dev', image: 'minecraft-wrestle' },
+  { id: 'about', order: 6, label: 'About me', href: '/about', image: 'football' },
+]
+// Stable placement keys keep the remaining stickers in their own spaces.
+const discoveries = [
+  { id: 'constellation', label: 'Constellation', href: 'https://russels-constellation.vercel.app/', image: 'spotify-planet' },
+  ...(Astro.url.pathname === '/' ? [
+    { id: 'guitar', label: 'Songbook', href: '/songs', image: 'guitar' },
+    { id: 'football', label: 'Football stories', href: '/blog/barclays-fantasy-league', image: 'football' },
+    { id: 'hills', label: 'Into the hills', href: '/blog/munnar-trip', image: 'hill-station' },
+    { id: 'arch', label: 'I use Arch, btw', href: '/blog/linux-experience', image: 'arch-linux-mark' },
+  ] : []),
+]
+const current = (href: string) => href === '/' ? Astro.url.pathname === '/' : Astro.url.pathname === href || Astro.url.pathname.startsWith(href + '/')
+---
+<nav class="sticker-navigation blog-sticker-navigation" data-sticker-navigation="blog" data-sticker-count={6 + discoveries.length} aria-label="Explore Russel’s blog">
+  <div class="sticker-navigation__list" data-sticker-list id="blog-sticker-links">
+    {items.map((item) => (
+      <div class="sticker-navigation__item" data-sticker-id={item.id} data-mobile-hidden="true" data-sticker-order={item.order} data-sticker-side={item.order < 5 ? 'left' : 'right'} style={`--sticker-row:${(item.order - 1) % 4};--sticker-angle:${[-5,6,-7,4,5,-5,3][item.order - 1]}deg`}>
+        {item.id === 'music' ? <HeadphonesSticker /> : <a class="sticker-link" href={item.href} aria-current={current(item.href) ? 'page' : undefined}>
+          <img src={`/charms/${item.image}.${item.id === 'home' ? 'svg' : 'webp'}`} alt="" width="94" height="80" draggable="false" />
+          <span class="sticker-link__label">{item.label}</span>
+        </a>}
+      </div>
+    ))}
+    <div class="sticker-navigation__item" data-sticker-id="theme" data-sticker-order="8" data-sticker-side="right" style="--sticker-row:3;--sticker-angle:-6deg">
+      <ThemeToggle sticker />
+    </div>
+    {discoveries.map((item, index) => (
+      <div class="sticker-navigation__item" data-sticker-id={item.id} data-mobile-hidden="true" data-sticker-order={index + 9} style={`--sticker-angle:${[-9,8,-11,6,-7,10][index]}deg`}>
+        <a class="sticker-link" href={item.href}>
+          <img src={`/charms/${item.image}.${item.id === 'arch' ? 'svg' : 'webp'}`} alt="" width="94" height="80" draggable="false" loading="lazy" />
+          <span class="sticker-link__label">{item.label}</span>
+        </a>
+      </div>
+    ))}
+  </div>
+  <button type="button" class="back-to-top" data-back-to-top aria-label="Back to top" title="Back to top" hidden>↑</button>
+  <button type="button" class="sticker-navigation__reset" data-sticker-reset>↺ Reset sticker positions</button>
+</nav>
+<script>
+  import { initStickerNavigation } from '@/lib/sticker-navigation'
+  let cleanup: (() => void) | undefined
+  document.addEventListener('astro:page-load', () => {
+    cleanup?.()
+    const root = document.querySelector('[data-sticker-navigation="blog"]')
+    if (root) cleanup = initStickerNavigation(root)
+  })
+  document.addEventListener('astro:before-swap', () => cleanup?.())
+</script>
+<style is:global>
+  .blog-sticker-navigation { --sticker-foreground:var(--foreground); --sticker-muted:var(--muted-foreground); --sticker-background:var(--background); --sticker-border:var(--border); width:100%; }
+</style>

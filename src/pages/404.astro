@@ -29,7 +29,7 @@ const randomQuote = quotes[Math.floor(Math.random() * quotes.length)]
       <h1 class="mb-4 text-3xl font-medium">404: Page not found</h1>
       <blockquote class="mt-6 pl-4 border-l-2 italic text-muted-foreground">
         <p class="prose">{randomQuote.text}</p>
-        <footer class="mt-2 text-sm">— {randomQuote.author}</footer>
+        <footer class="mt-2 text-sm">{randomQuote.author}</footer>
       </blockquote>
     </div>
     <Link

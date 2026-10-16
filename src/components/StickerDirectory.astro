@@ -1,0 +1,26 @@
+---
+const links = [
+  { href: '/songs', label: 'Songs', image: 'guitar' },
+  { href: '/movies', label: 'Movies', image: 'movie-clapperboard' },
+  { href: '/wallpapers', label: 'Wallpapers', image: 'hill-station' },
+  { href: '/collaborate', label: 'Collaborate', image: 'contact-envelope' },
+]
+---
+<section id="sticker-directory" aria-labelledby="sticker-directory-heading" class="sticker-directory">
+  <h2 id="sticker-directory-heading">Also here</h2>
+  <nav aria-label="More places to explore">
+    {links.map((link, index) => <a href={link.href} class="sticker-link" style={`--sticker-angle:${index % 2 ? 4 : -4}deg`} aria-current={Astro.url.pathname === link.href ? 'page' : undefined}>
+      <img src={`/charms/${link.image}.webp`} alt="" width="94" height="80" loading="lazy" draggable="false" />
+      <span class="sticker-link__label">{link.label}</span>
+    </a>)}
+  </nav>
+</section>
+<style>
+  .sticker-directory { width:100%; max-width:56rem; margin:32px auto 24px; padding:24px 16px; scroll-margin-top:32px; }
+  h2 { font-size:14px; font-weight:500; text-align:center; color:var(--muted-foreground); margin-bottom:24px; }
+  nav { display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-around; gap:28px 12px; padding-bottom:35px; }
+  nav a { width:36%; }
+  nav a:nth-child(2n) { margin-top:30px; }
+  nav a:nth-child(3n) { margin-top:12px; }
+  @media(min-width:768px) { nav a { width:13%; } nav a:nth-child(3n) { margin-top:55px; } }
+</style>

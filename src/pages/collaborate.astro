@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
     <div class="space-y-2">
       <h1 class="text-4xl font-bold">Let's Collaborate</h1>
       <p class="text-muted-foreground">
-        Have a blog idea you'd like me to write about? Or perhaps feedback, project collaboration, or just want to chat? Send me a message and let's create something together.
+        Have something to say about a post, or want to work on something together? Leave me a message.
       </p>
     </div>
 
@@ -59,7 +59,7 @@ import { cn } from '@/lib/utils'
                 required
                 rows="6"
                 class="w-full rounded-md border bg-background px-4 py-2.5 text-sm transition-colors focus:border-ring focus:outline-none focus:ring-2 focus:ring-ring/20 resize-none"
-                placeholder="Share your blog ideas, thoughts, feedback, or collaboration proposal..."
+                placeholder="What did you have in mind?"
               ></textarea>
               <p id="tag-hint" class="text-xs text-muted-foreground hidden">
                 Selected topics will be added to your message automatically
@@ -341,8 +341,8 @@ import { cn } from '@/lib/utils'
 
         showStatus(
           'success',
-          'Message sent successfully!',
-          'Thank you for reaching out. I\'ll get back to you soon.'
+          'Message sent.',
+          'Thanks for writing. I\'ll get back to you when I can.'
         )
         
         form.reset()

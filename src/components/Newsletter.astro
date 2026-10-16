@@ -7,8 +7,8 @@ interface Props {
 }
 
 const {
-  title = "Join the Journey",
-  description = "Get a notification when a new blog is published. No spam, I promise!",
+  title = "New posts by email",
+  description = "If I write something new, I can send you an email.",
   variant = 'default',
   position = 'bottom',
 } = Astro.props
@@ -26,6 +26,7 @@ const runblogApiBaseUrl =
     {variant === 'default' && (
       <div class="newsletter-content">
         <div class="newsletter-text">
+          <span class="mobile-sticker-slot mobile-sticker-slot--float" data-mobile-sticker-slot="constellation" aria-hidden="true"></span>
           <h3 class="newsletter-title">{title}</h3>
           <p class="newsletter-description">{description}</p>
         </div>
@@ -46,7 +47,7 @@ const runblogApiBaseUrl =
               </svg>
             </button>
           </div>
-          <p class="form-help-text">We respect your privacy. Unsubscribe at any time.</p>
+          <p class="form-help-text">Unsubscribe whenever you want.</p>
         </form>
       </div>
     )}
@@ -86,7 +87,7 @@ const runblogApiBaseUrl =
               class="card-input"
               aria-label="Email address"
             />
-            <button type="submit" class="card-button">Subscribe Now</button>
+            <button type="submit" class="card-button">Subscribe</button>
           </form>
         </div>
       </div>
@@ -176,6 +177,12 @@ const runblogApiBaseUrl =
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
+  }
+
+  @media (max-width: 1199px) {
+    .newsletter-text:has(.mobile-sticker-slot) { display: flow-root; }
+    .newsletter-title { margin-bottom: 8px; }
+    .newsletter-section[data-variant='default'] { margin: 1rem 0; }
   }
 
   .newsletter-text {
