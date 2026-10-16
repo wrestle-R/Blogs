@@ -1,43 +1,141 @@
 ---
-import Breadcrumbs from '@/components/Breadcrumbs.astro'
-import Link from '@/components/Link.astro'
+import { Image } from 'astro:assets'
 import PageHead from '@/components/PageHead.astro'
-import ProjectCard from '@/components/ProjectCard.astro'
 import Layout from '@/layouts/Layout.astro'
 import { getAllProjects } from '@/lib/data-utils'
+import runPhoto from '../../public/blogimages/blog1.jpg'
 
-const projects = await getAllProjects()
+const allProjects = await getAllProjects()
+const order = ['Multi Codex', 'Varte', 'HyprTrack', 'Bible Wordle']
+const projects = allProjects.sort((a, b) => order.indexOf(a.data.name) - order.indexOf(b.data.name))
+const portfolioUrl = ['localhost', '127.0.0.1'].includes(Astro.url.hostname) ? 'http://localhost:5173' : 'https://russel.is-a.dev'
 ---
 
-<Layout class="max-w-4xl  ">
-  <PageHead slot="head" title="About" />
-  <Breadcrumbs items={[{ label: 'About', icon: 'lucide:info' }]} />
+<Layout class="max-w-4xl">
+  <PageHead slot="head" title="About me" description="I'm Russel Daniel Paul. I build web apps and IoT dashboards, play football, run, and write things down before I forget them." />
 
-  <section>
-    <div class="min-w-full">
-      <div class="prose mb-8">
-        <h1 class="text-3xl font-bold mb-4">Hey, I'm Russel 👋</h1>
-        <p class="mt-0">
-          I'm a Computer Engineering student at Fr. CRCE, passionate about web development
-          and building intuitive applications. Currently exploring AI/ML and IoT while
-          working on various full-stack projects.
+  <article class="about-page">
+    <header class="about-intro">
+      <div class="about-intro-copy">
+        <span class="mobile-sticker-slot mobile-sticker-slot--float" data-mobile-sticker-slot="home" aria-hidden="true"></span>
+        <p class="about-label">About me</p>
+        <h1>Hi, I'm Russel.</h1>
+        <p>
+          I'm Russel Daniel Paul, a fourth year computer engineering student in Mumbai.
+          I work mostly with React, Next.js and Node, and I've been working on IoT
+          dashboards at Technode and NetstellarIOT.
         </p>
         <p>
-          When I'm not coding, you'll find me playing football (I'm the vice-captain of my
-          college team!), strumming my guitar, or diving deep into music theory. I also have
-          a soft spot for sitcoms, check out my blog for my favorites.
+          That has meant everything from a React and Java dashboard to queues for
+          incoming device data, and more recently an MQTT dashboard running in Docker
+          on a VPS. My <a href={portfolioUrl}>portfolio</a> has the work details.
         </p>
         <p>
-          This blog is my digital diary, a place to pen down thoughts, reflections, and
-          random musings before I forget them. It's not always serious, and sometimes it
-          reads like I'm arguing with myself (and losing), but that's the fun of it.
+          I use Arch with Hyprland. Getting it set up took an entire day, which was
+          apparently not enough to put me off it. There's a
+          <a href="/blog/linux-experience">whole post about that</a> on here.
         </p>
       </div>
+      <figure class="about-photo">
+        <Image src={runPhoto} alt="Birds above the trees and flowers, photographed during a run" width={540} height={680} format="webp" />
+        <figcaption>From a run.</figcaption>
+      </figure>
+    </header>
 
-      <h2 class="mb-4 text-2xl font-medium">Projects</h2>
-      <div class="flex flex-col gap-4">
-        {projects.map((project) => <ProjectCard project={project} />)}
+    <div class="sticker-spot" data-sticker-spot="middle" aria-hidden="true"></div>
+
+    <section class="about-section" aria-labelledby="about-projects">
+      <h2 id="about-projects">Things I've made</h2>
+      <p>Some web apps, some desktop tools. A few of them are below.</p>
+      <div class="about-projects">
+        {projects.map((project) => (
+          <article class="about-project">
+            <a href={project.data.link} class="about-project-preview" aria-label={`See ${project.data.name} on GitHub`}>
+              <div class:list={['about-project-media', { 'has-dark-preview': !!project.data.imageDark }]}>
+                <Image class="about-project-image--light" data-project-variant="light" src={project.data.image} alt={`${project.data.name}, light theme`} width={960} height={540} widths={[320, 640, 960]} sizes="(max-width: 767px) 90vw, 220px" format="webp" loading="lazy" />
+                {project.data.imageDark && <Image class="about-project-image--dark" data-project-variant="dark" src={project.data.imageDark} alt={`${project.data.name}, dark theme`} width={960} height={540} widths={[320, 640, 960]} sizes="(max-width: 767px) 90vw, 220px" format="webp" loading="lazy" />}
+              </div>
+            </a>
+            <div>
+              <h3><a href={project.data.link}>{project.data.name}</a></h3>
+              <p>{project.data.description}</p>
+              <p class="about-project-stack">{project.data.tags.join(' / ')}</p>
+            </div>
+          </article>
+        ))}
       </div>
-    </div>
-  </section>
+      <p>The rest is on <a href="https://github.com/wrestle-R">my GitHub</a>.</p>
+    </section>
+
+    <section class="about-section about-reading" aria-labelledby="about-outside">
+      <div class="mobile-context-heading"><h2 id="about-outside">Outside of that</h2>
+        <span class="mobile-sticker-slot" data-mobile-sticker-slot="runny" aria-hidden="true"></span></div>
+      <p>
+        Football was the reason I used to run, and running was usually the punishment.
+        Somehow it became the thing I started waking up early for. I've written about
+        <a href="/blog/the-long-stride">that switch</a> too.
+      </p>
+      <p>
+        I play guitar, listen to a lot of music, and have watched enough sitcoms to have
+        <a href="/blog/sitcoms">opinions about them</a>. Supernatural alone took up a
+        fairly unreasonable part of my lockdown.
+      </p>
+      <p>
+        I like hill stations as well. If you want a break from the tech posts,
+        <a href="/blog/munnar-trip">there's a Munnar post</a> on here.
+      </p>
+    </section>
+
+    <section class="about-section about-reading" aria-labelledby="about-writing">
+      <h2 id="about-writing">Why I started writing</h2>
+      <p>
+        I kept forgetting things I wanted to remember. Thoughts, stories, the things
+        that happened while I was figuring something out. Writing them down seemed
+        like a better plan than trusting my memory.
+      </p>
+      <p>
+        Some posts are about Linux or running. Some are just me trying to work out what
+        I think. Writing for people to read wasn't really the point when
+        <a href="/blog/voices-told-me-to-write">I started this</a>, but if someone reads
+        one and relates to it, I call that a W.
+      </p>
+    </section>
+  </article>
 </Layout>
+
+<style>
+  .about-page { padding:12px 0 32px; }
+  .about-intro { display:grid; grid-template-columns:minmax(0,1fr) 220px; gap:48px; align-items:start; }
+  .about-label { margin:0 0 12px; font-size:12px; color:var(--muted-foreground); }
+  h1 { margin:0 0 28px; font-size:clamp(2.4rem,5vw,3.6rem); font-weight:650; letter-spacing:-.045em; line-height:1.1; }
+  h2 { margin:0 0 18px; font-size:1.6rem; font-weight:600; letter-spacing:-.025em; }
+  p { margin:0 0 20px; font-size:16px; line-height:1.85; color:var(--muted-foreground); text-wrap:pretty; }
+  a { color:var(--foreground); text-decoration:underline; text-decoration-color:color-mix(in srgb,var(--foreground) 30%,transparent); text-underline-offset:4px; }
+  a:hover { text-decoration-color:var(--foreground); }
+  a:focus-visible { outline:2px solid var(--foreground); outline-offset:5px; border-radius:3px; }
+  .about-photo { margin:22px 0 0; transform:rotate(3deg); }
+  .about-photo img { width:100%; height:290px; object-fit:cover; object-position:center 65%; border-radius:3px; }
+  figcaption { padding:9px 4px; font-size:11px; color:var(--muted-foreground); }
+  .about-section { margin-top:48px; }
+  .about-section:first-of-type { margin-top:8px; }
+  .about-reading { max-width:660px; }
+  .about-projects { margin:28px 0 24px; }
+  .about-project { display:grid; grid-template-columns:220px minmax(0,1fr); gap:28px; padding:28px 0; border-top:1px solid var(--border); }
+  .about-project-preview img { width:100%; height:auto; aspect-ratio:1.8; object-fit:cover; border-radius:5px; }
+  .about-project-image--dark { display:none; }
+  :global([data-theme='dark']) .has-dark-preview .about-project-image--light { display:none; }
+  :global([data-theme='dark']) .has-dark-preview .about-project-image--dark { display:block; }
+  .about-project-preview { display:block; border-radius:5px; align-self:start; }
+  h3 { margin:0 0 8px; font-size:19px; font-weight:600; }
+  h3 a { text-decoration:none; }
+  .about-project p { margin:0 0 12px; font-size:14px; line-height:1.75; }
+  .about-project .about-project-stack { margin-bottom:0; font:11px/1.7 var(--font-mono); color:var(--muted-foreground); }
+  @media(max-width:767px) {
+    .about-intro { grid-template-columns:1fr; gap:8px; }
+    .about-photo { width:160px; margin:8px auto 18px; }
+    .about-photo img { height:200px; }
+    .about-project { grid-template-columns:1fr; gap:18px; }
+    .about-project-preview { max-width:340px; }
+    .about-section { margin-top:38px; }
+  }
+</style>
