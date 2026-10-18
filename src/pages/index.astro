@@ -21,22 +21,15 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
   <PageHead slot="head" title="Home" />
   
 <section class="rounded-lg border bg-gradient-to-br from-background to-muted/20 relative endurance-panel">
-  <a 
-    id="now-playing-badge" 
-    href="/spotify"
-    class="hidden absolute right-2.5 top-3 z-10 max-w-[calc(100%-1.25rem)] sm:right-4 sm:top-4 sm:max-w-[calc(100%-2rem)]"
-  >
-    <div class="flex items-center gap-1.5 rounded-full bg-primary/15 px-2.5 py-1.5 shadow-sm transition-all hover:bg-primary/25 sm:gap-2.5 sm:px-4 sm:py-2">
-      <span id="playing-indicator" class="inline-block h-2 w-2 animate-pulse rounded-full bg-primary sm:h-2.5 sm:w-2.5"></span>
-      <div class="flex max-w-[92px] items-center gap-1.5 overflow-hidden sm:max-w-[180px] sm:gap-2 md:max-w-[250px]">
-        <svg id="badge-icon" class="h-3.5 w-3.5 flex-shrink-0 text-primary sm:h-4 sm:w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-        </svg>
-        <div class="overflow-hidden relative">
-          <span id="now-playing-text" class="inline-block whitespace-nowrap text-xs font-semibold text-primary sm:text-sm">Now Playing</span>
-        </div>
-      </div>
-    </div>
+  <a id="now-playing-badge" href="/spotify" class="listening-badge hidden">
+    <span class="listening-badge__surface">
+      <span id="playing-indicator" class="listening-badge__indicator animate-pulse" hidden></span>
+      <svg id="badge-icon" class="listening-badge__icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+      </svg>
+      <span class="listening-badge__song"><span id="now-playing-text">Now playing</span></span>
+      <span id="now-playing-time" class="listening-badge__time" hidden></span>
+    </span>
   </a>
   
   <div class="endurance-copy flex flex-col space-y-1.5 p-5 sm:p-8">
@@ -55,159 +48,98 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
 <script>
   import { SPOTIFY_API_BASE } from '../lib/spotify-api';
   let nowPlayingInterval: ReturnType<typeof setInterval> | undefined;
-  let lastKnownSong = '';
 
-  const checkNowPlaying = async () => {
-    try {
-      const response = await fetch(`${SPOTIFY_API_BASE}/now-playing`, {
-        cache: 'no-cache'
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        
-        const badge = document.getElementById('now-playing-badge');
-        const text = document.getElementById('now-playing-text');
-        const indicator = document.getElementById('playing-indicator');
-        const icon = document.getElementById('badge-icon');
-        
-        if (data.isPlaying && data.name && badge && text) {
-          const songName = data.name;
-          
-          // Only update DOM if song changed for better performance
-          if (songName !== lastKnownSong) {
-            lastKnownSong = songName;
-            
-            // Update icon to show currently playing
-            if (icon) {
-              icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />';
-            }
-            
-            // Show pulse animation for currently playing
-            if (indicator) {
-              indicator.classList.remove('hidden');
-            }
-            
-            // Check if text is too long (more than 20 characters)
-            if (songName.length > 20) {
-              // Duplicate text for seamless scrolling
-              text.textContent = songName + ' • ' + songName + ' • ';
-              text.classList.add('scrolling-text');
-            } else {
-              text.textContent = songName;
-              text.classList.remove('scrolling-text');
-            }
-            
-            badge.classList.remove('hidden');
-          }
-        } else {
-          // Try to get last played song
-          await checkLastPlayed();
-        }
-      }
-    } catch (error) {
-      console.log('Spotify server not available');
-      await checkLastPlayed();
+  function updateListeningBadge(songName: string, isPlaying: boolean, timeAgo = '') {
+    const badge = document.getElementById('now-playing-badge');
+    const text = document.getElementById('now-playing-text');
+    const time = document.getElementById('now-playing-time');
+    const indicator = document.getElementById('playing-indicator');
+    const icon = document.getElementById('badge-icon');
+    if (!badge || !text || !time || !indicator || !icon) return;
+    const key = JSON.stringify([songName, isPlaying, timeAgo]);
+    if (badge.dataset.track !== key) {
+      badge.dataset.track = key;
+      indicator.hidden = !isPlaying;
+      time.hidden = !timeAgo;
+      time.textContent = timeAgo ? `(${timeAgo})` : '';
+      const label = isPlaying ? `Now playing: ${songName}` : `Last played: ${songName}${timeAgo ? `, ${timeAgo}` : ''}`;
+      badge.setAttribute('aria-label', label);
+      badge.title = label;
+      icon.innerHTML = isPlaying
+        ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />'
+        : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />';
+      text.textContent = songName.length > 20 ? `${songName} • ${songName} • ` : songName;
+      text.classList.toggle('scrolling-text', songName.length > 20);
     }
-  };
+    badge.classList.remove('hidden');
+  }
 
   const checkLastPlayed = async () => {
     try {
-      const response = await fetch(`${SPOTIFY_API_BASE}/last-played`, {
-        cache: 'no-cache'
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        
-        const badge = document.getElementById('now-playing-badge');
-        const text = document.getElementById('now-playing-text');
-        const indicator = document.getElementById('playing-indicator');
-        const icon = document.getElementById('badge-icon');
-        
-        if (data.name && badge && text) {
-          const songName = data.name;
-          
-          // Calculate time ago dynamically
-          const playedDate = new Date(data.playedAt);
-          const now = new Date();
-          const diffMs = now.getTime() - playedDate.getTime();
-          const diffMins = Math.floor(diffMs / 60000);
-          const diffHours = Math.floor(diffMins / 60);
-          
-          let timeAgo = '';
-          if (diffHours > 0) {
-            timeAgo = `${diffHours}h ago`;
-          } else if (diffMins > 0) {
-            timeAgo = `${diffMins}m ago`;
-          } else {
-            timeAgo = 'Just now';
-          }
-          
-          const displayText = `${songName} (${timeAgo})`;
-          
-          // Only update if changed
-          if (displayText !== lastKnownSong) {
-            lastKnownSong = displayText;
-            
-            // Update icon to show last played (clock icon)
-            if (icon) {
-              icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />';
-            }
-            
-            // Hide pulse animation for last played
-            if (indicator) {
-              indicator.classList.add('hidden');
-            }
-            
-            // Check if text is too long
-            if (displayText.length > 20) {
-              text.textContent = displayText + ' • ' + displayText + ' • ';
-              text.classList.add('scrolling-text');
-            } else {
-              text.textContent = displayText;
-              text.classList.remove('scrolling-text');
-            }
-            
-            badge.classList.remove('hidden');
-          }
-        } else if (badge) {
-          badge.classList.add('hidden');
-        }
+      const response = await fetch(`${SPOTIFY_API_BASE}/last-played`, { cache: 'no-cache' });
+      if (!response.ok) throw new Error('Last played unavailable');
+      const data = await response.json();
+      if (!data.name) {
+        document.getElementById('now-playing-badge')?.classList.add('hidden');
+        return;
       }
-    } catch (error) {
-      console.log('Could not fetch last played song');
-      const badge = document.getElementById('now-playing-badge');
-      if (badge) {
-        badge.classList.add('hidden');
+      const playedAt = new Date(data.playedAt).getTime();
+      let timeAgo = '';
+      if (Number.isFinite(playedAt)) {
+        const minutes = Math.max(0, Math.floor((Date.now() - playedAt) / 60000));
+        timeAgo = minutes >= 60 ? `${Math.floor(minutes / 60)}h ago` : minutes > 0 ? `${minutes}m ago` : 'Just now';
       }
+      updateListeningBadge(data.name, false, timeAgo);
+    } catch {
+      document.getElementById('now-playing-badge')?.classList.add('hidden');
     }
   };
 
+  const checkNowPlaying = async () => {
+    try {
+      const response = await fetch(`${SPOTIFY_API_BASE}/now-playing`, { cache: 'no-cache' });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.isPlaying && data.name) {
+          updateListeningBadge(data.name, true);
+          return;
+        }
+      }
+    } catch { /* Keep the last-played fallback available. */ }
+    await checkLastPlayed();
+  };
+
   document.addEventListener('astro:page-load', () => {
-    // Clear any existing interval
-    if (nowPlayingInterval) {
-      clearInterval(nowPlayingInterval);
-    }
-    
-    // Initial check
-    checkNowPlaying();
-    
-    // Refresh the visible badge without sending requests from background tabs.
+    clearInterval(nowPlayingInterval);
+    if (!document.getElementById('now-playing-badge')) return;
+    void checkNowPlaying();
     nowPlayingInterval = setInterval(() => {
       if (!document.hidden) void checkNowPlaying();
     }, 15000);
   });
-
-  // Clean up on page navigation
-  document.addEventListener('astro:before-preparation', () => {
-    if (nowPlayingInterval) {
-      clearInterval(nowPlayingInterval);
-    }
-  });
+  document.addEventListener('astro:before-preparation', () => clearInterval(nowPlayingInterval));
 </script>
 
 <style>
+  .listening-badge { position: absolute; top: 8px; right: 10px; z-index: 10; display: flex; align-items: center; width: max-content; max-width: calc(100% - 20px); min-height: 44px; color: var(--primary); text-decoration: none; }
+  .listening-badge.hidden { display: none; }
+  .listening-badge__surface { display: flex; align-items: center; gap: 6px; max-width: 100%; min-width: 0; height: 32px; padding: 0 12px; border-radius: 999px; background: color-mix(in srgb,var(--primary) 15%,transparent); box-shadow: 0 1px 2px #0001; }
+  .listening-badge:hover .listening-badge__surface { background: color-mix(in srgb,var(--primary) 22%,transparent); }
+  .listening-badge:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; border-radius: 999px; }
+  .listening-badge__indicator { flex: 0 0 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
+  .listening-badge__icon { flex: 0 0 14px; width: 14px; height: 14px; }
+  .listening-badge__song { display: block; flex: 0 1 auto; min-width: 0; max-width: 160px; overflow: hidden; }
+  #now-playing-text { display: block; width: max-content; white-space: nowrap; font-size: 12px; line-height: 16px; font-weight: 600; }
+  .listening-badge__time { flex: none; white-space: nowrap; font-size: 12px; line-height: 16px; font-weight: 500; opacity: .8; }
+  .listening-badge__indicator[hidden],.listening-badge__time[hidden] { display: none; }
+  @media (min-width:640px) {
+    .listening-badge { top: 12px; right: 16px; max-width: calc(100% - 32px); }
+    .listening-badge__surface { height: 40px; gap: 8px; padding: 0 16px; }
+    .listening-badge__icon { flex-basis: 16px; width: 16px; height: 16px; }
+    .listening-badge__song { max-width: 250px; }
+    #now-playing-text,.listening-badge__time { font-size: 14px; line-height: 20px; }
+  }
+  @media (prefers-reduced-motion:reduce) { .scrolling-text,.listening-badge__indicator { animation: none !important; } }
   @media (max-width: 639px) {
     .endurance-panel:has(#now-playing-badge:not(.hidden)) .endurance-copy { padding-top:3.6rem; }
   }

@@ -1,8 +1,9 @@
 ---
+import CloudThemeIcon from './CloudThemeIcon.astro'
 interface Props { sticker?: boolean }
 ---
-<button id="theme-toggle" type="button" class="theme-switch" data-theme-switch role="switch" aria-checked="true" aria-label="Lights" title="Turn the lights off">
-  <span class="theme-switch__plate" aria-hidden="true"><span class="theme-switch__socket"><span class="theme-switch__rocker"><span class="theme-switch__light"></span></span></span></span>
+<button id="theme-toggle" type="button" class="theme-switch" data-theme-switch role="switch" aria-checked="true" aria-label="Light mode" title="Turn the lights off">
+  <CloudThemeIcon />
 </button>
 
 <script is:inline data-astro-rerun>
@@ -50,7 +51,7 @@ interface Props { sticker?: boolean }
 <script>
   // @ts-nocheck
   const THEME_KEY = 'theme'
-  let nextRevealDirection = 'expand'
+  let nextTurnDirection = 'forward'
 
   function getCookieDomain() {
     const host = window.location.hostname
@@ -94,27 +95,17 @@ interface Props { sticker?: boolean }
     }
 
     if (element.classList.contains('theme-transition')) return
-    const rect = sourceEl.getBoundingClientRect()
-    const x = rect.left + rect.width / 2
-    const y = rect.top + rect.height / 2
-    const endRadius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y))
-    element.style.setProperty('--theme-transition-x', `${x}px`)
-    element.style.setProperty('--theme-transition-y', `${y}px`)
-    element.style.setProperty('--theme-transition-radius', `${endRadius}px`)
-    element.dataset.themeReveal = nextRevealDirection
+    element.dataset.themeTurn = nextTurnDirection
     element.classList.add('theme-transition')
     const cleanup = () => {
       element.classList.remove('theme-transition')
-      delete element.dataset.themeReveal
-      element.style.removeProperty('--theme-transition-x')
-      element.style.removeProperty('--theme-transition-y')
-      element.style.removeProperty('--theme-transition-radius')
+      delete element.dataset.themeTurn
     }
     try {
       const transition = document.startViewTransition(() => applyTheme(newTheme))
       transition.finished.then(cleanup, cleanup)
       transition.ready.then(() => {
-        nextRevealDirection = nextRevealDirection === 'expand' ? 'contract' : 'expand'
+        nextTurnDirection = nextTurnDirection === 'forward' ? 'backward' : 'forward'
       }, () => { /* A skipped animation still applies the theme. */ })
     } catch {
       cleanup()
