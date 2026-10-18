@@ -5,17 +5,8 @@ import PageHead from '../components/PageHead.astro';
 
 <Layout>
   <PageHead slot="head" title="Songs" description="Songs you can add to my Spotify playlist." />
-  <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <!-- Back Navigation -->
-    <a
-      href="/spotify"
-      class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6 group"
-    >
-      <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-      </svg>
-      <span>Back to Spotify</span>
-    </a>
+  <div class="songs-page container mx-auto px-4 py-8 max-w-4xl">
+    <div class="song-return-navigation" data-return-navigation aria-hidden="true"></div>
 
     <div class="mb-8 text-center space-y-4">
       <div class="flex justify-center">

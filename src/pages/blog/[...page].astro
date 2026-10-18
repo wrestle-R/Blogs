@@ -26,6 +26,7 @@ const myYears = Object.keys(myPostsByYear).sort((a, b) => parseInt(b) - parseInt
 const collaboratorPosts = page.data.filter((post: any) => !post.data.authors?.includes('russel'))
 const collaboratorPostsByYear = groupPostsByYear(collaboratorPosts)
 const collaboratorYears = Object.keys(collaboratorPostsByYear).sort((a, b) => parseInt(b) - parseInt(a))
+const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songbook']
 ---
 
 <Layout class="max-w-4xl">
@@ -65,7 +66,7 @@ const collaboratorYears = Object.keys(collaboratorPostsByYear).sort((a, b) => pa
       </div>
     </div>
 
-    <div class="p-6">
+    <div class="p-6 post-list-shell">
       <div class="tab-content" data-tab-content="mine" data-active="true">
         {myPosts.length > 0 ? (
           <div class="flex min-h-[calc(100vh-24rem)] flex-col gap-y-8">
@@ -76,7 +77,7 @@ const collaboratorYears = Object.keys(collaboratorPostsByYear).sort((a, b) => pa
                   <ul class="flex flex-col gap-4">
                     {myPostsByYear[year].map((post) => (
                       <li class="transform transition-all hover:scale-[1.01]">
-                        <BlogCard entry={post} />
+                        <BlogCard entry={post} sticker={mobilePostStickers[myPosts.indexOf(post)]} />
                       </li>
                     ))}
                   </ul>
@@ -104,7 +105,7 @@ const collaboratorYears = Object.keys(collaboratorPostsByYear).sort((a, b) => pa
                   <ul class="flex flex-col gap-4">
                     {collaboratorPostsByYear[year].map((post) => (
                       <li class="transform transition-all hover:scale-[1.01]">
-                        <BlogCard entry={post} />
+                        <BlogCard entry={post} sticker={mobilePostStickers[collaboratorPosts.indexOf(post)]} />
                       </li>
                     ))}
                   </ul>

@@ -16,7 +16,10 @@ const apiBase = import.meta.env.PUBLIC_RUNBLOG_API_BASE_URL || 'https://runny.ru
     </div>
     <div class="sticker-inline" data-sticker-inline data-sticker-id="subscribe">
       <button type="submit" class="subscribe-sticker" aria-label="Subscribe to new posts">
-        <img src="/charms/contact-envelope.webp" alt="" width="62" height="54" draggable="false" />
+        <picture>
+          <source media="(max-width: 1199px)" srcset="/charms/newsletter-clip.webp" />
+          <img src="/charms/contact-envelope.webp" alt="" width="62" height="54" draggable="false" />
+        </picture>
         <span class="sticker-link__label" data-subscribe-label>Subscribe</span>
       </button>
     </div>
@@ -71,7 +74,8 @@ const apiBase = import.meta.env.PUBLIC_RUNBLOG_API_BASE_URL || 'https://runny.ru
   input:focus-visible { outline: 2px solid var(--foreground); outline-offset: 3px; }
   .newsletter-status { min-height: 18px; margin: 6px 0 0; font-size: 11px; line-height: 1.4; color: var(--muted-foreground); }
   .subscribe-sticker { display: grid; place-items: center; gap: 0; width: 84px; min-height: 84px; padding: 0; border: 0; background: none; color: var(--foreground); cursor: grab; box-shadow: none; transform: rotate(4deg); transition: transform 180ms ease; }
-  .subscribe-sticker img { width: 62px; height: 54px; object-fit: contain; pointer-events: none; filter: drop-shadow(0 3px 3px #0003); }
+  .subscribe-sticker picture { display: contents; }
+  .subscribe-sticker img { width: 68px; height: 60px; object-fit: contain; pointer-events: none; filter: drop-shadow(1.2px 0 0 #fffdf6) drop-shadow(-1.2px 0 0 #fffdf6) drop-shadow(0 1.2px 0 #fffdf6) drop-shadow(0 -1.2px 0 #fffdf6) drop-shadow(1.2px 1.2px 0 #fffdf6) drop-shadow(-1.2px -1.2px 0 #fffdf6) drop-shadow(0 4px 3px #0003); }
   .subscribe-sticker::before,.subscribe-sticker::after { display: none; }
   .subscribe-sticker:hover { transform: rotate(0) translateY(-2px); box-shadow: none; }
   .subscribe-sticker:active { transform: rotate(0) scale(.96); }
@@ -81,6 +85,9 @@ const apiBase = import.meta.env.PUBLIC_RUNBLOG_API_BASE_URL || 'https://runny.ru
     .newsletter-section { grid-template-columns: 1fr; gap: 16px; padding: 20px; }
     .newsletter-form { gap: 20px; }
     input { font-size: 16px; }
+  }
+  @media(max-width:1199px) {
+    .subscribe-sticker picture, .subscribe-sticker img { width: 72px; height: 72px; }
   }
   @media(prefers-reduced-motion:reduce) { .subscribe-sticker { transition: none; } }
 </style>

@@ -18,6 +18,5 @@ import SocialIcons from './SocialIcons.astro'
   </div>
   <SocialIcons links={SOCIAL_LINKS} />
   </div>
-  {Astro.url.pathname !== '/about' && <span class="mobile-sticker-slot" data-mobile-sticker-slot="about" aria-hidden="true"></span>}
-  {Astro.url.pathname === '/' && <span class="mobile-sticker-slot" data-mobile-sticker-slot="songbook" aria-hidden="true"></span>}
+  {Astro.url.pathname !== '/wallpapers' && <span class="mobile-sticker-slot" data-mobile-sticker-slot="wallpapers" aria-hidden="true"></span>}
 </footer>

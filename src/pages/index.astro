@@ -13,6 +13,7 @@ const sortedPosts = allPosts.sort((a, b) => b.data.date.valueOf() - a.data.date.
 const latestPosts = sortedPosts.slice(0, 5)
 const myBlogs = sortedPosts.filter((post) => post.data.authors?.includes('russel')).slice(0, 5)
 const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('russel')).slice(0, 5)
+const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songbook']
 ---
 
 
@@ -39,7 +40,6 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
   </a>
   
   <div class="endurance-copy flex flex-col space-y-1.5 p-5 sm:p-8">
-    <span class="mobile-sticker-slot mobile-sticker-slot--float mobile-music-slot" data-mobile-sticker-slot="music" aria-hidden="true"></span>
     <div class="endurance-definition">
     <h3 class="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-3xl font-bold leading-none text-transparent sm:text-4xl">en·dur·ance</h3>
     <p class="text-muted-foreground text-sm">
@@ -272,13 +272,13 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
         </div>
       </div>
 
-      <div class="p-6">
+      <div class="p-6 post-list-shell">
         <div class="tab-content" data-tab-content="mine" data-active="true">
           {myBlogs.length > 0 ? (
             <ul class="flex flex-col gap-y-4">
-              {myBlogs.map((post) => (
+              {myBlogs.map((post, index) => (
                 <li class="transform transition-all hover:scale-[1.01]">
-                  <BlogCard entry={post} />
+                  <BlogCard entry={post} sticker={mobilePostStickers[index]} />
                 </li>
               ))}
             </ul>
@@ -295,9 +295,9 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
         <div class="tab-content hidden" data-tab-content="collaborators" data-active="false">
           {friendsBlogs.length > 0 ? (
             <ul class="flex flex-col gap-y-4">
-              {friendsBlogs.map((post) => (
+              {friendsBlogs.map((post, index) => (
                 <li class="transform transition-all hover:scale-[1.01]">
-                  <BlogCard entry={post} />
+                  <BlogCard entry={post} sticker={mobilePostStickers[index]} />
                 </li>
               ))}
             </ul>
