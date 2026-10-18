@@ -3,32 +3,49 @@ import ThemeToggle from './ThemeToggle.astro'
 import HeadphonesSticker from './HeadphonesSticker.astro'
 import '@/styles/sticker-navigation.css'
 
+/*
+ * TODO(blog): finish the designer's visual review of the sticker navigation.
+ * [x] Replace the top bar and Explore menu with loose, movable object stickers.
+ * [x] Keep desktop stickers large in the gutters; put fewer phone stickers in content gaps.
+ * [x] Keep Portfolio fixed top-left and the small Home sticker beside the content title.
+ * [x] Put Minecraft near the top and larger playable headphones on the left.
+ * [x] Preserve the original headphone song; let the Music caption open Spotify.
+ * [x] Use the simpler green Constellation planet and link to russels-constellation.vercel.app.
+ * [x] Restore All posts and Wallpapers; show Add a song on Home and Spotify.
+ * [x] Remove Movies, Authors, Topics, Writing, compass and Collaborate navigation links.
+ * [x] Keep Collaborators, existing posts and email links.
+ * [x] Keep newsletter compact with breathing room, a movable Subscribe envelope and Reset icon.
+ * [x] Use a plain up arrow and a fixed top-right tactile switch with the original circular reveal.
+ * [x] Rebuild About from real projects and the author's writing; use theme-matched project images.
+ * [x] Remove the Spotify card background while preserving playback and preview fallbacks.
+ * [ ] Get final visual approval for phone spacing, footer controls and desktop sticker placement.
+ */
+
 const local = ['localhost', '127.0.0.1'].includes(Astro.url.hostname)
 const items = [
   { id: 'home', order: 1, label: Astro.url.pathname === '/' ? 'Home' : 'Back to blogs', href: '/', image: 'home' },
   { id: 'music', order: 3, label: 'Music', href: '/spotify', image: 'headphones' },
-  { id: 'portfolio', order: 4, label: 'Back to portfolio', href: local ? 'http://localhost:5173' : 'https://russeldanielpaul.is-a.dev', image: 'dell-laptop' },
   { id: 'runny', order: 5, label: 'Runny', href: 'https://runny.russel.is-a.dev', image: 'running-shoe' },
   { id: 'minecraft', order: 7, label: 'Minecraft', href: local ? 'http://localhost:5173/minecraft' : 'https://minecraft.russel.is-a.dev', image: 'minecraft-wrestle' },
   { id: 'about', order: 6, label: 'About me', href: '/about', image: 'football' },
 ]
 // Stable placement keys keep the remaining stickers in their own spaces.
 const discoveries = [
-  { id: 'constellation', label: 'Constellation', href: 'https://russels-constellation.vercel.app/', image: 'spotify-planet' },
-  ...(Astro.url.pathname === '/' ? [
-    { id: 'guitar', label: 'Songbook', href: '/songs', image: 'guitar' },
-    { id: 'football', label: 'Football stories', href: '/blog/barclays-fantasy-league', image: 'football' },
-    { id: 'hills', label: 'Into the hills', href: '/blog/munnar-trip', image: 'hill-station' },
-    { id: 'arch', label: 'I use Arch, btw', href: '/blog/linux-experience', image: 'arch-linux-mark' },
-  ] : []),
+  { id: 'songbook', label: 'Add a song', href: '/songs', image: 'guitar' },
+  { id: 'posts', label: 'All posts', href: '/blog', image: 'blog-notebook' },
+  { id: 'constellation', label: 'Constellation', href: 'https://russels-constellation.vercel.app/', image: 'spotify-planet-natural' },
+  { id: 'wallpapers', label: 'Wallpapers', href: '/wallpapers', image: 'hill-station' },
+  { id: 'arch', label: 'I use Arch, btw', href: '/blog/linux-experience', image: 'arch-linux-mark' },
 ]
+
 const current = (href: string) => href === '/' ? Astro.url.pathname === '/' : Astro.url.pathname === href || Astro.url.pathname.startsWith(href + '/')
 ---
-<nav class="sticker-navigation blog-sticker-navigation" data-sticker-navigation="blog" data-sticker-count={6 + discoveries.length} aria-label="Explore Russel’s blog">
+<nav class="sticker-navigation blog-sticker-navigation" data-sticker-navigation="blog" aria-description="Drag stickers to move them. On a phone, press and hold first. With a keyboard, use Alt and arrow keys." data-sticker-count={6 + discoveries.length} aria-label="Explore Russel’s blog">
+  <a class="portfolio-return" href={local ? 'http://localhost:5173' : 'https://russeldanielpaul.is-a.dev'} aria-label="Back to portfolio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Portfolio</span></a>
   <div class="sticker-navigation__list" data-sticker-list id="blog-sticker-links">
     {items.map((item) => (
       <div class="sticker-navigation__item" data-sticker-id={item.id} data-mobile-hidden="true" data-sticker-order={item.order} data-sticker-side={item.order < 5 ? 'left' : 'right'} style={`--sticker-row:${(item.order - 1) % 4};--sticker-angle:${[-5,6,-7,4,5,-5,3][item.order - 1]}deg`}>
-        {item.id === 'music' ? <HeadphonesSticker /> : <a class="sticker-link" href={item.href} aria-current={current(item.href) ? 'page' : undefined}>
+        {item.id === 'music' ? <HeadphonesSticker /> : <a class="sticker-link" href={item.href} aria-label={item.label} aria-current={current(item.href) ? 'page' : undefined}>
           <img src={`/charms/${item.image}.${item.id === 'home' ? 'svg' : 'webp'}`} alt="" width="94" height="80" draggable="false" />
           <span class="sticker-link__label">{item.label}</span>
         </a>}
@@ -47,7 +64,7 @@ const current = (href: string) => href === '/' ? Astro.url.pathname === '/' : As
     ))}
   </div>
   <button type="button" class="back-to-top" data-back-to-top aria-label="Back to top" title="Back to top" hidden>↑</button>
-  <button type="button" class="sticker-navigation__reset" data-sticker-reset>↺ Reset sticker positions</button>
+  <div class="sticker-navigation__item sticker-navigation__reset-item" data-sticker-id="reset" data-sticker-fixed hidden><button type="button" class="reset-sticker" data-sticker-reset aria-label="Reset sticker positions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 10a8 8 0 1 1 1 8M4 10V4m0 6h6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Reset</span></button></div>
 </nav>
 <script>
   import { initStickerNavigation } from '@/lib/sticker-navigation'

@@ -7,7 +7,6 @@ import { SITE } from '@/consts'
 import { cn } from '@/lib/utils'
 
 import StickerNavigation from '@/components/StickerNavigation.astro'
-import StickerDirectory from '@/components/StickerDirectory.astro'
 interface Props {
   class?: string
 }
@@ -26,8 +25,7 @@ const { class: className } = Astro.props
   </Head>
   <body class="relative flex h-fit min-h-screen flex-col gap-y-6 font-sans">
     <StickerNavigation />
-    <div class="sticker-spot" data-sticker-spot="intro" aria-hidden="true"></div>
-    <div class="sticky top-0 z-40 bg-background/95 backdrop-blur-sm">
+    <div class="blog-reading-tools sticky top-0 z-40 bg-background/95 backdrop-blur-sm">
       <slot name="subposts-navigation" />
       <slot name="table-of-contents" />
     </div>
@@ -36,9 +34,6 @@ const { class: className } = Astro.props
     >
       <slot />
     </main>
-    {!['', '/about', '/spotify'].includes(Astro.url.pathname.replace(/\/$/, '')) && <div class="sticker-spot" data-sticker-spot="middle" aria-hidden="true"></div>}
-    <div class="sticker-spot" data-sticker-spot="outro" aria-hidden="true"></div>
-    <StickerDirectory />
     <Footer />
     <script is:inline>
       (() => {

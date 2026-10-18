@@ -40,6 +40,7 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
   
   <div class="endurance-copy flex flex-col space-y-1.5 p-5 sm:p-8">
     <span class="mobile-sticker-slot mobile-sticker-slot--float mobile-music-slot" data-mobile-sticker-slot="music" aria-hidden="true"></span>
+    <div class="endurance-definition">
     <h3 class="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-3xl font-bold leading-none text-transparent sm:text-4xl">en·dur·ance</h3>
     <p class="text-muted-foreground text-sm">
       /ɛnˈdjʊərəns/ • <span class="font-medium">noun</span>
@@ -47,6 +48,7 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
     <p class="text-muted-foreground">
       the ability to keep going when you're tired and would rather stop.
     </p>
+    </div>
   </div>
 </section>
 
@@ -233,14 +235,13 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
   }
 </style>
 
-  <div class="sticker-spot" data-sticker-spot="middle" aria-hidden="true"></div>
   <div id="guitar"><VirtualGuitar /></div>
 
 
   <section class="flex flex-col gap-y-6">
     <div class="flex items-center justify-between">
       <h2 class="text-3xl font-bold">Latest Posts</h2>
-      <span class="mobile-sticker-slot" data-mobile-sticker-slot="about" aria-hidden="true"></span>
+      <span class="mobile-sticker-slot" data-mobile-sticker-slot="posts" aria-hidden="true"></span>
     </div>
 
     <div class="rounded-lg border bg-card" data-tabs-container>
@@ -314,7 +315,6 @@ const friendsBlogs = sortedPosts.filter((post) => !post.data.authors?.includes('
     </div>
   </section>
 
-  <div class="sticker-spot sticker-spot--interests" data-sticker-spot="interests" aria-hidden="true"></div>
   <Newsletter variant="default" position="bottom" />
 
 </Layout>
