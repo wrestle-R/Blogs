@@ -14,6 +14,7 @@ FILES = (
     "references/voice.md",
     "references/examples.md",
     "references/sources.md",
+    "references/commits.md",
 )
 
 

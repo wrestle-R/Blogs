@@ -98,8 +98,11 @@ Swearing is lighter by the owner's choice. The archive's strongest insults and c
 | Caption | Brief observation, undercut or wordplay | What is actually depicted |
 | Newsletter or empty state | Familiar invitation, a little character | What the reader will receive or can do |
 | Button, error or recovery step | Familiar plain language; restrained supporting joke if useful | The action, result and recovery instruction |
+| Git commit subject | Brief ordinary wording, often lowercase; sometimes relief, lingo or a small joke | The actual changed thing and any claims about checks |
 
 Raw does not require making every surface equally long or equally jokey. It means retaining the speaker's grammar and attitude inside the needs of that surface. Keeping action text clear is a proposed usability default, not an owner-approved rule for every website.
+
+Commit names have their own compact register. The owner confirmed subjects such as `made a decent readme`, `new blog boyss`, `auth is working finallyyy` and `last commit i promise` as his own. See [the commit guide](commits.md) for the sources and how to mix plain messages with a little more character. Do not carry a long blog sentence into a commit merely because both use the same voice.
 
 ## Failure modes
 

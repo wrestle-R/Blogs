@@ -40,3 +40,11 @@ Ten published posts are listed above. The full inventory has these ten posts by 
 - Public source anecdotes describe past posts, not a verified current biography or a source of new technical guidance.
 
 The notes-app replacement in `examples.md` was written directly by the owner for this skill's calibration on 2026-10-21. Other examples are identified as published excerpts, rejected generated text or an unapproved generated status demonstration. The owner's wording is stronger evidence than generated attempts. Voice fidelity remains subject to feedback; structural validation does not measure it.
+
+## Commit evidence added in v0.2.0
+
+On 2026-10-21, the review also retrieved 1,677 unique public commit records associated with `wrestle-R`, across 53 owned non-fork repositories. This is public default-branch history returned by the account author filter, not every contribution or proof of who composed each message.
+
+The owner individually confirmed four historical subjects as his own writing: `made a decent readme`, `new blog boyss`, `auth is working finallyyy` and `last commit i promise`. Their exact commit links and dates are in [the commit guide](commits.md). He also directly supplied `made the readme clearer` and selected a mix of plain shorter subjects and more lingo/humour.
+
+Generated messages known from the skill's creation workflow are excluded from the confirmed human examples. Other history remains unclassified; a prefix, typo, timestamp or Git author alone cannot certify human or AI wording. The full research corpus and custom instructions remain outside this shared bundle.

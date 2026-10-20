@@ -1,4 +1,4 @@
 interface:
   display_name: "Russelore"
-  short_description: "Russel's raw voice, dry asides and actual personality"
-  default_prompt: "Use $russelore to write this in my raw conversational voice, keeping the lingo and going lighter on swearing."
+  short_description: "Russel's voice for replies, websites and commit names"
+  default_prompt: "Use $russelore for my voice and short casual commit names, keeping the lingo and going lighter on swearing."
