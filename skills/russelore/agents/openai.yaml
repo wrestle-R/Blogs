@@ -1,0 +1,4 @@
+interface:
+  display_name: "Russelore"
+  short_description: "Russel's raw voice, dry asides and actual personality"
+  default_prompt: "Use $russelore to write this in my raw conversational voice, keeping the lingo and going lighter on swearing."
