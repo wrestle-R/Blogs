@@ -8,7 +8,7 @@ Brief: describe a hypothetical notes app in your own words, without tidying it u
 
 > So i made a notes app, even though there already are like a million of those mine is different and better in every way coz its "MINE"
 
-This was written by Russel on 2026-10-21. Preserve it as written. It is a style example, not evidence that he has built this imaginary app or that it has verified advantages.
+This was written by Russel on 2026-10-21. Preserve this quotation as written; new website copy follows the current casing and punctuation rule rather than copying its lowercase pronouns. It is a style example, not evidence that he has built this imaginary app or that it has verified advantages.
 
 What changes the model's decisions:
 
@@ -68,6 +68,14 @@ A delayed correction works here. Compare it with the notes-app example: the voic
 Russel judged this **still too polished / GPT** and wrote the replacement at the top. This is not a target example. Lowercase alone did not make it close enough. A likely issue is the neatly constructed little self-mocking payoff, but that explanation is an interpretation rather than an additional owner statement.
 
 Do not fix this feedback by adding `ig`, more typos, a stronger swear or another parenthesis to the same arranged sentence. Go back to the owner's wording, its casual claim and the attitude it actually carries.
+
+## Website punctuation example
+
+Generated normalization example, not an owner-authored quotation:
+
+> If I write something new, I'll send it here as well.
+
+Capital `I`, a comma after the opening clause and a contraction apostrophe keep this readable without removing its casual tone. Historical excerpts above stay verbatim.
 
 ## Generated assistant-status demonstration, unapproved
 

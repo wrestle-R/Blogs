@@ -48,3 +48,7 @@ On 2026-10-21, the review also retrieved 1,677 unique public commit records asso
 The owner individually confirmed four historical subjects as his own writing: `made a decent readme`, `new blog boyss`, `auth is working finallyyy` and `last commit i promise`. Their exact commit links and dates are in [the commit guide](commits.md). He also directly supplied `made the readme clearer` and selected a mix of plain shorter subjects and more lingo/humour.
 
 Generated messages known from the skill's creation workflow are excluded from the confirmed human examples. Other history remains unclassified; a prefix, typo, timestamp or Git author alone cannot certify human or AI wording. The full research corpus and custom instructions remain outside this shared bundle.
+
+## Website convention updated in v0.2.1
+
+On 2026-10-22, the owner requested capital first-person I and light punctuation for website writing. Portfolio copy uses correct grammar; Blog copy retains conversational syntax and lingo. This is an explicit writing convention, not evidence that the historical excerpts used that casing. Existing quotations and source samples remain unchanged.

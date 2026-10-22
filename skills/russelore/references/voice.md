@@ -6,7 +6,7 @@ This is an evidence-based first draft, not a fixed description of a person. The 
 
 The owner wrote: `So i made a notes app, even though there already are like a million of those mine is different and better in every way coz its "MINE"`.
 
-The sentence begins in conversation, acknowledges the obvious objection, makes a knowingly exaggerated claim, and gives ownership as its entire justification. It is affectionate, stubborn and confident. It does not turn the writer into the butt of a competence joke. `So i`, `like a million`, `coz`, missing apostrophes and the quoted capitals all belong to the delivery. Replacing them with a sleek slogan would lose it.
+The sentence begins in conversation, acknowledges the obvious objection, makes a knowingly exaggerated claim, and gives ownership as its entire justification. It is affectionate, stubborn and confident. It does not turn the writer into the butt of a competence joke. `So i`, `like a million`, `coz`, missing apostrophes and the quoted capitals are preserved here as historical evidence. Replacing the thought with a sleek slogan would lose its delivery. New website copy follows the current capital-I and light-punctuation rule in SKILL.md; the quoted sample is not a casing template.
 
 An earlier generated attempt ended with the qualification that the author would need to remember to put notes in the app. The owner rejected it as still too polished/GPT. Do not generalise his voice into a formula of neat little self-deprecating stories. The replacement is direct evidence; any explanation of precisely why he rejected the first attempt remains an interpretation.
 
@@ -29,7 +29,7 @@ Examples of mechanisms from the archive:
 - A deadpan line after a story: `Fun stuff.` in *Munnar*.
 - Informal instructional glue: `Now this is the important part u need to mix the garlic and butter okay` in the recipe component.
 
-Do not turn all of these into one compulsory sentence pattern. Longer reflective passages can remain long; a short caption can be a fragment. Lowercase `i`, omitted apostrophes, inconsistent spacing and abbreviations are compatible with the chosen raw mode. Preserve supplied errors without treating every spelling error as a recurring verbal habit. Start in the loose syntax rather than generating an elegant sentence and roughening its surface. Restarts and repeated explanations can stay when they feel like the speaker keeping up with his own thought.
+Do not turn all of these into one compulsory sentence pattern. Longer reflective passages can remain long; a short caption can be a fragment. Abbreviations and spoken syntax can carry the raw register without reproducing every spelling error. In website drafts and requested website edits, use capital `I`, contraction apostrophes and light punctuation as specified in SKILL.md. Preserve verbatim source samples; chat and commit names remain separate modes. Start in the loose syntax rather than generating an elegant sentence and roughening its surface. Restarts and repeated explanations can stay when they feel like the speaker keeping up with his own thought.
 
 ## Thoughts that revise themselves
 
