@@ -3,7 +3,7 @@
     <img src="/charms/headphones.webp" alt="" width="94" height="80" draggable="false" />
     <span class="headphone-sticker__indicator" aria-hidden="true"><span class="headphone-sticker__symbol"></span></span>
   </button>
-  <a class="headphone-sticker__destination" href="/spotify" aria-current={Astro.url.pathname.replace(/\/$/, '') === '/spotify' ? 'page' : undefined} title="Open my Spotify feed"><span class="sticker-link__label">Music</span></a>
+  <a class="headphone-sticker__destination" href="/spotify" aria-current={Astro.url.pathname.replace(/\/$/, '') === '/spotify' ? 'page' : undefined} title="Open my Spotify feed" aria-label="Open my Spotify feed"><svg class="headphone-sticker__feed-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 12v7h14v-7M10 5h9v9M19 5 9 15" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sticker-link__label">Music</span></a>
   <audio data-headphone-audio preload="none" src="/unsweetened_lemonade-after-14s.mp3"></audio>
   <span class="sr-only" id="headphone-status" role="status" data-headphone-status></span>
 </div>

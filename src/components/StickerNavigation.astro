@@ -59,7 +59,7 @@ const current = (href: string) => href === '/' ? Astro.url.pathname === '/' : As
     </div>
     {discoveries.map((item, index) => (
       <div class="sticker-navigation__item" data-sticker-id={item.id} data-mobile-hidden="true" data-sticker-order={index + 9} style={`--sticker-angle:${[-9,8,-11,6,-7,10][index]}deg`}>
-        <a class="sticker-link" href={item.href}>
+        <a class="sticker-link" href={item.href} aria-label={item.label} title={item.label}>
           <img src={`/charms/${item.image}.${item.id === 'arch' ? 'svg' : 'webp'}`} alt="" width="94" height="80" draggable="false" loading="lazy" />
           <span class="sticker-link__label">{item.label}</span>
         </a>

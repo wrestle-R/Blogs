@@ -141,7 +141,10 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
   }
   @media (prefers-reduced-motion:reduce) { .scrolling-text,.listening-badge__indicator { animation: none !important; } }
   @media (max-width: 639px) {
-    .endurance-panel:has(#now-playing-badge:not(.hidden)) .endurance-copy { padding-top:3.6rem; }
+    .endurance-panel { display: flex; flex-direction: column; }
+    .endurance-copy { order: 0; padding: 20px; }
+    .listening-badge { order: 1; position: static; align-self: flex-start; margin: -6px 20px 14px; max-width: calc(100% - 40px); }
+    #guitar { display: none; }
   }
   @media (max-width: 1199px) {
     .endurance-copy { display: flow-root; }
