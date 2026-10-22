@@ -1,23 +1,30 @@
 ---
+import { Icon } from 'astro-icon/components'
 import '@/styles/footer.css'
+
 const footerLinks = [
-  { label: 'Email', href: 'mailto:russeldanielpaul@gmail.com' },
-  { label: 'GitHub', href: 'https://github.com/wrestle-R' },
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/russel-daniel-970b8a303' },
+  { label: 'GitHub', href: 'https://github.com/wrestle-R', icon: 'lucide:github' },
+  { label: 'LinkedIn', href: 'https://linkedin.com/in/russel-daniel-970b8a303', icon: 'lucide:linkedin' },
+  { label: 'Email', href: 'mailto:russeldanielpaul@gmail.com', icon: 'lucide:mail' },
 ]
 ---
 
 <footer class="site-footer blog-footer" data-home-footer={Astro.url.pathname === '/' ? '' : undefined}>
-  <div class="site-footer-panel">
-    <div class="site-footer-signature">
-      <p class="site-footer-copyright">© Running out of Excuses</p>
-      <p class="site-footer-name"><span class="site-footer-heart">♥</span> Russel</p>
+  <div class="site-footer-frame">
+    {Astro.url.pathname !== '/wallpapers' && <span class="mobile-sticker-slot site-footer-wallpapers" data-mobile-sticker-slot="wallpapers" aria-hidden="true"></span>}
+    <div class="site-footer-panel">
+      <p class="site-footer-copyright"><span class="site-footer-copyright-symbol">©</span><span>Running out of Excuses</span></p>
+      <nav class="site-footer-connect" aria-label="Connect">
+        <span class="site-footer-connect-label" aria-hidden="true">Connect</span>
+        <div class="site-footer-links">
+          {footerLinks.map(({ label, href, icon }) => (
+            <a href={href} title={label} target={href.startsWith('https:') ? '_blank' : undefined} rel={href.startsWith('https:') ? 'noopener noreferrer' : undefined}>
+              <Icon name={icon} aria-hidden="true" />
+              <span class="site-footer-link-label">{label}</span>
+            </a>
+          ))}
+        </div>
+      </nav>
     </div>
-    <nav class="site-footer-links" aria-label="Social links">
-      {footerLinks.map(({ label, href }) => (
-        <a href={href} target={href.startsWith('https:') ? '_blank' : undefined} rel={href.startsWith('https:') ? 'noopener noreferrer' : undefined}>{label}</a>
-      ))}
-    </nav>
-    {Astro.url.pathname !== '/wallpapers' && <span class="mobile-sticker-slot" data-mobile-sticker-slot="wallpapers" aria-hidden="true"></span>}
   </div>
 </footer>
