@@ -1,4 +1,5 @@
 ---
+import '@/styles/footer.css'
 const footerLinks = [
   { label: 'Email', href: 'mailto:russeldanielpaul@gmail.com' },
   { label: 'GitHub', href: 'https://github.com/wrestle-R' },
@@ -6,16 +7,17 @@ const footerLinks = [
 ]
 ---
 
-<footer class="blog-footer" data-home-footer={Astro.url.pathname === '/' ? '' : undefined}>
-  <div class="blog-footer__panel">
-    <div class="blog-footer__row">
-      <p class="footer-copyright">© Running out of Excuses | <span class="blog-footer__heart">♥</span> Russel</p>
-      <nav class="blog-footer__links" aria-label="Social links">
-        {footerLinks.map(({ label, href }) => (
-          <a href={href} target={href.startsWith('https:') ? '_blank' : undefined} rel={href.startsWith('https:') ? 'noopener noreferrer' : undefined}>{label}</a>
-        ))}
-        {Astro.url.pathname !== '/wallpapers' && <span class="mobile-sticker-slot" data-mobile-sticker-slot="wallpapers" aria-hidden="true"></span>}
-      </nav>
+<footer class="site-footer blog-footer" data-home-footer={Astro.url.pathname === '/' ? '' : undefined}>
+  <div class="site-footer-panel">
+    <div class="site-footer-signature">
+      <p class="site-footer-copyright">© Running out of Excuses</p>
+      <p class="site-footer-name"><span class="site-footer-heart">♥</span> Russel</p>
     </div>
+    <nav class="site-footer-links" aria-label="Social links">
+      {footerLinks.map(({ label, href }) => (
+        <a href={href} target={href.startsWith('https:') ? '_blank' : undefined} rel={href.startsWith('https:') ? 'noopener noreferrer' : undefined}>{label}</a>
+      ))}
+    </nav>
+    {Astro.url.pathname !== '/wallpapers' && <span class="mobile-sticker-slot" data-mobile-sticker-slot="wallpapers" aria-hidden="true"></span>}
   </div>
 </footer>
