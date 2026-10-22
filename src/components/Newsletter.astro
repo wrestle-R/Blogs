@@ -1,6 +1,6 @@
 ---
 interface Props { title?: string; description?: string; variant?: 'default' | 'minimal' | 'card'; position?: 'top' | 'bottom' | 'inline' }
-const { title = 'New posts by email', description = 'If I write something new, I can send you an email.' } = Astro.props
+const { title = 'New posts by email', description = 'if i write something new ill send it here as well' } = Astro.props
 const apiBase = import.meta.env.PUBLIC_RUNBLOG_API_BASE_URL || 'https://runny.russel.is-a.dev'
 ---
 <section class="newsletter-section" aria-labelledby="newsletter-heading" data-newsletter-api-base={apiBase}>
