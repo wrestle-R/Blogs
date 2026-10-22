@@ -1021,19 +1021,19 @@ import PageHead from '../components/PageHead.astro';
   }
 
   .view-toggle[data-active="true"] {
-    background: oklch(0.995 0 0);
-    color: oklch(0.2 0 0);
-    box-shadow: 0 2px 8px 0 oklch(0.9 0 0);
+    background: var(--card);
+    color: var(--foreground);
+    box-shadow: var(--sk-paper-shadow);
     font-weight: 600;
     transition: background 0.2s, color 0.2s;
   }
   .view-toggle[data-active="false"] {
     background: transparent;
-    color: oklch(0.5 0 0);
+    color: var(--muted-foreground);
     transition: color 0.2s;
   }
   .view-toggle[data-active="false"]:hover {
-    color: oklch(0.2 0 0);
+    color: var(--foreground);
   }
   .view-toggle {
     border-radius: 0.5rem;
@@ -1079,8 +1079,8 @@ import PageHead from '../components/PageHead.astro';
     background: transparent;
   }
 
-  .audio-seek-slider::-webkit-slider-track {
-    background: hsl(var(--muted));
+  .audio-seek-slider::-webkit-slider-runnable-track {
+    background: var(--muted);
     border-radius: 9999px;
     height: 6px;
   }
@@ -1091,7 +1091,7 @@ import PageHead from '../components/PageHead.astro';
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: hsl(var(--primary));
+    background: var(--primary);
     cursor: pointer;
     margin-top: -4px;
     transition: transform 0.2s;
@@ -1102,7 +1102,7 @@ import PageHead from '../components/PageHead.astro';
   }
 
   .audio-seek-slider::-moz-range-track {
-    background: hsl(var(--muted));
+    background: var(--muted);
     border-radius: 9999px;
     height: 6px;
   }
@@ -1111,7 +1111,7 @@ import PageHead from '../components/PageHead.astro';
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: hsl(var(--primary));
+    background: var(--primary);
     cursor: pointer;
     border: none;
     transition: transform 0.2s;

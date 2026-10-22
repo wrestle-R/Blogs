@@ -1,6 +1,7 @@
 ---
 import '@/styles/global.css'
 import '@/styles/typography.css'
+import '@/styles/tactile-theme.css'
 import Footer from '@/components/Footer.astro'
 import Head from '@/components/Head.astro'
 import { SITE } from '@/consts'
@@ -24,12 +25,15 @@ const { class: className } = Astro.props
     <slot name="head" />
   </Head>
   <body class="relative flex h-fit min-h-screen flex-col gap-y-6 font-sans">
+    <a class="skip-to-content" href="#main-content">Skip to content</a>
     <StickerNavigation />
     <div class="blog-reading-tools sticky top-0 z-40 bg-background/95 backdrop-blur-sm">
       <slot name="subposts-navigation" />
       <slot name="table-of-contents" />
     </div>
     <main
+      id="main-content"
+      tabindex="-1"
       class={cn('w-full mx-auto flex grow flex-col gap-y-6 px-4', className)}
     >
       <slot />

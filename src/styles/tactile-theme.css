@@ -1,0 +1,169 @@
+/* Host-owned paper materials, following the Skeuomorphism UI face/base/well
+   language. Existing stickers and the cloud transition keep their own styles. */
+:root {
+  color-scheme: light;
+  --background: #f4f1e9;
+  --foreground: #302f29;
+  --primary: #435c49;
+  --primary-foreground: #fffdf7;
+  --muted: #e9e5da;
+  --muted-foreground: #68665b;
+  --border: #d4cfc0;
+  --ring: #57715a;
+  --card: #faf8f1;
+  --card-foreground: var(--foreground);
+  --secondary: #ece9df;
+  --secondary-foreground: var(--foreground);
+  --accent: #e3e9dc;
+  --accent-foreground: #344d39;
+  --popover: var(--card);
+  --popover-foreground: var(--foreground);
+  --input: var(--border);
+  --destructive: #b53b37;
+  --destructive-foreground: #fff;
+  --sk-surface: var(--card);
+  --sk-surface-raised: color-mix(in srgb, var(--card) 60%, white);
+  --sk-well: color-mix(in srgb, var(--muted) 50%, var(--background));
+  --sk-edge: var(--border);
+  --sk-highlight: #ffffffc7;
+  --sk-base: #e4dfd1;
+  --sk-shadow: #3b322312;
+  --sk-ring: var(--ring);
+  --sk-paper-shadow: inset 0 1px 0 var(--sk-highlight),
+    0 2px 0 var(--sk-base), 0 3px 0 var(--sk-edge),
+    0 8px 16px -8px var(--sk-shadow);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --background: #20221f;
+  --foreground: #eeeade;
+  --primary: #b9cba8;
+  --primary-foreground: #232d22;
+  --muted: #2b2e28;
+  --muted-foreground: #b3b4a6;
+  --border: #44483c;
+  --ring: #b9cba8;
+  --destructive: #f08c84;
+  --destructive-foreground: #241817;
+  --card: #292c26;
+  --secondary: #32362e;
+  --accent: #394634;
+  --accent-foreground: #d7e8c9;
+  --sk-surface-raised: #30332c;
+  --sk-highlight: #ffffff12;
+  --sk-base: #191c17;
+  --sk-shadow: #00000055;
+}
+
+@theme inline {
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-input: var(--input);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--primary) 25%, var(--background));
+  color: var(--foreground);
+}
+
+:root :focus-visible {
+  outline: 2px solid var(--sk-ring);
+  outline-offset: 4px;
+}
+
+.skip-to-content {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 12px 18px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--foreground);
+  transform: translateY(-160%);
+}
+.skip-to-content:focus { transform: none; }
+
+:root .sk-paper-card,
+:root .endurance-panel,
+:root .newsletter-section {
+  border-color: var(--sk-edge);
+  background: linear-gradient(145deg, var(--sk-surface-raised), var(--sk-surface));
+  box-shadow: var(--sk-paper-shadow);
+}
+.sk-paper-card {
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.sk-paper-card:has(a:hover),
+.sk-paper-card:focus-within {
+  border-color: color-mix(in srgb, var(--primary) 50%, var(--border));
+}
+.sk-paper-card img { border-radius: 5px; }
+
+/* The list is a recessed tray; individual posts are the paper above it. */
+.post-list-tray {
+  border-color: var(--sk-edge);
+  background: var(--sk-well);
+  box-shadow: inset 0 1px 3px var(--sk-shadow);
+}
+
+:root input:where([type='email'], [type='text'], [type='search'], [type='url']),
+:root textarea,
+:root select {
+  background: var(--sk-well);
+  color: var(--foreground);
+  border-color: var(--sk-edge);
+  box-shadow: inset 0 2px 4px var(--sk-shadow), 0 1px 0 var(--sk-highlight);
+}
+:root input::placeholder,
+:root textarea::placeholder { color: var(--muted-foreground); opacity: 1; }
+
+:root [data-slot='button']:where([data-variant='outline'], [data-variant='muted']) {
+  border: 1px solid var(--sk-edge);
+  background: linear-gradient(145deg, var(--sk-surface-raised), var(--sk-surface));
+  color: var(--foreground);
+  box-shadow: inset 0 1px 0 var(--sk-highlight), 0 2px 0 var(--sk-base), 0 3px 0 var(--sk-edge);
+}
+:root [data-slot='button']:where([data-variant='default']) {
+  box-shadow: inset 0 1px 0 var(--sk-highlight), 0 2px 0 color-mix(in srgb, var(--primary) 65%, black);
+}
+:root [data-slot='button']:not(:disabled):active { translate: 0 1px; box-shadow: none; }
+
+/* Keep prose quiet. Avoid the uneven word gaps from forced justification. */
+.prose { text-align: start; line-height: 1.85; }
+.prose :where(p, li) { letter-spacing: 0; }
+.prose :where(a) { text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.prose :where(blockquote) {
+  border-color: var(--primary);
+  background: var(--sk-well);
+  box-shadow: inset 0 1px 3px var(--sk-shadow);
+}
+.prose :where(img) { border-radius: 6px; }
+.prose :where(table) { font-variant-numeric: tabular-nums; }
+.blog-reading-tools:has(details) {
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 5px var(--sk-shadow);
+}
+.blog-footer { padding-top: 20px; border-top: 1px solid var(--border); }
+
+@media (max-width: 639px) {
+  .prose { line-height: 1.8; }
+}
+
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+[data-slot='pagination-link'] { min-width: 44px; min-height: 44px; }
+[data-slot='pagination-link'][data-active='true'] {
+  background: var(--card);
+  border-color: var(--sk-edge);
+  box-shadow: var(--sk-paper-shadow);
+}

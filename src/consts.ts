@@ -3,7 +3,7 @@ import type { IconMap, SocialLink, Site } from '@/types'
 export const SITE: Site = {
   title: 'Blogs',
   description:
-    'Personal blog and thoughts from Russel Daniel Paul and friends.',
+    'Personal blog and thoughts from Russel Daniel Paul.',
   href: 'https://blogs.russeldanielpaul.is-a.dev',
   author: 'Russel Daniel Paul',
   locale: 'en-US',
