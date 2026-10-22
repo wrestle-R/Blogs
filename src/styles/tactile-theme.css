@@ -108,13 +108,6 @@
 }
 .sk-paper-card img { border-radius: 5px; }
 
-/* The list is a recessed tray; individual posts are the paper above it. */
-.post-list-tray {
-  border-color: var(--sk-edge);
-  background: var(--sk-well);
-  box-shadow: inset 0 1px 3px var(--sk-shadow);
-}
-
 :root input:where([type='email'], [type='text'], [type='search'], [type='url']),
 :root textarea,
 :root select {
@@ -172,9 +165,9 @@ button:disabled { cursor: not-allowed; }
 body {
   background-color: var(--background);
   background-image:
-    linear-gradient(color-mix(in srgb, var(--border) 24%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--border) 24%, transparent) 1px, transparent 1px);
-  background-size: 32px 32px;
+    linear-gradient(color-mix(in srgb, var(--border) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--border) 8%, transparent) 1px, transparent 1px);
+  background-size: 48px 48px;
 }
 
 .sticker-navigation .portfolio-return {
