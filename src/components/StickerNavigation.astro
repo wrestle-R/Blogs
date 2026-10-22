@@ -17,7 +17,7 @@ import '@/styles/sticker-navigation.css'
  * [x] Remove Movies, Authors, Topics, Writing, compass and Collaborate navigation links.
  * [x] Keep existing personal posts and email links.
  * [x] Keep newsletter compact with breathing room, a movable Subscribe sticker and Reset icon.
- * [x] Use a plain up arrow; anchor the cloud switch to the document top with a smooth, reversible page-edge reveal.
+ * [x] Use a plain up arrow; anchor the cloud switch to the document top with a original alternating circle reveal.
  * [x] Rebuild About from real projects and the author's writing; use theme-matched project images.
  * [x] Remove the Spotify card background while preserving playback and preview fallbacks.
  * [ ] Get final visual approval for phone spacing, footer controls and desktop sticker placement.
@@ -44,7 +44,7 @@ const discoveries = [
 const current = (href: string) => href === '/' ? Astro.url.pathname === '/' : Astro.url.pathname === href || Astro.url.pathname.startsWith(href + '/')
 ---
 <nav class="sticker-navigation blog-sticker-navigation" data-sticker-navigation="blog" aria-description="Drag stickers to move them. On a phone, press and hold first. With a keyboard, use Alt and arrow keys." data-sticker-count={6 + discoveries.length} aria-label="Explore Russel’s blog">
-  <a class="portfolio-return" href={local ? 'http://localhost:5173' : 'https://russeldanielpaul.is-a.dev'} aria-label="Portfolio"><span aria-hidden="true">🌐</span><span>Portfolio</span></a>
+  <a class="portfolio-return" href={local ? 'http://localhost:5173' : 'https://russeldanielpaul.is-a.dev'} aria-label="Portfolio"><svg class="portfolio-return__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M5 6.5c4 2 10 2 14 0M5 17.5c4-2 10-2 14 0"/></svg><span>Portfolio</span><svg class="portfolio-return__arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></a>
   <div class="sticker-navigation__list" data-sticker-list id="blog-sticker-links">
     {items.map((item) => (
       <div class="sticker-navigation__item" data-sticker-id={item.id} data-mobile-hidden="true" data-sticker-order={item.order} data-sticker-side={item.order < 5 ? 'left' : 'right'} style={`--sticker-row:${(item.order - 1) % 4};--sticker-angle:${[-5,6,-7,4,5,-5,3][item.order - 1]}deg`}>

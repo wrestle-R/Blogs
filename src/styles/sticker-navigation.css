@@ -69,7 +69,7 @@ body:has(.blog-sticker-navigation) > .sticky:not(:has(*)) { display: none; }
 [data-return-home-heading] { padding-left: 82px; min-height: 88px; }
 .mobile-return-label, .post-sticker-corner { display: none; }
 .sticker-inline { position: relative; transform: translate(var(--sticker-x,0px),var(--sticker-y,0px)); user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
-@media (max-width: 768px) { #guitar:has(.guitar-section) { display: none; } .endurance-copy { gap: 12px; } }
+@media (max-width: 768px) { .endurance-copy { gap: 12px; } }
 @media (min-width: 1200px) {
   body:has(.blog-sticker-navigation) { padding-top: 108px; }
   .blog-sticker-navigation ~ main.max-w-4xl, .spotify-page, .songs-page { max-width: min(56rem, calc(100vw - 432px)); }

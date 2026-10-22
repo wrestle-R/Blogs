@@ -167,3 +167,33 @@ button:disabled { cursor: not-allowed; }
   border-color: var(--sk-edge);
   box-shadow: var(--sk-paper-shadow);
 }
+
+/* A quiet drafting-paper ground, with solid surfaces above it. */
+body {
+  background-color: var(--background);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--border) 24%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--border) 24%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.sticker-navigation .portfolio-return {
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--sk-edge);
+  border-radius: 6px 9px 7px 5px;
+  color: var(--foreground);
+  background: linear-gradient(145deg, var(--sk-surface-raised), var(--sk-surface));
+  box-shadow: inset 0 1px 0 var(--sk-highlight), 0 2px 0 var(--sk-base), 0 3px 0 var(--sk-edge);
+  font-family: var(--font-sans);
+  transition: box-shadow 150ms ease, translate 150ms ease;
+}
+.portfolio-return__icon { width: 18px; height: 18px; color: var(--primary); }
+.portfolio-return__arrow { width: 12px; height: 12px; color: var(--muted-foreground); }
+.sticker-navigation .portfolio-return:hover { translate: 0 -1px; }
+.sticker-navigation .portfolio-return:active { translate: 0 1px; box-shadow: inset 0 1px 2px var(--sk-shadow); }
+@media (max-width: 359px) {
+  .sticker-navigation .portfolio-return { gap: 5px; padding-inline: 8px; font-size: 12px; }
+  .portfolio-return__arrow { display: none; }
+}
