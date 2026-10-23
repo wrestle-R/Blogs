@@ -1,6 +1,7 @@
 /** Owner-selected repertoire. A title in this list is not a playable arrangement.
  * Only scores explicitly registered in guitar-presets.ts can become questions. */
 import ownerSongList from './guitar-song-list.json'
+import arrangements from './guitar-arrangements.json'
 export { default as ownerSongList } from './guitar-song-list.json'
 export interface QuizSong { id: string; title: string; artist: string; neighbours: string[] }
 const legacyEntries: [string,string,string][] = [
@@ -91,5 +92,19 @@ const confuserGroups = [
 ]
 const entries = new Map(legacyEntries.map(([id,title,artist])=>[id,{id,title,artist}]))
 for(const {id,title,artist} of ownerSongList) entries.set(id,{id,title,artist})
-export const quizCatalogue: QuizSong[] = [...entries.values()].map(song=>({...song,neighbours:neighbours[song.id]||confuserGroups.find(group=>group.includes(song.id))?.filter(other=>other!==song.id)||[]}))
+const texture=new Map(arrangements.map(a=>{const attacks=new Set(a.events.map(e=>e[0])).size;return [a.id,{bpm:a.bpm,density:attacks/a.beats,chord:a.events.length/attacks}]}))
+texture.set('thrones',{bpm:170,density:32/24,chord:1})
+const primaryArtist=(artist:string)=>artist.split(/,| & | feat\./)[0].toLowerCase()
+function similarSongs(song:{id:string;artist:string}) {
+  const original=neighbours[song.id]||confuserGroups.find(group=>group.includes(song.id))?.filter(other=>other!==song.id)||[]
+  const own=texture.get(song.id)
+  const distance=(other:{id:string;artist:string})=>{
+    const t=texture.get(other.id)
+    const same=primaryArtist(song.artist)===primaryArtist(other.artist)?-4:0
+    return same+(own&&t?Math.abs(Math.log2(own.bpm/t.bpm))*2+Math.abs(own.density-t.density)+Math.abs(own.chord-t.chord):10)
+  }
+  const remaining=[...entries.values()].filter(other=>other.id!==song.id&&!original.includes(other.id)).sort((a,b)=>distance(a)-distance(b))
+  return [...original,...remaining.map(other=>other.id)].slice(0,8)
+}
+export const quizCatalogue: QuizSong[] = [...entries.values()].map(song=>({...song,neighbours:similarSongs(song)}))
 export const songById = (id:string) => quizCatalogue.find(song=>song.id===id)!

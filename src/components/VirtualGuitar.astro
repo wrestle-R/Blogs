@@ -294,6 +294,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
       else await playScore(thronesIntro)
     }
 
+    root.addEventListener('guitar:prepare', () => { void audioReady().catch(audioError) }, { signal })
     root.addEventListener('guitar:play', event => {
       const preset = guitarPresets.find(p => p.id === (event as CustomEvent<string>).detail)
       if (preset) void playScore(preset)

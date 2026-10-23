@@ -8,7 +8,8 @@ describe('quiz results',()=>{
   })
   it('samples ten distinct playable questions from the expanded pool',()=>{
     expect(QUIZ_LENGTH).toBe(10)
-    expect(QUIZ_VERSION).toBe('v3')
+    expect(QUIZ_IDS).toHaveLength(200)
+    expect(QUIZ_VERSION).toBe('v4')
     expect(new Set(shuffled(QUIZ_IDS))).toEqual(new Set(QUIZ_IDS))
     expect(QUIZ_IDS.every(id=>guitarPresets.some(p=>p.id===id))).toBe(true)
     const original=[...QUIZ_IDS]

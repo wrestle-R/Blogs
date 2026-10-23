@@ -2,7 +2,7 @@
 import Layout from '@/layouts/Layout.astro'
 import PageHead from '@/components/PageHead.astro'
 import VirtualGuitar from '@/components/VirtualGuitar.astro'
-import { QUIZ_IDS, QUIZ_LENGTH } from '@/lib/guitar-quiz'
+import { QUIZ_LENGTH } from '@/lib/guitar-quiz'
 import '@/styles/guitar-room.css'
 ---
 <Layout class="max-w-4xl">
@@ -10,13 +10,15 @@ import '@/styles/guitar-room.css'
   <div class="guitar-quiz" data-guitar-quiz>
     <header class="quiz-heading">
       <div data-return-navigation class="quiz-home-slot"></div>
-      <div class="quiz-heading-copy"><h1 id="guitar-page-title">Name that tune</h1><p>A little guitar quiz, with songs from my playlist.</p></div>
+      <div class="quiz-heading-copy"><h1 id="guitar-page-title">Name that tune</h1></div>
     </header>
     <div class="quiz-paper">
     <section data-quiz-intro class="quiz-intro">
-      <h2>How many do u know?</h2><p>Listen to the guitar and pick the song.<br/>Ten questions, four choices each.</p>
-      <button class="quiz-primary" data-quiz-start>Let's play <span aria-hidden="true">↗</span></button>
-      <small>Ten songs from a pool of {QUIZ_IDS.length}. No timer. Replay as much as u like.</small>
+      <h2>Know the riff?</h2>
+      <p>Listen to ten guitar riffs and pick the song from four choices. Replay whenever u need.</p>
+      <small>Correct answers come first. Faster answers break ties.</small>
+      <button class="quiz-primary quiz-start" data-quiz-start><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="m6 3 11 7-11 7Z" fill="currentColor"/></svg>Let's play</button>
+      <p data-quiz-start-status role="status"></p>
     </section>
     <section data-quiz-round hidden aria-label="Current question">
       <div class="quiz-meta"><span data-quiz-counter>01 / {String(QUIZ_LENGTH).padStart(2,'0')}</span><span data-quiz-points>0 correct</span></div>
@@ -30,8 +32,9 @@ import '@/styles/guitar-room.css'
     </section>
     <section data-quiz-results hidden class="quiz-results" aria-labelledby="quiz-result-title">
       <h2 id="quiz-result-title" tabindex="-1">How'd u do?</h2>
+      <p class="quiz-summary" data-quiz-summary></p>
       <p class="quiz-percentile" data-quiz-percentile role="status">Finding your percentile…</p>
-      <p class="quiz-result-note" data-quiz-result-note>Comparing with completed quizzes.</p>
+      <p class="quiz-result-note" data-quiz-result-note>Your quiz benchmark.</p>
       <button data-quiz-again class="quiz-primary">Play again ↗</button>
     </section>
     </div>
@@ -40,76 +43,87 @@ import '@/styles/guitar-room.css'
 </Layout>
 <script>
   import { songById } from '@/lib/guitar-catalogue'
-  import { QUIZ_LENGTH, newQuestions, ordinal, submitQuiz, answerOptions, type QuizAnswer } from '@/lib/guitar-quiz'
-  let cleanup: (()=>void) | undefined
+  import { QUIZ_LENGTH,ordinal,startQuizSession,nextQuizQuestion,recordQuizAnswer,type QuizQuestion,type QuizComparison } from '@/lib/guitar-quiz'
+  let cleanup:(()=>void)|undefined
   function initQuiz() {
     cleanup?.()
-    const page = document.querySelector<HTMLElement>('[data-guitar-quiz]')
-    if (!page) return
-    const controller = new AbortController(), {signal} = controller
-    const get = <T extends HTMLElement = HTMLElement>(name:string) => page.querySelector<T>(`[data-${name}]`)!
-    const instrument = get('guitar')
-    const intro=get('quiz-intro'), round=get('quiz-round'), results=get('quiz-results')
-    const play=get<HTMLButtonElement>('quiz-play'), stop=get<HTMLButtonElement>('quiz-stop'), next=get<HTMLButtonElement>('quiz-next')
-    const answers=get('quiz-answers'), feedback=get('quiz-feedback'), status=get('guitar-status')
-    let questions=newQuestions(), index=0, score=0, answered=false, heard=false, runId=crypto.randomUUID(), submitted: QuizAnswer[]=[], request: AbortController|undefined
+    const page=document.querySelector<HTMLElement>('[data-guitar-quiz]')
+    if(!page)return
+    const controller=new AbortController(),{signal}=controller
+    const get=<T extends HTMLElement=HTMLElement>(name:string)=>page.querySelector<T>(`[data-${name}]`)!
+    const instrument=get('guitar'),intro=get('quiz-intro'),round=get('quiz-round'),results=get('quiz-results')
+    const play=get<HTMLButtonElement>('quiz-play'),stop=get<HTMLButtonElement>('quiz-stop'),next=get<HTMLButtonElement>('quiz-next'),startButton=get<HTMLButtonElement>('quiz-start')
+    const answers=get('quiz-answers'),feedback=get('quiz-feedback'),status=get('guitar-status')
+    let current:QuizQuestion,runId='',generation=0,score=0,answered=false,heard=false,busy=false,comparison:QuizComparison|null=null,request:AbortController|undefined
     const stopAudio=()=>instrument.dispatchEvent(new Event('guitar:stop'))
-    function showQuestion() {
-      stopAudio(); answered=false; heard=false; play.disabled=false; play.textContent='▶ Play the riff';next.hidden=true;feedback.textContent='';status.textContent='Listen, then pick the song.'
-      get('quiz-counter').textContent=`${String(index+1).padStart(2,'0')} / ${String(QUIZ_LENGTH).padStart(2,'0')}`;get('quiz-points').textContent=`${score} correct`
-      page!.querySelectorAll('.quiz-steps span').forEach((s,i)=>{s.classList.toggle('done',i<index);s.classList.toggle('current',i===index)})
-      const id=questions[index]
-      const options=answerOptions(id)
-      answers.replaceChildren(...options.map((option,i)=>{
-        const song=songById(option),button=document.createElement('button')
-        button.type='button'; button.dataset.answer=option;button.disabled=true
+    const playAudio=()=>instrument.dispatchEvent(new CustomEvent('guitar:play',{detail:current.songId}))
+    async function action<T>(work:(signal:AbortSignal)=>Promise<T>) {
+      request?.abort();const active=new AbortController();request=active
+      const timeout=setTimeout(()=>active.abort(),25000)
+      try{return await work(active.signal)}finally{clearTimeout(timeout)}
+    }
+    function showQuestion(q:QuizQuestion) {
+      stopAudio();current=q;answered=false;heard=false;busy=false;play.disabled=false;play.textContent='▶ Play the riff';next.hidden=true;feedback.textContent='';status.textContent='Listen, then pick the song.'
+      get('quiz-counter').textContent=`${String(q.number).padStart(2,'0')} / ${String(QUIZ_LENGTH).padStart(2,'0')}`
+      get('quiz-points').textContent=`${score} correct`
+      page!.querySelectorAll('.quiz-steps span').forEach((el,i)=>{el.classList.toggle('done',i<q.number-1);el.classList.toggle('current',i===q.number-1)})
+      answers.replaceChildren(...q.options.map((option,i)=>{
+        const song=songById(option),button=document.createElement('button');button.type='button';button.dataset.answer=option;button.disabled=true
         const letter=document.createElement('span'),label=document.createElement('span');letter.textContent=String.fromCharCode(65+i);label.textContent=song.title;button.append(letter,label)
-        button.addEventListener('click',()=>{
-          if(answered||!heard)return
-          answered=true;submitted.push({songId:id,answerId:option});stopAudio();const correct=option===id;if(correct)score++
-          for(const choice of answers.querySelectorAll<HTMLButtonElement>('button')){choice.disabled=true;if(choice.dataset.answer===id)choice.dataset.result='correct';else if(choice===button)choice.dataset.result='wrong'}
-          const actual=songById(id)
-          feedback.textContent=`${correct?'Yep, got it.':'That was '+actual.title+'.'} ${actual.artist}.`
-          get('quiz-points').textContent=`${score} correct`;next.textContent=index===QUIZ_LENGTH-1?'See my result →':'Next song →';next.hidden=false
-        },{signal})
-        return button
+        button.addEventListener('click',async()=>{
+          if(answered||!heard||busy)return
+          busy=true;stopAudio();play.disabled=true;const token=generation
+          for(const choice of answers.querySelectorAll<HTMLButtonElement>('button'))choice.disabled=true
+          feedback.textContent='Checking…'
+          try {
+            const result=await action(s=>recordQuizAnswer(runId,q.number,option,s))
+            if(signal.aborted||token!==generation)return
+            if(result.songId!==q.songId)throw new Error('Question mismatch')
+            answered=true;score=result.score;comparison=result.result
+            for(const choice of answers.querySelectorAll<HTMLButtonElement>('button')){if(choice.dataset.answer===result.songId)choice.dataset.result='correct';else if(choice===button)choice.dataset.result='wrong'}
+            const actual=songById(result.songId)
+            feedback.textContent=`${result.correct?'Yep, got it.':'That was '+actual.title+'.'} ${actual.artist}.`
+            get('quiz-points').textContent=`${score} correct`;next.textContent=result.complete?'See my result →':'Next song →';next.hidden=false
+          } catch {
+            if(signal.aborted||token!==generation)return
+            feedback.textContent="Couldn't save that answer. Tap your choice to retry.";button.disabled=false
+          } finally {if(token===generation){busy=false;play.disabled=instrument.dataset.riffState==='playing'}}
+        },{signal});return button
       }))
     }
-    function start() {stopAudio();questions=newQuestions();index=0;score=0;request?.abort();runId=crypto.randomUUID();submitted=[];intro.hidden=true;results.hidden=true;round.hidden=false;showQuestion();play.focus()}
-    get('quiz-start').addEventListener('click',start,{signal});get('quiz-again').addEventListener('click',start,{signal})
-    play.addEventListener('click',()=>instrument.dispatchEvent(new CustomEvent('guitar:play',{detail:questions[index]})),{signal})
-    stop.addEventListener('click',stopAudio,{signal})
+    async function start() {
+      const token=++generation;instrument.dispatchEvent(new Event('guitar:prepare'));stopAudio();request?.abort();busy=true;startButton.disabled=true;get('quiz-start-status').textContent='Getting your first riff…'
+      try {
+        const session=await action(startQuizSession)
+        if(signal.aborted||token!==generation)return
+        runId=session.runId;score=0;comparison=null;intro.hidden=true;results.hidden=true;round.hidden=false;showQuestion(session.question);play.focus();playAudio()
+      } catch {if(!signal.aborted&&token===generation)get('quiz-start-status').textContent="Couldn't start the quiz. Please try again."}
+      finally {if(token===generation){busy=false;startButton.disabled=false}}
+    }
+    get('quiz-start').addEventListener('click',()=>void start(),{signal});get('quiz-again').addEventListener('click',()=>void start(),{signal})
+    play.addEventListener('click',playAudio,{signal});stop.addEventListener('click',stopAudio,{signal})
     instrument.addEventListener('guitar:state',event=>{
       const state=(event as CustomEvent<string>).detail
-      stop.disabled=state!=='playing';play.disabled=state==='playing';play.textContent=state==='playing'?'Playing…':heard?'↻ Replay the riff':'▶ Play the riff'
-      if(state==='playing'){heard=true;if(!answered)answers.querySelectorAll<HTMLButtonElement>('button').forEach(b=>b.disabled=false)}
+      stop.disabled=state!=='playing';play.disabled=busy||state==='playing';play.textContent=state==='playing'?'Playing…':heard?'↻ Replay the riff':'▶ Play the riff'
+      if(state==='playing'){heard=true;if(!answered&&!busy)answers.querySelectorAll<HTMLButtonElement>('button').forEach(b=>b.disabled=false)}
       if(state==='error')status.textContent='Sound unavailable. Tap Play to try again.'
     },{signal})
     const strings=Array.from(page.querySelectorAll<HTMLElement>('.pocket-strings span'))
     instrument.addEventListener('guitar:note',event=>{const line=strings[(event as CustomEvent<number>).detail];line.getAnimations().forEach(a=>a.cancel());if(!matchMedia('(prefers-reduced-motion: reduce)').matches)line.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(3px)',opacity:1},{transform:'translateY(-2px)',opacity:1},{transform:'translateY(0)',opacity:.45}],{duration:350})},{signal})
     next.addEventListener('click',async()=>{
-      if(!answered)return
-      if(index<QUIZ_LENGTH-1){index++;showQuestion();play.focus();return}
-      answered=false;stopAudio();round.hidden=true;results.hidden=false
-      const resultRun=runId
-      get('quiz-percentile').textContent='Finding your percentile…'
-      get('quiz-result-note').textContent='Comparing with completed quizzes.'
-      results.querySelector<HTMLElement>('h2')!.focus()
-      const resultRequest=new AbortController()
-      request=resultRequest
-      const timeout=setTimeout(()=>resultRequest.abort(),25000)
-      try {
-        const result=await submitQuiz(runId,submitted,resultRequest.signal)
-        if(signal.aborted||resultRun!==runId)return
-        get('quiz-percentile').textContent=result.percentile===null?"You're the first player.":`${ordinal(result.percentile)} percentile`
-        get('quiz-result-note').textContent=result.percentile===null?'Your result starts the comparison.':'Compared with previous completed quizzes.'
-      } catch {
-        if(signal.aborted||resultRun!==runId)return
-        get('quiz-percentile').textContent='Percentile unavailable'
-        get('quiz-result-note').textContent="Couldn't save this run or load a percentile. You can still play again."
-      } finally {clearTimeout(timeout)}
+      if(!answered||busy)return
+      if(current.number===QUIZ_LENGTH){
+        stopAudio();round.hidden=true;results.hidden=false;get('quiz-summary').textContent=`${score} / ${QUIZ_LENGTH} correct`
+        get('quiz-percentile').textContent=comparison?.percentile===null||!comparison?'Quiz completed':`${ordinal(comparison.percentile)} percentile`
+        get('quiz-result-note').textContent='Your quiz benchmark. Correct answers come first, faster answers break ties.'
+        results.querySelector<HTMLElement>('h2')!.focus();return
+      }
+      busy=true;stopAudio();play.disabled=true;next.disabled=true;const token=generation
+      try{const q=await action(s=>nextQuizQuestion(runId,current.number,s));if(signal.aborted||token!==generation)return;showQuestion(q);play.focus();playAudio()}
+      catch{if(!signal.aborted&&token===generation)feedback.textContent="Couldn't load the next riff. Tap Next song to retry."}
+      finally{if(token===generation){busy=false;next.disabled=false;play.disabled=instrument.dataset.riffState==='playing'}}
     },{signal})
-    cleanup=()=>{stopAudio();request?.abort();controller.abort();strings.forEach(s=>s.getAnimations().forEach(a=>a.cancel()));cleanup=undefined}
+    cleanup=()=>{generation++;stopAudio();request?.abort();controller.abort();strings.forEach(s=>s.getAnimations().forEach(a=>a.cancel()));cleanup=undefined}
   }
   document.addEventListener('astro:page-load',initQuiz)
   document.addEventListener('astro:before-swap',()=>cleanup?.())
