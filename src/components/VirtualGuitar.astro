@@ -18,6 +18,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
   <div class="guitar-neck" role="group" aria-label="Guitar fretboard" aria-describedby="guitar-help">
       {strings.map((string, row) => (
         <div class="guitar-string-row" style={`--string-gauge:${3 - row * .35}px`}>
+          <svg class="guitar-string" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true"><path d="M0 50H1000" /></svg>
           {frets.map((fret) => (
             <button
               type="button"
@@ -52,11 +53,50 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
     const readout = root.querySelector<HTMLOutputElement>('[data-guitar-note]')
     let context: AudioContext | undefined
     const voices = new Set<AudioBufferSourceNode>()
-    const timers = new Set<ReturnType<typeof setTimeout>>()
+    const timers = new Map<HTMLElement, ReturnType<typeof setTimeout>>()
+    const animations = new Map<SVGPathElement, number>()
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
+
+    function vibrate(button: HTMLButtonElement, clientX?: number) {
+      const row = button.closest<HTMLElement>('.guitar-string-row')
+      const string = row?.querySelector<SVGSVGElement>('.guitar-string')
+      const path = string?.querySelector<SVGPathElement>('path')
+      if (!string || !path) return
+      const previousFrame = animations.get(path)
+      if (previousFrame !== undefined) cancelAnimationFrame(previousFrame)
+      path.setAttribute('d', 'M0 50H1000')
+      animations.delete(path)
+      if (reducedMotion.matches) return
+
+      const bounds = string.getBoundingClientRect()
+      const keyBounds = button.getBoundingClientRect()
+      // Use the actual pointer position; keyboard/open-string plucks use a
+      // sensible point on the string. Both ends always remain anchored.
+      const x = clientX ?? keyBounds.left + keyBounds.width / 2
+      const pick = x < bounds.left ? 500 : Math.max(30, Math.min(970, (x - bounds.left) / bounds.width * 1000))
+      const started = performance.now()
+      const frame = (now: number) => {
+        const elapsed = now - started
+        if (elapsed >= 400 || reducedMotion.matches) {
+          path.setAttribute('d', 'M0 50H1000')
+          animations.delete(path)
+          return
+        }
+        const displacement = 5 * 100 / bounds.height * Math.exp(-elapsed / 130) * Math.cos(elapsed * .09)
+        const peak = 50 + displacement
+        // Two smooth curves meet at the pluck point, where motion is largest.
+        // Displacement falls away on either side instead of moving frets.
+        path.setAttribute('d', `M0 50 C${pick * .35} 50 ${pick * .65} ${peak} ${pick} ${peak} C${pick + (1000 - pick) * .35} ${peak} ${pick + (1000 - pick) * .65} 50 1000 50`)
+        animations.set(path, requestAnimationFrame(frame))
+      }
+      frame(started)
+    }
 
     // A plucked-string buffer is generated locally. Sound starts only after a
     // deliberate click/keypress, without downloading the old piano samples.
-    async function pluck(button: HTMLButtonElement) {
+    async function pluck(button: HTMLButtonElement, clientX?: number) {
+      const row = button.closest<HTMLElement>('.guitar-string-row')
+      if (!row) return
       try {
         context ??= new AudioContext()
         await context.resume()
@@ -86,12 +126,10 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
           readout.textContent = button.dataset.note || ''
           readout.classList.add('show')
         }
-        button.classList.remove('is-playing')
-        // Restart only this key's feedback; no layout animation for the card.
-        void button.offsetWidth
-        button.classList.add('is-playing')
-        const timer = setTimeout(() => { button.classList.remove('is-playing'); readout?.classList.remove('show'); timers.delete(timer) }, 420)
-        timers.add(timer)
+        vibrate(button, clientX)
+        clearTimeout(timers.get(row))
+        const timer = setTimeout(() => { readout?.classList.remove('show'); timers.delete(row) }, 420)
+        timers.set(row, timer)
       } catch {
         if (!signal.aborted && readout) {
           readout.textContent = 'Sound unavailable. Tap to try again.'
@@ -104,7 +142,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
       keys.forEach((key) => { key.tabIndex = key === button ? 0 : -1 })
     }
     keys.forEach((button) => {
-      button.addEventListener('click', () => { selectKey(button); void pluck(button) }, { signal })
+      button.addEventListener('click', (event) => { selectKey(button); void pluck(button, event.detail ? event.clientX : undefined) }, { signal })
       button.addEventListener('keydown', (event) => {
         let row = Number(button.dataset.row)
         let fret = Number(button.dataset.fret)
@@ -138,6 +176,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
       resizeObserver.disconnect()
       controller.abort()
       timers.forEach(clearTimeout)
+      animations.forEach((frame, path) => { cancelAnimationFrame(frame); path.setAttribute('d', 'M0 50H1000') })
       voices.forEach((source) => source.stop())
       void context?.close()
       cleanup = undefined
@@ -151,35 +190,32 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
   .guitar-section { min-width: 0; container-type: inline-size; margin-block: 8px; }
   h2 { margin: 0 0 22px; color: var(--foreground); font-size: 30px; font-weight: 700; letter-spacing: -.035em; }
   .guitar-neck { position: relative; overflow: hidden; padding-block: 22px; border-radius: 10px; background: transparent; }
-  .guitar-string-row { display: grid; grid-template-columns: 48px 1.89fr 1.78fr 1.68fr 1.59fr 1.5fr 1.41fr 1.33fr 1.26fr 1.19fr 1.12fr 1.06fr 1fr; }
+  .guitar-string-row { position: relative; isolation: isolate; --open-width: 48px; display: grid; grid-template-columns: var(--open-width) 1.89fr 1.78fr 1.68fr 1.59fr 1.5fr 1.41fr 1.33fr 1.26fr 1.19fr 1.12fr 1.06fr 1fr; }
   .guitar-key { position: relative; isolation: isolate; display: grid; place-items: center; min-width: 0; min-height: 46px; padding: 0; border: 0; border-right: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent); border-radius: 0; background: transparent; color: var(--foreground); touch-action: manipulation; }
-  .guitar-key::before { content: ''; position: absolute; z-index: -1; left: 0; right: -1px; top: 50%; height: var(--string-gauge); background: var(--muted-foreground); opacity: .8; }
+  .guitar-string { position: absolute; z-index: -1; left: var(--open-width); top: 0; width: calc(100% - var(--open-width)); height: 100%; overflow: visible; opacity: .8; pointer-events: none; }
+  .guitar-string path { fill: none; stroke: var(--muted-foreground); stroke-width: var(--string-gauge); vector-effect: non-scaling-stroke; }
   .guitar-key[data-inlay]::after { content: ''; position: absolute; z-index: -2; left: 50%; bottom: -5px; width: 10px; height: 10px; border-radius: 50%; background: var(--muted-foreground); opacity: .28; }
   .guitar-key--open { border-right: 2px solid color-mix(in srgb, var(--foreground) 18%, transparent); }
-  .guitar-key--open::before { display: none; }
   .guitar-key__note { padding: 2px 3px; border-radius: 3px; font: 500 11px/1.5 var(--font-mono); opacity: 0; }
   .guitar-key--open .guitar-key__note { font: 650 17px/1.5 var(--font-sans); }
   .guitar-key--open .guitar-key__note, .guitar-key:focus-visible .guitar-key__note { opacity: 1; }
   .guitar-key:focus-visible .guitar-key__note { background: var(--card); }
   .guitar-key:focus-visible { outline-offset: -4px; border-radius: 4px; }
-  .guitar-key.is-playing::before { animation: guitar-pluck 400ms ease-out; }
   .guitar-note-display { position: absolute; inset: 50% auto auto 50%; translate: -50% -50%; max-width: 90%; color: var(--foreground); font-size: clamp(24px, 8vw, 48px); font-weight: 650; text-align: center; opacity: 0; pointer-events: none; }
   .guitar-note-display.show { opacity: .85; }
   @container (max-width: 799px) {
-    .guitar-string-row { grid-template-columns: 44px repeat(10, minmax(0, 1fr)); }
-    .guitar-key:nth-child(n+12) { display: none; }
+    .guitar-string-row { --open-width: 44px; grid-template-columns: var(--open-width) repeat(10, minmax(0, 1fr)); }
+    .guitar-key:nth-of-type(n+12) { display: none; }
   }
   @container (max-width: 639px) {
-    .guitar-string-row { grid-template-columns: 44px repeat(8, minmax(0, 1fr)); }
-    .guitar-key:nth-child(n+10) { display: none; }
+    .guitar-string-row { --open-width: 44px; grid-template-columns: var(--open-width) repeat(8, minmax(0, 1fr)); }
+    .guitar-key:nth-of-type(n+10) { display: none; }
   }
   @container (max-width: 479px) {
     h2 { font-size: 24px; margin-bottom: 16px; }
     .guitar-neck { padding-block: 12px; }
-    .guitar-string-row { grid-template-columns: 40px repeat(5, minmax(0, 1fr)); }
+    .guitar-string-row { --open-width: 40px; grid-template-columns: var(--open-width) repeat(5, minmax(0, 1fr)); }
     .guitar-key { min-height: 44px; }
-    .guitar-key:nth-child(n+7) { display: none; }
+    .guitar-key:nth-of-type(n+7) { display: none; }
   }
-  @keyframes guitar-pluck { 0%, 40%, 80% { translate: 0 -1px; } 20%, 60% { translate: 0 1px; } 100% { translate: 0 0; } }
-  @media (prefers-reduced-motion: reduce) { .guitar-key.is-playing::before { animation: none; } }
 </style>
