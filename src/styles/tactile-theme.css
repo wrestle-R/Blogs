@@ -158,13 +158,19 @@ button:disabled { cursor: not-allowed; }
   box-shadow: var(--sk-paper-shadow);
 }
 
-/* A quiet drafting-paper ground, with solid surfaces above it. */
+/* Same Fine silt tiles as Portfolio, at the selected 100% texture strength. */
 body {
   background-color: var(--background);
-  background-image:
-    linear-gradient(color-mix(in srgb, var(--border) 8%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in srgb, var(--border) 8%, transparent) 1px, transparent 1px);
-  background-size: 48px 48px;
+  background-image: url('/textures/fine-silt-light.png');
+  background-repeat: repeat;
+  background-size: 384px 384px;
+  background-attachment: fixed;
+}
+:root[data-theme='dark'] body {
+  background-image: url('/textures/fine-silt-dark.png');
+}
+@media print {
+  body, :root[data-theme='dark'] body { background-image: none; }
 }
 
 .sticker-navigation .portfolio-return {

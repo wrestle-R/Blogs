@@ -1,4 +1,6 @@
 ---
+interface Props { studio?: boolean }
+const { studio = false } = Astro.props
 const strings = [
   { name: 'Low E', midi: 40 },
   { name: 'A', midi: 45 },
@@ -12,8 +14,8 @@ const frets = Array.from({ length: 13 }, (_, fret) => fret)
 const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) - 1}`
 ---
 
-<section class="guitar-section" aria-labelledby="guitar-title" data-guitar>
-  <h2 id="guitar-title">Virtual Guitar</h2>
+<section class:list={['guitar-section', { 'guitar-section--studio': studio }]} aria-labelledby={studio ? 'guitar-page-title' : 'guitar-title'} data-guitar data-studio={studio ? '' : undefined}>
+  {!studio && <div class="guitar-heading"><h2 id="guitar-title">Virtual Guitar</h2><a href="/guitar">Open guitar room ↗</a></div>}
   <p id="guitar-help" class="sr-only">Tap a string to play. Use arrow keys to move between visible frets and Enter to play.</p>
   <div class="guitar-neck" role="group" aria-label="Guitar fretboard" aria-describedby="guitar-help">
       {strings.map((string, row) => (
@@ -41,6 +43,8 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
 </section>
 
 <script>
+  import { pluckedString } from '@/lib/guitar-riff'
+  import { guitarPresets, thronesIntro, type GuitarPreset } from '@/lib/guitar-presets'
   let cleanup: (() => void) | undefined
 
   function initGuitar() {
@@ -51,7 +55,20 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
     const { signal } = controller
     const keys = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-midi]'))
     const readout = root.querySelector<HTMLOutputElement>('[data-guitar-note]')
+    const trigger = document.querySelector<HTMLButtonElement>('[data-endurance-riff]')
+    const status = document.querySelector<HTMLElement>('[data-endurance-status], [data-guitar-status]')
+    const quizMode = !!document.querySelector('[data-guitar-quiz]')
+    const notify = (state: string) => root.dispatchEvent(new CustomEvent('guitar:state', { detail: state, bubbles: true }))
     let context: AudioContext | undefined
+    let output: DynamicsCompressorNode | undefined
+    let master: GainNode | undefined
+    const buffers = new Map<number, AudioBuffer>()
+    const riffVoices = new Set<AudioBufferSourceNode>()
+    const voiceGains = new Map<AudioBufferSourceNode, GainNode>()
+    let riffPlaying = false
+    let riffRun = 0
+    let riffFrame: number | undefined
+    let readoutTimer: ReturnType<typeof setTimeout> | undefined
     const voices = new Set<AudioBufferSourceNode>()
     const timers = new Map<HTMLElement, ReturnType<typeof setTimeout>>()
     const animations = new Map<SVGPathElement, number>()
@@ -66,7 +83,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
       if (previousFrame !== undefined) cancelAnimationFrame(previousFrame)
       path.setAttribute('d', 'M0 50H1000')
       animations.delete(path)
-      if (reducedMotion.matches) return
+      if (reducedMotion.matches || !string.getBoundingClientRect().width) return
 
       const bounds = string.getBoundingClientRect()
       const keyBounds = button.getBoundingClientRect()
@@ -92,51 +109,191 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
       frame(started)
     }
 
-    // A plucked-string buffer is generated locally. Sound starts only after a
-    // deliberate click/keypress, without downloading the old piano samples.
-    async function pluck(button: HTMLButtonElement, clientX?: number) {
-      const row = button.closest<HTMLElement>('.guitar-string-row')
-      if (!row) return
-      try {
-        context ??= new AudioContext()
-        await context.resume()
-        if (signal.aborted) return
-        if (context.state !== 'running') throw new Error('Audio is suspended')
-        const frequency = 440 * 2 ** ((Number(button.dataset.midi) - 69) / 12)
-        const delay = Math.max(2, Math.round(context.sampleRate / frequency - .5))
-        const buffer = context.createBuffer(1, Math.ceil(context.sampleRate * 2.2), context.sampleRate)
-        const samples = buffer.getChannelData(0)
-        for (let i = 0; i <= delay; i++) samples[i] = (Math.random() * 2 - 1) * .65
-        for (let i = delay + 1; i < samples.length; i++) {
-          samples[i] = (samples[i - delay] + samples[i - delay - 1]) * .498
-        }
-        const source = context.createBufferSource()
-        const gain = context.createGain()
-        gain.gain.setValueAtTime(.32, context.currentTime)
-        gain.gain.setTargetAtTime(0, context.currentTime + 1.5, .15)
-        source.buffer = buffer
-        source.connect(gain).connect(context.destination)
-        // Bound polyphony when rapidly strumming on a touch screen.
-        if (voices.size >= 12) voices.values().next().value?.stop()
-        voices.add(source)
-        source.onended = () => { voices.delete(source); source.disconnect(); gain.disconnect() }
-        source.start()
-        root!.dataset.audioState = context.state
-        if (readout) {
-          readout.textContent = button.dataset.note || ''
-          readout.classList.add('show')
-        }
-        vibrate(button, clientX)
-        clearTimeout(timers.get(row))
-        const timer = setTimeout(() => { readout?.classList.remove('show'); timers.delete(row) }, 420)
-        timers.set(row, timer)
-      } catch {
-        if (!signal.aborted && readout) {
-          readout.textContent = 'Sound unavailable. Tap to try again.'
-          readout.classList.add('show')
-        }
+    async function audioReady() {
+      if (!context) {
+        context = new AudioContext()
+        output = context.createDynamicsCompressor()
+        output.threshold.value = -15
+        output.knee.value = 18
+        output.ratio.value = 3
+        output.attack.value = .003
+        output.release.value = .18
+        const body = context.createBiquadFilter()
+        body.type = 'lowshelf'
+        body.frequency.value = 180
+        body.gain.value = 2
+        const warmth = context.createBiquadFilter()
+        warmth.type = 'highshelf'
+        warmth.frequency.value = 2600
+        warmth.gain.value = -4
+        master = context.createGain()
+        master.gain.value = quizMode ? .65 : 1
+        output.connect(master).connect(body).connect(warmth).connect(context.destination)
       }
+      await context.resume()
+      if (signal.aborted || context.state !== 'running') throw new Error('Audio unavailable')
+      root!.dataset.audioState = context.state
+      return context
     }
+
+    function noteBuffer(midi: number) {
+      let buffer = buffers.get(midi)
+      if (!buffer) {
+        const samples = pluckedString(midi, context!.sampleRate)
+        buffer = context!.createBuffer(1, samples.length, context!.sampleRate)
+        buffer.getChannelData(0).set(samples)
+        buffers.set(midi, buffer)
+      }
+      return buffer
+    }
+
+    function sound(button: HTMLButtonElement, when: number, velocity = 1, riff = false, duration?: number) {
+      const source = context!.createBufferSource()
+      const gain = context!.createGain()
+      source.buffer = noteBuffer(Number(button.dataset.midi))
+      gain.gain.setValueAtTime(.32 * velocity, when)
+      gain.gain.setTargetAtTime(0, when + 1.8, .18)
+      if (duration !== undefined) {
+        const release = Math.max(.06, duration * .9)
+        gain.gain.setTargetAtTime(0, when + release, .015)
+      }
+      source.connect(gain).connect(output!)
+      // Future scheduled riff voices must not evict one another before playing.
+      if (!riff && voices.size >= 12) voices.values().next().value?.stop()
+      voices.add(source)
+      voiceGains.set(source, gain)
+      if (riff) riffVoices.add(source)
+      source.onended = () => { voices.delete(source); riffVoices.delete(source); voiceGains.delete(source); source.disconnect(); gain.disconnect() }
+      source.start(when)
+      if (duration !== undefined) source.stop(when + Math.min(2.5, duration + .08))
+    }
+
+    function showPluck(button: HTMLButtonElement, clientX?: number) {
+      root!.dispatchEvent(new CustomEvent('guitar:note', {detail: Number(button.dataset.row), bubbles: true}))
+      if (readout) {
+        readout.textContent = button.dataset.note || ''
+        readout.classList.add('show')
+      }
+      vibrate(button, clientX)
+      button.classList.add('is-playing')
+      clearTimeout(timers.get(button))
+      timers.set(button, setTimeout(() => { button.classList.remove('is-playing'); timers.delete(button) }, 300))
+      clearTimeout(readoutTimer)
+      readoutTimer = setTimeout(() => readout?.classList.remove('show'), 450)
+    }
+
+    function stopRiff(announce = true) {
+      const wasPlaying = riffPlaying
+      riffRun++
+      riffPlaying = false
+      if (riffFrame !== undefined) cancelAnimationFrame(riffFrame)
+      riffFrame = undefined
+      voices.forEach(source => {
+        const now = context!.currentTime
+        const gain = voiceGains.get(source)!
+        gain.gain.cancelAndHoldAtTime(now)
+        gain.gain.linearRampToValueAtTime(0, now + .025)
+        source.stop(now + .03)
+      })
+      riffVoices.clear()
+      timers.forEach(clearTimeout)
+      timers.clear()
+      keys.forEach(key => key.classList.remove('is-playing'))
+      animations.forEach((frame, path) => { cancelAnimationFrame(frame); path.setAttribute('d', 'M0 50H1000') })
+      animations.clear()
+      clearTimeout(readoutTimer)
+      readout?.classList.remove('show')
+      readout?.setAttribute('aria-live', 'polite')
+      root!.dataset.riffState = 'idle'
+      notify('idle')
+      trigger?.setAttribute('aria-pressed', 'false')
+      trigger?.setAttribute('aria-label', 'Play endurance guitar riff')
+      if (status && announce && wasPlaying) status.textContent = 'Guitar stopped.'
+    }
+
+    function audioError() {
+      if (signal.aborted) return
+      if (readout) {
+        readout.textContent = 'Sound unavailable. Tap to try again.'
+        readout.classList.add('show')
+      }
+      if (status) status.textContent = 'Sound unavailable. Try again.'
+      notify('error')
+    }
+
+    async function pluck(button: HTMLButtonElement, clientX?: number) {
+      if (riffPlaying) stopRiff(false)
+      try {
+        const audio = await audioReady()
+        sound(button, audio.currentTime)
+        showPluck(button, clientX)
+      } catch { audioError() }
+    }
+
+    function guitarVisible() { return quizMode || (root!.getBoundingClientRect().width > 0 && keys[0].offsetWidth > 0) }
+
+    async function playScore(preset: GuitarPreset) {
+      if (!guitarVisible() || signal.aborted) return
+      stopRiff(false)
+      riffPlaying = true
+      const run = ++riffRun
+      trigger?.setAttribute('aria-pressed', 'true')
+      trigger?.setAttribute('aria-label', 'Stop endurance guitar riff')
+      root!.dataset.riffState = 'starting'
+      try {
+        const audio = await audioReady()
+        if (run !== riffRun || !guitarVisible()) return
+        const notes = preset.notes
+        notes.forEach(note => noteBuffer(Number(keys[note.row * 13 + note.fret].dataset.midi)))
+        const bpm = preset.bpm
+        const beat = 60 / bpm
+        const start = audio.currentTime + .06
+        const end = start + preset.beats * beat + 1.2
+        notes.forEach(note => sound(keys[note.row * 13 + note.fret], start + note.beat * beat, note.velocity, true, note.durationBeats === undefined ? undefined : note.durationBeats * beat))
+        root!.dataset.riffState = 'playing'
+        notify('playing')
+        if (status) status.textContent = quizMode ? 'Listen to the guitar.' : `Playing ${preset.label}.`
+        readout?.setAttribute('aria-live', 'off')
+        let next = 0
+        const tick = () => {
+          if (signal.aborted || run !== riffRun) return
+          while (next < notes.length && start + notes[next].beat * beat <= audio.currentTime) {
+            const note = notes[next++]
+            showPluck(keys[note.row * 13 + note.fret])
+          }
+          if (audio.currentTime >= end) {
+            stopRiff(false)
+            if (status) status.textContent = quizMode ? 'Play it again, or pick your answer.' : `${preset.label}, finished.`
+          } else riffFrame = requestAnimationFrame(tick)
+        }
+        riffFrame = requestAnimationFrame(tick)
+      } catch { stopRiff(false); audioError() }
+    }
+
+    async function playRiff() {
+      if (riffPlaying) stopRiff()
+      else await playScore(thronesIntro)
+    }
+
+    root.addEventListener('guitar:play', event => {
+      const preset = guitarPresets.find(p => p.id === (event as CustomEvent<string>).detail)
+      if (preset) void playScore(preset)
+    }, { signal })
+    root.addEventListener('guitar:stop', () => stopRiff(false), { signal })
+
+    trigger?.addEventListener('click', () => { void playRiff() }, { signal })
+    document.addEventListener('keydown', event => {
+      if (trigger && riffPlaying) {
+        if (event.target === trigger && ['Enter', ' '].includes(event.key)) event.preventDefault()
+        stopRiff()
+        return
+      }
+      if (event.key === 'Escape' && (riffPlaying || voices.size > 0)) { event.preventDefault(); stopRiff() }
+    }, { signal })
+    document.addEventListener('pointerdown', event => {
+      if (trigger && riffPlaying && !(event.target instanceof Node && trigger.contains(event.target))) stopRiff()
+    }, { signal, capture: true })
+    document.addEventListener('visibilitychange', () => { if (document.hidden && (riffPlaying || voices.size > 0)) stopRiff() }, { signal })
 
     function selectKey(button: HTMLButtonElement) {
       keys.forEach((key) => { key.tabIndex = key === button ? 0 : -1 })
@@ -164,6 +321,13 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
     // A smaller viewport removes frets instead of adding a scrollable panel.
     // Keep the one keyboard entry point on a visible key after resizing.
     const resizeObserver = new ResizeObserver(() => {
+      const visible = guitarVisible()
+      if (trigger) {
+        trigger.disabled = !visible
+        if (visible) trigger.setAttribute('aria-label', riffPlaying ? 'Stop endurance guitar riff' : 'Play endurance guitar riff')
+        else trigger.removeAttribute('aria-label')
+      }
+      if (!visible && (riffPlaying || voices.size > 0)) stopRiff()
       const selected = keys.find((key) => key.tabIndex === 0)
       if (selected && selected.offsetWidth === 0) {
         const open = keys[Number(selected.dataset.row) * 13]
@@ -173,6 +337,8 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
     })
     resizeObserver.observe(root)
     cleanup = () => {
+      stopRiff(false)
+      if (trigger) trigger.disabled = true
       resizeObserver.disconnect()
       controller.abort()
       timers.forEach(clearTimeout)
@@ -189,6 +355,10 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
 <style>
   .guitar-section { min-width: 0; container-type: inline-size; margin-block: 8px; }
   h2 { margin: 0 0 22px; color: var(--foreground); font-size: 30px; font-weight: 700; letter-spacing: -.035em; }
+  .guitar-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+  .guitar-heading a { color: var(--muted-foreground); font-size: 12px; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
+  .guitar-heading a:hover { color: var(--primary); }
+  .show-note-labels .guitar-key__note { opacity: 1; font-size: 10px; background: var(--card); }
   .guitar-neck { position: relative; overflow: hidden; padding-block: 22px; border-radius: 10px; background: transparent; }
   .guitar-string-row { position: relative; isolation: isolate; --open-width: 48px; display: grid; grid-template-columns: var(--open-width) 1.89fr 1.78fr 1.68fr 1.59fr 1.5fr 1.41fr 1.33fr 1.26fr 1.19fr 1.12fr 1.06fr 1fr; }
   .guitar-key { position: relative; isolation: isolate; display: grid; place-items: center; min-width: 0; min-height: 46px; padding: 0; border: 0; border-right: 1px solid color-mix(in srgb, var(--foreground) 14%, transparent); border-radius: 0; background: transparent; color: var(--foreground); touch-action: manipulation; }
@@ -200,6 +370,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
   .guitar-key--open .guitar-key__note { font: 650 17px/1.5 var(--font-sans); }
   .guitar-key--open .guitar-key__note, .guitar-key:focus-visible .guitar-key__note { opacity: 1; }
   .guitar-key:focus-visible .guitar-key__note { background: var(--card); }
+  .guitar-key.is-playing .guitar-key__note { opacity: 1; background: var(--primary); color: var(--primary-foreground); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent); }
   .guitar-key:focus-visible { outline-offset: -4px; border-radius: 4px; }
   .guitar-note-display { position: absolute; inset: 50% auto auto 50%; translate: -50% -50%; max-width: 90%; color: var(--foreground); font-size: clamp(24px, 8vw, 48px); font-weight: 650; text-align: center; opacity: 0; pointer-events: none; }
   .guitar-note-display.show { opacity: .85; }

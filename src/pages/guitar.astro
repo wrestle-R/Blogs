@@ -1,0 +1,119 @@
+---
+import Layout from '@/layouts/Layout.astro'
+import PageHead from '@/components/PageHead.astro'
+import VirtualGuitar from '@/components/VirtualGuitar.astro'
+import '@/styles/guitar-room.css'
+---
+<Layout class="max-w-4xl">
+  <PageHead slot="head" title="Name that tune" description="Five songs, one virtual guitar. Listen to a little riff and see how many you recognise." />
+  <div class="guitar-quiz" data-guitar-quiz>
+    <header class="quiz-heading">
+      <div data-return-navigation class="quiz-home-slot"></div>
+      <div><p class="quiz-eyebrow">A LITTLE MUSIC QUIZ</p><h1 id="guitar-page-title">Name that tune<span>.</span></h1></div>
+    </header>
+    <section data-quiz-intro class="quiz-intro">
+      <p>Five songs. One guitar.<br/>Let's see how many u know.</p>
+      <button class="quiz-primary" data-quiz-start>Let's play <span aria-hidden="true">↗</span></button>
+      <small>Short guitar melodies, from my playlist.<br/>Five guitar arrangements for now. No timer, replay as much as u like.</small>
+    </section>
+    <section data-quiz-round hidden aria-label="Current question">
+      <div class="quiz-meta"><span data-quiz-counter>01 / 05</span><span data-quiz-points>0 correct</span></div>
+      <div class="quiz-steps" aria-hidden="true">{Array.from({length:5},()=> <span></span>)}</div>
+      <div class="quiz-playback"><button class="quiz-primary" data-quiz-play>▶ Play the riff</button><button class="quiz-stop" data-quiz-stop disabled>Stop</button><p data-guitar-status role="status">Listen, then pick the song.</p></div>
+      <div class="quiz-guitar"><VirtualGuitar studio /></div>
+      <div class="quiz-pocket"><div class="pocket-strings" aria-hidden="true">{Array.from({length:6},(_,i)=><span style={`--gauge:${3-i*.35}px`}></span>)}</div><p>Turn sideways to see the guitar.<br/>You can still play the quiz here.</p></div>
+      <h2 class="quiz-question" tabindex="-1">What song is it?</h2>
+      <div class="quiz-answers" data-quiz-answers></div>
+      <div class="quiz-feedback"><p data-quiz-feedback role="status"></p><button data-quiz-next class="quiz-next" hidden>Next song →</button></div>
+    </section>
+    <section data-quiz-results hidden class="quiz-results" aria-labelledby="quiz-result-title">
+      <p class="quiz-eyebrow">THAT'S ALL FIVE</p><h2 id="quiz-result-title" tabindex="-1">How'd u do?</h2>
+      <p class="quiz-score"><strong data-quiz-score>0</strong><span>/ 5</span></p>
+      <p data-quiz-percentile></p><small>Compared with previous runs on this device. Ties share a rank.</small>
+      <form data-quiz-save><label for="quiz-name">Put a name on it <span>(optional)</span></label><div><input id="quiz-name" name="name" maxlength="24" placeholder="Anonymous" autocomplete="nickname" /><button class="quiz-primary" type="submit">Save name</button></div><p data-quiz-save-status role="status"></p></form>
+      <button data-quiz-again class="quiz-next">Play again ↗</button>
+    </section>
+    <details class="quiz-leaderboard"><summary>Leaderboard <span>on this device</span></summary><ol data-quiz-board></ol><p data-quiz-empty>No saved runs yet. First spot's yours.</p></details>
+    <noscript>This quiz needs JavaScript to play the guitar and keep score.</noscript>
+  </div>
+</Layout>
+<script>
+  import { songById } from '@/lib/guitar-catalogue'
+  import { QUIZ_IDS, QUIZ_STORAGE, shuffled, readRuns, percentile, answerOptions, type QuizRun } from '@/lib/guitar-quiz'
+  let cleanup: (()=>void) | undefined
+  function initQuiz() {
+    cleanup?.()
+    const page = document.querySelector<HTMLElement>('[data-guitar-quiz]')
+    if (!page) return
+    const controller = new AbortController(), {signal} = controller
+    const get = <T extends HTMLElement = HTMLElement>(name:string) => page.querySelector<T>(`[data-${name}]`)!
+    const instrument = get('guitar')
+    const intro=get('quiz-intro'), round=get('quiz-round'), results=get('quiz-results')
+    const play=get<HTMLButtonElement>('quiz-play'), stop=get<HTMLButtonElement>('quiz-stop'), next=get<HTMLButtonElement>('quiz-next')
+    const answers=get('quiz-answers'), feedback=get('quiz-feedback'), status=get('guitar-status')
+    let questions=shuffled(QUIZ_IDS), index=0, score=0, answered=false, heard=false, run: QuizRun|undefined, history:QuizRun[]=[]
+    let available=true
+    const load=()=> {try { return readRuns(localStorage.getItem(QUIZ_STORAGE)) } catch {available=false;return []} }
+    const stopAudio=()=>instrument.dispatchEvent(new Event('guitar:stop'))
+    const board=()=> {
+      const records=load().sort((a,b)=>b.score-a.score || a.date-b.date).slice(0,5)
+      get('quiz-empty').hidden=records.length>0
+      get('quiz-board').replaceChildren(...records.map(r=>{const item=document.createElement('li'), name=document.createElement('span'), points=document.createElement('strong');name.textContent=r.name;points.textContent=`${r.score} / 5`;item.append(name,points);return item}))
+    }
+    function showQuestion() {
+      stopAudio(); answered=false; heard=false; play.disabled=false; play.textContent='▶ Play the riff';next.hidden=true;feedback.textContent='';status.textContent='Listen, then pick the song.'
+      get('quiz-counter').textContent=`0${index+1} / 05`;get('quiz-points').textContent=`${score} correct`
+      page!.querySelectorAll('.quiz-steps span').forEach((s,i)=>{s.classList.toggle('done',i<index);s.classList.toggle('current',i===index)})
+      const id=questions[index]
+      const options=answerOptions(id)
+      answers.replaceChildren(...options.map((option,i)=>{
+        const song=songById(option),button=document.createElement('button')
+        button.type='button'; button.dataset.answer=option;button.disabled=true
+        const letter=document.createElement('span'),label=document.createElement('span');letter.textContent=String.fromCharCode(65+i);label.textContent=song.title;button.append(letter,label)
+        button.addEventListener('click',()=>{
+          if(answered||!heard)return
+          answered=true;stopAudio();const correct=option===id;if(correct)score++
+          for(const choice of answers.querySelectorAll<HTMLButtonElement>('button')){choice.disabled=true;if(choice.dataset.answer===id)choice.dataset.result='correct';else if(choice===button)choice.dataset.result='wrong'}
+          const actual=songById(id)
+          feedback.textContent=`${correct?'Yep, got it.':'That was '+actual.title+'.'} ${actual.artist}.`
+          get('quiz-points').textContent=`${score} correct`;next.textContent=index===4?'See my score →':'Next song →';next.hidden=false
+        },{signal})
+        return button
+      }))
+    }
+    function start() {stopAudio();questions=shuffled(QUIZ_IDS);index=0;score=0;run=undefined;intro.hidden=true;results.hidden=true;round.hidden=false;showQuestion();play.focus()}
+    get('quiz-start').addEventListener('click',start,{signal});get('quiz-again').addEventListener('click',start,{signal})
+    play.addEventListener('click',()=>instrument.dispatchEvent(new CustomEvent('guitar:play',{detail:questions[index]})),{signal})
+    stop.addEventListener('click',stopAudio,{signal})
+    instrument.addEventListener('guitar:state',event=>{
+      const state=(event as CustomEvent<string>).detail
+      stop.disabled=state!=='playing';play.disabled=state==='playing';play.textContent=state==='playing'?'Playing…':heard?'↻ Replay the riff':'▶ Play the riff'
+      if(state==='playing'){heard=true;if(!answered)answers.querySelectorAll<HTMLButtonElement>('button').forEach(b=>b.disabled=false)}
+      if(state==='error')status.textContent='Sound unavailable. Tap Play to try again.'
+    },{signal})
+    const strings=Array.from(page.querySelectorAll<HTMLElement>('.pocket-strings span'))
+    instrument.addEventListener('guitar:note',event=>{const line=strings[(event as CustomEvent<number>).detail];line.getAnimations().forEach(a=>a.cancel());if(!matchMedia('(prefers-reduced-motion: reduce)').matches)line.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(3px)',opacity:1},{transform:'translateY(-2px)',opacity:1},{transform:'translateY(0)',opacity:.45}],{duration:350})},{signal})
+    next.addEventListener('click',()=>{
+      if(!answered)return
+      if(index<4){index++;showQuestion();play.focus();return}
+      answered=false;stopAudio();round.hidden=true;results.hidden=false;history=load()
+      const rank=percentile(score,history)
+      get('quiz-score').textContent=String(score);get('quiz-percentile').textContent=rank===null?'First run here. You set the bar.':`${rank}th percentile · ${history.length} previous ${history.length===1?'run':'runs'}`
+      run={id:crypto.randomUUID(),name:'Anonymous',score,date:Date.now()}
+      // Store every completed run once; adding a name updates this same record.
+      try {const fresh=load();localStorage.setItem(QUIZ_STORAGE,JSON.stringify([...fresh,run].slice(-100)));available=true}catch{available=false}
+      get<HTMLInputElement>('quiz-save-status').textContent=available?'Score saved on this device.':'Score shown here. This browser could not save it.'
+      const form=get<HTMLFormElement>('quiz-save');form.reset();form.querySelector('button')!.disabled=false
+      board();results.querySelector<HTMLElement>('h2')!.focus()
+    },{signal})
+    get<HTMLFormElement>('quiz-save').addEventListener('submit',event=>{
+      event.preventDefault();if(!run)return
+      const name=(page.querySelector<HTMLInputElement>('#quiz-name')!.value.trim()||'Anonymous').slice(0,24)
+      run={...run,name}
+      try {const records=load().filter(r=>r.id!==run!.id);localStorage.setItem(QUIZ_STORAGE,JSON.stringify([...records,run].slice(-100)));get('quiz-save-status').textContent='Saved. That spot is yours.';get<HTMLFormElement>('quiz-save').querySelector('button')!.disabled=true;board()}catch{get('quiz-save-status').textContent='This browser could not save your name. Your score is still here.'}
+    },{signal})
+    board();cleanup=()=>{stopAudio();controller.abort();strings.forEach(s=>s.getAnimations().forEach(a=>a.cancel()));cleanup=undefined}
+  }
+  document.addEventListener('astro:page-load',initQuiz)
+  document.addEventListener('astro:before-swap',()=>cleanup?.())
+</script>
