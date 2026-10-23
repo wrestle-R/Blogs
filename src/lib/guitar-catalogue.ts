@@ -32,7 +32,7 @@ const legacyEntries: [string,string,string][] = [
  ["bad-dream", "Bad Dream", "ISHAN"],
  ["if-i-had-no-song", "If I Had No Song", "ISHAN"],
  ["the-shade", "THE SHADE", "Rex Orange County"],
- ["sucker-for-pain", "Sucker for Pain (with Wiz Khalifa, Imagine Dragons, Logic & Ty Dolla $ign feat. X Ambassadors)", "Lil Wayne, Wiz Khalifa, Imagine Dragons, X Ambassadors, Logic, Ty Dolla $ign"],
+ ["sucker-for-pain", "Sucker for Pain", "Lil Wayne, Wiz Khalifa, Imagine Dragons, X Ambassadors, Logic, Ty Dolla $ign"],
  ["two-moons", "Two Moons", "BoyWithUke"],
  ["me-and-my-guitar", "Me and My Guitar", "A Boogie Wit da Hoodie"],
  ["you", "You", "Benjamin Steer"],

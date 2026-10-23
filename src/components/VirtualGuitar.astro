@@ -15,7 +15,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
 ---
 
 <section class:list={['guitar-section', { 'guitar-section--studio': studio }]} aria-labelledby={studio ? 'guitar-page-title' : 'guitar-title'} data-guitar data-studio={studio ? '' : undefined}>
-  {!studio && <div class="guitar-heading"><h2 id="guitar-title">Virtual Guitar</h2><a href="/guitar">Open guitar room ↗</a></div>}
+  {!studio && <div class="guitar-heading"><h2 id="guitar-title">Virtual Guitar</h2></div>}
   <p id="guitar-help" class="sr-only">Tap a string to play. Use arrow keys to move between visible frets and Enter to play.</p>
   <div class="guitar-neck" role="group" aria-label="Guitar fretboard" aria-describedby="guitar-help">
       {strings.map((string, row) => (
@@ -375,8 +375,6 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
   .guitar-section { min-width: 0; container-type: inline-size; margin-block: 8px; }
   h2 { margin: 0 0 22px; color: var(--foreground); font-size: 30px; font-weight: 700; letter-spacing: -.035em; }
   .guitar-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
-  .guitar-heading a { color: var(--muted-foreground); font-size: 12px; text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
-  .guitar-heading a:hover { color: var(--primary); }
   .show-note-labels .guitar-key__note { opacity: 1; font-size: 10px; background: var(--card); }
   .guitar-neck { position: relative; overflow: hidden; padding-block: 22px; border-radius: 10px; background: transparent; }
   .guitar-string-row { position: relative; isolation: isolate; --open-width: 48px; display: grid; grid-template-columns: var(--open-width) 1.89fr 1.78fr 1.68fr 1.59fr 1.5fr 1.41fr 1.33fr 1.26fr 1.19fr 1.12fr 1.06fr 1fr; }
