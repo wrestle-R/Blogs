@@ -62,6 +62,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
     let context: AudioContext | undefined
     let output: DynamicsCompressorNode | undefined
     let master: GainNode | undefined
+    let riffBus: GainNode | undefined
     const buffers = new Map<number, AudioBuffer>()
     const riffVoices = new Set<AudioBufferSourceNode>()
     const voiceGains = new Map<AudioBufferSourceNode, GainNode>()
@@ -128,6 +129,9 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
         warmth.gain.value = -4
         master = context.createGain()
         master.gain.value = quizMode ? .65 : 1
+        riffBus = context.createGain()
+        riffBus.gain.value = 0
+        riffBus.connect(output)
         output.connect(master).connect(body).connect(warmth).connect(context.destination)
       }
       await context.resume()
@@ -157,7 +161,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
         const release = Math.max(.06, duration * .9)
         gain.gain.setTargetAtTime(0, when + release, .015)
       }
-      source.connect(gain).connect(output!)
+      source.connect(gain).connect(riff ? riffBus! : output!)
       // Future scheduled riff voices must not evict one another before playing.
       if (!riff && voices.size >= 12) voices.values().next().value?.stop()
       voices.add(source)
@@ -188,10 +192,19 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
       riffPlaying = false
       if (riffFrame !== undefined) cancelAnimationFrame(riffFrame)
       riffFrame = undefined
+      // Mute the whole score even when future sources have not started yet.
+      // Individual source cancellation below also prevents a later restart.
+      if (context && riffBus) {
+        const now = context.currentTime
+        riffBus.gain.cancelScheduledValues(now)
+        riffBus.gain.setValueAtTime(riffBus.gain.value, now)
+        riffBus.gain.linearRampToValueAtTime(0, now + .015)
+      }
       voices.forEach(source => {
         const now = context!.currentTime
         const gain = voiceGains.get(source)!
-        gain.gain.cancelAndHoldAtTime(now)
+        if (typeof gain.gain.cancelAndHoldAtTime === 'function') gain.gain.cancelAndHoldAtTime(now)
+        else { gain.gain.cancelScheduledValues(now); gain.gain.setValueAtTime(gain.gain.value, now) }
         gain.gain.linearRampToValueAtTime(0, now + .025)
         source.stop(now + .03)
       })
@@ -222,7 +235,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
     }
 
     async function pluck(button: HTMLButtonElement, clientX?: number) {
-      if (riffPlaying) stopRiff(false)
+      stopRiff(false)
       try {
         const audio = await audioReady()
         sound(button, audio.currentTime)
@@ -247,6 +260,11 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
         notes.forEach(note => noteBuffer(Number(keys[note.row * 13 + note.fret].dataset.midi)))
         const bpm = preset.bpm
         const beat = 60 / bpm
+        // Each explicit play opens the score bus after the previous stop fade.
+        // The run token prevents a cancelled async start from reopening it.
+        riffBus!.gain.cancelScheduledValues(audio.currentTime)
+        riffBus!.gain.setValueAtTime(0, audio.currentTime)
+        riffBus!.gain.linearRampToValueAtTime(1, audio.currentTime + .03)
         const start = audio.currentTime + .06
         const end = start + preset.beats * beat + 1.2
         notes.forEach(note => sound(keys[note.row * 13 + note.fret], start + note.beat * beat, note.velocity, true, note.durationBeats === undefined ? undefined : note.durationBeats * beat))
@@ -271,7 +289,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
     }
 
     async function playRiff() {
-      if (riffPlaying) stopRiff()
+      if (riffPlaying || root!.dataset.riffState === 'starting') stopRiff()
       else await playScore(thronesIntro)
     }
 

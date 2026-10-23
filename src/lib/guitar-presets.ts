@@ -1,4 +1,6 @@
 import { enduranceRiff, RIFF_BPM, RIFF_BEATS, type RiffNote } from './guitar-riff'
+import arrangements from './guitar-arrangements.json'
+import { songById } from './guitar-catalogue'
 export interface GuitarPreset { id: string; label: string; detail: string; bpm: number; beats: number; notes: RiffNote[] }
 export const tuning = [40, 45, 50, 55, 59, 64]
 export const chords = [
@@ -16,35 +18,74 @@ export function melody(notes: number[], lengths: number[], velocity = .85): Riff
   let beat = 0
   return notes.map((midi, i) => { const note = { beat, ...position(midi), velocity, durationBeats: lengths[i] }; beat += lengths[i]; return note })
 }
+
+// Source beats already include dotted notes and tuplets. Ties are merged during
+// transcription, and a single octave shift preserves each phrase's intervals.
+export function arrangedNotes(events: number[][]): RiffNote[] {
+  const groups = new Map<number, Map<number, number>>()
+  for (const [beat, pitch, duration] of events) {
+    const chord = groups.get(beat) || new Map<number, number>()
+    chord.set(pitch, Math.max(chord.get(pitch) || 0, duration))
+    groups.set(beat, chord)
+  }
+  return [...groups].sort(([a], [b]) => a-b).flatMap(([beat, chord]) => {
+    const pitches = [...chord.keys()].sort((a,b) => b-a)
+    const placed: {row:number;fret:number}[] = []
+    const assign = (i: number): boolean => {
+      if (i === pitches.length) return true
+      for (let row = 5; row >= 0; row--) {
+        const fret = pitches[i]-tuning[row]
+        if (fret < 0 || fret > 12 || placed.some(p => p.row === row)) continue
+        placed.push({row,fret})
+        if (assign(i+1)) return true
+        placed.pop()
+      }
+      return false
+    }
+    if (!assign(0)) throw new Error(`Unplayable guitar voicing at beat ${beat}`)
+    return pitches.map((pitch,i) => ({beat,...placed[i],velocity:pitches.length>2 ? .6 : .82,durationBeats:chord.get(pitch)!}))
+  })
+}
 // Short opening-hook arrangement, not a full-song transcription.
 // Pitch reference: CCYD Music's Year 8 Ostinato booklet (Shape of You riff).
 const shape = melody([61,64,61,61,64,61,61,64,61,63,61,59], [.5,1,.5,.5,1,.5,.5,1,.5,.5,1,.5])
-// Four bars of the opening C-minor / C-major ostinato, simplified for guitar.
-// Reference: unpianiste.com/wp-content/uploads/partitions/Game_of_Thrones.pdf
-// Main-title guitar arrangement: four-bar ostinato, both statements of the
-// opening melody, then the rising second section and closing cadence.
-// Melody reference: the arranger's score at unpianiste.com (above), down an octave.
-const mainThemePitches = [55,48,51,53,55,48,51,53,50, 53,46,50,48,53,46,50,48,48]
-const mainThemeLengths = [3,3,.5,.5,2,2,.5,.5,12, 3,3,.5,.5,2,2,.5,.5,12]
-const secondPitches = [55,48,51,53,55,48,51,53,50,53,46,50,51,50,46,48,60,58,48,56,55,44,51,53,55,58,57,48,53,50,41,48,47,46]
-const secondLengths = [3,3,.5,.5,2,2,.5,.5,12,3,3,1.5,1.5,1.5,1.5,12,6,6,3,3,6,6,3,3,12,6,6,3,3,6,6,3,3,6]
-// Keep tied long melody notes alive with a gentle pluck each bar, plus a quiet
-// six-eighth-note accompaniment. This is guitar synthesis, not the recording.
-const openingPitches = [55,48,51,53,55,48,51,53,55,48,52,53,55,48,52,53]
-const openingLengths = Array.from({length:4},()=>[1.5,.5,.5,.5]).flat()
-const titlePitches = [...openingPitches,...mainThemePitches,...mainThemePitches,...secondPitches]
-const titleLengths = [...openingLengths,...mainThemeLengths,...mainThemeLengths,...secondLengths]
-const titleLead = melody(titlePitches,titleLengths,.95).flatMap((note,i) =>
-  Array.from({length:Math.ceil(titleLengths[i]/3)},(_,bar)=>({...note,beat:note.beat+bar*3,velocity:bar ? .65 : note.velocity})))
-const titleBeats = titleLengths.reduce((a,b)=>a+b,0)
-const titleBacking: RiffNote[] = []
-for(let beat=0;beat<titleBeats;beat+=.5) {
-  const bar=Math.floor(beat/3)
-  const root = bar < 4 ? 48 : [48,48,48,48,43,43,43,43,46,46,46,46,41,41,41,41][(bar-4)%16]
-  const pitch = [root,root+7,root+12,root+7,root+12,root+7][Math.round((beat%3)*2)]
-  titleBacking.push({beat,...position(pitch),velocity:.22})
+// The intro pulse is quarter, quarter, eighth, eighth in 3/4. The previous
+// dotted-quarter/eighth/eighth/eighth transcription rushed the lower C note.
+// Rhythm reference: Pierre Loiselle, Guitare 1, bars 9–16 (A-minor arrangement,
+// transposed here to the theme's C minor). Main phrases: Easy Breezy's C-minor
+// transcription. No invented backing arpeggio or repeated attacks on tied notes.
+export const THRONES_BPM = 144 // Deliberately calmer guitar interpretation.
+const ostinatoLengths = [1,1,.5,.5]
+const minorOpening = [55,48,51,53]
+const majorOpening = [55,48,52,53]
+const openingNotes = melody([
+ ...Array.from({length:4},()=>minorOpening).flat(),
+ ...Array.from({length:4},()=>majorOpening).flat(),
+],Array.from({length:8},()=>ostinatoLengths).flat(),.85)
+const mainThemePitches = [55,48,51,53,55,48,51,53,
+ ...Array.from({length:3},()=>[50,43,46,48]).flat(),50,43,46,
+ 53,46,51,50,53,46,
+ 51,50,48,44,46,...Array.from({length:2},()=>[48,41,44,46]).flat(),48,41,44]
+const mainThemeLengths = [3,3,.5,.5,2,2,.5,.5,
+ ...Array.from({length:3},()=>ostinatoLengths).flat(),1,1,1,
+ 3,3,.5,.5,2,3,
+ .5,.5,1,.5,.5,...Array.from({length:2},()=>ostinatoLengths).flat(),1,1,1]
+// Phrase lengths include the notated rests/ties; keep the upper statement in
+// the guitar's register instead of changing isolated pitches to arbitrary octaves.
+const mainNotes = melody(mainThemePitches,mainThemeLengths)
+const mainBeats = mainThemeLengths.reduce((sum,value)=>sum+value,0)
+const closingPitches = [60,58,48,56,55,44,51,53,55,48]
+const closingLengths = [6,6,3,3,6,6,3,3,6,6]
+const closingNotes = melody(closingPitches,closingLengths,.8)
+export const thronesIntro: GuitarPreset = {
+ id:'thrones-intro',label:'Game of Thrones',detail:'Ramin Djawadi · guitar theme',
+ bpm:THRONES_BPM,beats:24+mainBeats*3+48,
+ notes:[...openingNotes,
+ ...mainNotes.map(n=>({...n,beat:n.beat+24})),
+ ...mainNotes.map(n=>({...n,beat:n.beat+24+mainBeats})),
+ ...melody(mainThemePitches.map(p=>p+12),mainThemeLengths).map(n=>({...n,beat:n.beat+24+mainBeats*2})),
+ ...closingNotes.map(n=>({...n,beat:n.beat+24+mainBeats*3}))],
 }
-export const thronesIntro: GuitarPreset = {id:'thrones-intro',label:'Game of Thrones',detail:'Ramin Djawadi · main-title guitar arrangement',bpm:168,beats:titleBeats,notes:[...titleLead,...titleBacking].sort((a,b)=>a.beat-b.beat)}
 
 // Short, score-referenced guitar reductions. Register is lowered to the guitar;
 // simultaneous backing tones are reduced, while the melody and notated rests
@@ -69,6 +110,10 @@ export const guitarPresets: GuitarPreset[] = [
  {id:'dandelions',label:'Dandelions',detail:'Ruth B. · opening melody',bpm:80,beats:16,notes:dandelionNotes},
  {id:'snowman',label:'Snowman',detail:'Sia · opening arpeggios and vocal pickup',bpm:103.5,beats:18,notes:[...snowOpening,...snowVoice]},
  {id:'505',label:'505',detail:'Arctic Monkeys · opening harmony',bpm:140,beats:16,notes:fifthNotes},
- {id:'thrones',label:'Game of Thrones',detail:'Ramin Djawadi · opening theme',bpm:168,beats:24,notes:melody(mainThemePitches.slice(0,9),mainThemeLengths.slice(0,9))},
+ ...arrangements.map(arrangement => {
+   const song = songById(arrangement.id)
+   return {id:song.id,label:song.title,detail:`${song.artist} · short guitar reduction`,bpm:arrangement.bpm,beats:arrangement.beats,notes:arrangedNotes(arrangement.events)}
+ }),
+ {id:'thrones',label:'Game of Thrones',detail:'Ramin Djawadi · opening theme',bpm:THRONES_BPM,beats:12,notes:melody(mainThemePitches.slice(0,8),mainThemeLengths.slice(0,8))},
  {id:'endurance',label:'A little endurance',detail:'An original fingerstyle phrase',bpm:RIFF_BPM,beats:RIFF_BEATS,notes:enduranceRiff},
 ]
