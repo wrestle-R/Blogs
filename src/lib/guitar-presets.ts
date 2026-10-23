@@ -46,15 +46,12 @@ export function arrangedNotes(events: number[][]): RiffNote[] {
     return pitches.map((pitch,i) => ({beat,...placed[i],velocity:pitches.length>2 ? .6 : .82,durationBeats:chord.get(pitch)!}))
   })
 }
-// Short opening-hook arrangement, not a full-song transcription.
-// Pitch reference: CCYD Music's Year 8 Ostinato booklet (Shape of You riff).
-const shape = melody([61,64,61,61,64,61,61,64,61,63,61,59], [.5,1,.5,.5,1,.5,.5,1,.5,.5,1,.5])
 // The intro pulse is quarter, quarter, eighth, eighth in 3/4. The previous
 // dotted-quarter/eighth/eighth/eighth transcription rushed the lower C note.
 // Rhythm reference: Pierre Loiselle, Guitare 1, bars 9–16 (A-minor arrangement,
 // transposed here to the theme's C minor). Main phrases: Easy Breezy's C-minor
 // transcription. No invented backing arpeggio or repeated attacks on tied notes.
-export const THRONES_BPM = 144 // Deliberately calmer guitar interpretation.
+export const THRONES_BPM = 170 // Score-referenced quarter-note tempo (see source notes).
 const ostinatoLengths = [1,1,.5,.5]
 const minorOpening = [55,48,51,53]
 const majorOpening = [55,48,52,53]
@@ -87,33 +84,12 @@ export const thronesIntro: GuitarPreset = {
  ...closingNotes.map(n=>({...n,beat:n.beat+24+mainBeats*3}))],
 }
 
-// Short, score-referenced guitar reductions. Register is lowered to the guitar;
-// simultaneous backing tones are reduced, while the melody and notated rests
-// remain. See guitar-arrangement-sources.md for the exact source and measures.
-const bluePitches = [72,71,67,72,71,67,72,71,67,72,74,76, 67,69,72,77,76,71,71,71,72,74,72, 67,64,65,67,71,72, 67,69,72,77,76,71,71,79,77,76]
-const blueLengths = [...Array(12).fill(.5), ...Array(6).fill(.5),1,.5,.5,.5,.5, 1.5,.5,.5,.5,1.5,1.5, ...Array(6).fill(.5),1.5,.5,.5,.5]
-const blueNotes = melody(bluePitches.map(p=>p-8),blueLengths)
-const dandelionPitches = [81,79,76,76,74,76,74,72, 81,79,76,76,74,74,72,74,72, 69,72,74,76,74,72,76,81, 67,72,74,76,74,72,74]
-const dandelionLengths = [1/3,1/3,1/3,2/3,1/3,2/3,1/3,1, 1/3,1/3,1/3,2/3,1/3,2/3,1/3,2/3,1/3, ...Array(6).fill(1/3),1,1, ...Array(6).fill(1/3),2]
-const dandelionNotes = melody(dandelionPitches.map(p=>p-11),dandelionLengths)
-const snowOpening = melody([64,67,72,76,72,67,64,67,72,76,72,67,64,67,72,76,79,84].map(p=>p-11),Array(18).fill(.5),.6)
-const snowVoice = melody([69,74,76,74,74,69,76,74,74,74].map(p=>p-11),[1,.5,1,.5,1,.25,.75,.5,.5,1.5]).map(n=>({...n,beat:n.beat+10.5}))
-const fifthNotes: RiffNote[] = [
-  // Organ harmony reduced to guitar voicings. D minor for eight quarter beats,
-  // E minor for eight, matching the four-bar opening at 140 BPM.
-  ...[50,57,62,65].map(p=>({beat:0,...position(p),velocity:.65})),
-  ...[52,59,64,67].map(p=>({beat:8,...position(p),velocity:.65})),
-]
+// Locally stored, source-referenced short reductions.
 export const guitarPresets: GuitarPreset[] = [
- {id:'shape',label:'Shape of You',detail:'Ed Sheeran · opening riff',bpm:96,beats:8,notes:shape},
- {id:'blue',label:'blue',detail:'yung kai · opening melody',bpm:105,beats:24,notes:blueNotes},
- {id:'dandelions',label:'Dandelions',detail:'Ruth B. · opening melody',bpm:80,beats:16,notes:dandelionNotes},
- {id:'snowman',label:'Snowman',detail:'Sia · opening arpeggios and vocal pickup',bpm:103.5,beats:18,notes:[...snowOpening,...snowVoice]},
- {id:'505',label:'505',detail:'Arctic Monkeys · opening harmony',bpm:140,beats:16,notes:fifthNotes},
  ...arrangements.map(arrangement => {
    const song = songById(arrangement.id)
    return {id:song.id,label:song.title,detail:`${song.artist} · short guitar reduction`,bpm:arrangement.bpm,beats:arrangement.beats,notes:arrangedNotes(arrangement.events)}
  }),
- {id:'thrones',label:'Game of Thrones',detail:'Ramin Djawadi · opening theme',bpm:THRONES_BPM,beats:12,notes:melody(mainThemePitches.slice(0,8),mainThemeLengths.slice(0,8))},
+ {id:'thrones',label:'Game of Thrones',detail:'Ramin Djawadi · opening theme',bpm:THRONES_BPM,beats:24,notes:openingNotes},
  {id:'endurance',label:'A little endurance',detail:'An original fingerstyle phrase',bpm:RIFF_BPM,beats:RIFF_BEATS,notes:enduranceRiff},
 ]

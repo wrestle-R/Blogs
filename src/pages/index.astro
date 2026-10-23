@@ -3,7 +3,6 @@ import BlogCard from '@/components/BlogCard.astro'
 import Newsletter from '@/components/Newsletter.astro'
 import PageHead from '@/components/PageHead.astro'
 import PaginationComponent from '@/components/ui/pagination'
-import VirtualGuitar from '@/components/VirtualGuitar.astro'
 import { SITE } from '@/consts'
 import Layout from '@/layouts/Layout.astro'
 import { getAllPosts } from '@/lib/data-utils'
@@ -34,8 +33,7 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
   
   <div class="endurance-copy flex flex-col space-y-1.5 p-5 sm:p-8">
     <div class="endurance-definition">
-    <h3 class="text-3xl font-bold leading-none sm:text-4xl"><button type="button" class="endurance-trigger" data-endurance-riff disabled aria-controls="guitar" aria-pressed="false">en·dur·ance</button></h3>
-    <span class="sr-only" role="status" data-endurance-status></span>
+    <h3 class="text-3xl font-bold leading-none sm:text-4xl">en·dur·ance</h3>
     <p class="text-muted-foreground text-sm">
       /ɛnˈdjʊərəns/ • <span class="font-medium">noun</span>
     </p>
@@ -133,11 +131,6 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
   #now-playing-text { display: block; width: max-content; white-space: nowrap; font-size: 12px; line-height: 16px; font-weight: 600; }
   .listening-badge__time { flex: none; white-space: nowrap; font-size: 12px; line-height: 16px; font-weight: 500; opacity: .8; }
   .listening-badge__indicator[hidden],.listening-badge__time[hidden] { display: none; }
-  .mobile-guitar-room { display: none; }
-  .endurance-trigger { padding: 0; border: 0; background: none; color: var(--foreground); font: inherit; letter-spacing: inherit; text-align: left; min-height: 44px; transition: color 180ms ease; }
-  .endurance-trigger:disabled { cursor: default; }
-  .endurance-trigger:not(:disabled):hover, .endurance-trigger[aria-pressed='true'] { color: var(--primary); }
-  .endurance-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 5px; border-radius: 3px; }
   @media (min-width:640px) {
     .listening-badge { top: 12px; right: 16px; max-width: calc(100% - 32px); }
     .listening-badge__surface { height: 40px; gap: 8px; padding: 0 16px; }
@@ -147,12 +140,9 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
   }
   @media (prefers-reduced-motion:reduce) { .scrolling-text,.listening-badge__indicator { animation: none !important; } }
   @media (max-width: 639px) {
-    .endurance-trigger { min-height: 0; }
-    .mobile-guitar-room { display: inline-flex; align-items: center; min-height: 44px; font-size: 12px; color: var(--muted-foreground); }
     .endurance-panel { display: flex; flex-direction: column; }
     .endurance-copy { order: 0; padding: 20px; }
     .listening-badge { order: 1; position: static; align-self: flex-start; margin: -6px 20px 14px; max-width: calc(100% - 40px); }
-    #guitar { display: none; }
   }
   @media (max-width: 1199px) {
     .endurance-copy { display: flow-root; }
@@ -178,8 +168,6 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
   }
 </style>
 
-  <div id="guitar"><VirtualGuitar /></div>
-  <a class="mobile-guitar-room" href="/guitar">Open guitar room ↗</a>
 
 
   <section class="flex flex-col gap-y-6">

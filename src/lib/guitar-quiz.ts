@@ -1,7 +1,7 @@
 import { songById } from './guitar-catalogue'
 import { guitarPresets } from './guitar-presets'
-export const QUIZ_VERSION = 'v2'
-export const QUIZ_LENGTH = 5
+export const QUIZ_VERSION = 'v3'
+export const QUIZ_LENGTH = 10
 export const QUIZ_IDS = guitarPresets.filter(preset=>preset.id!=='endurance').map(preset=>preset.id)
 export interface QuizAnswer { songId: string; answerId: string }
 export function shuffled<T>(items: readonly T[]): T[] {

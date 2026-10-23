@@ -2,11 +2,11 @@
 import Layout from '@/layouts/Layout.astro'
 import PageHead from '@/components/PageHead.astro'
 import VirtualGuitar from '@/components/VirtualGuitar.astro'
-import { QUIZ_IDS } from '@/lib/guitar-quiz'
+import { QUIZ_IDS, QUIZ_LENGTH } from '@/lib/guitar-quiz'
 import '@/styles/guitar-room.css'
 ---
 <Layout class="max-w-4xl">
-  <PageHead slot="head" title="Name that tune" description="Five songs, one virtual guitar. Listen to a little riff and see how many you recognise." />
+  <PageHead slot="head" title="Name that tune" description="Ten songs, one virtual guitar. Listen to a little riff and see how many you recognise." />
   <div class="guitar-quiz" data-guitar-quiz>
     <header class="quiz-heading">
       <div data-return-navigation class="quiz-home-slot"></div>
@@ -14,13 +14,13 @@ import '@/styles/guitar-room.css'
     </header>
     <div class="quiz-paper">
     <section data-quiz-intro class="quiz-intro">
-      <h2>How many do u know?</h2><p>Listen to the guitar and pick the song.<br/>Five questions, four choices each.</p>
+      <h2>How many do u know?</h2><p>Listen to the guitar and pick the song.<br/>Ten questions, four choices each.</p>
       <button class="quiz-primary" data-quiz-start>Let's play <span aria-hidden="true">↗</span></button>
-      <small>Five songs from a pool of {QUIZ_IDS.length}. No timer. Replay as much as u like.</small>
+      <small>Ten songs from a pool of {QUIZ_IDS.length}. No timer. Replay as much as u like.</small>
     </section>
     <section data-quiz-round hidden aria-label="Current question">
-      <div class="quiz-meta"><span data-quiz-counter>01 / 05</span><span data-quiz-points>0 correct</span></div>
-      <div class="quiz-steps" aria-hidden="true">{Array.from({length:5},()=> <span></span>)}</div>
+      <div class="quiz-meta"><span data-quiz-counter>01 / {String(QUIZ_LENGTH).padStart(2,'0')}</span><span data-quiz-points>0 correct</span></div>
+      <div class="quiz-steps" aria-hidden="true">{Array.from({length:QUIZ_LENGTH},()=> <span></span>)}</div>
       <div class="quiz-playback"><button class="quiz-primary" data-quiz-play>▶ Play the riff</button><button class="quiz-stop" data-quiz-stop disabled>Stop</button><p data-guitar-status role="status">Listen, then pick the song.</p></div>
       <div class="quiz-guitar"><VirtualGuitar studio /></div>
       <div class="quiz-pocket"><div class="pocket-strings" aria-hidden="true">{Array.from({length:6},(_,i)=><span style={`--gauge:${3-i*.35}px`}></span>)}</div><p>Turn sideways to see the guitar.<br/>You can still play the quiz here.</p></div>
@@ -40,7 +40,7 @@ import '@/styles/guitar-room.css'
 </Layout>
 <script>
   import { songById } from '@/lib/guitar-catalogue'
-  import { newQuestions, ordinal, submitQuiz, answerOptions, type QuizAnswer } from '@/lib/guitar-quiz'
+  import { QUIZ_LENGTH, newQuestions, ordinal, submitQuiz, answerOptions, type QuizAnswer } from '@/lib/guitar-quiz'
   let cleanup: (()=>void) | undefined
   function initQuiz() {
     cleanup?.()
@@ -56,7 +56,7 @@ import '@/styles/guitar-room.css'
     const stopAudio=()=>instrument.dispatchEvent(new Event('guitar:stop'))
     function showQuestion() {
       stopAudio(); answered=false; heard=false; play.disabled=false; play.textContent='▶ Play the riff';next.hidden=true;feedback.textContent='';status.textContent='Listen, then pick the song.'
-      get('quiz-counter').textContent=`0${index+1} / 05`;get('quiz-points').textContent=`${score} correct`
+      get('quiz-counter').textContent=`${String(index+1).padStart(2,'0')} / ${String(QUIZ_LENGTH).padStart(2,'0')}`;get('quiz-points').textContent=`${score} correct`
       page!.querySelectorAll('.quiz-steps span').forEach((s,i)=>{s.classList.toggle('done',i<index);s.classList.toggle('current',i===index)})
       const id=questions[index]
       const options=answerOptions(id)
@@ -70,7 +70,7 @@ import '@/styles/guitar-room.css'
           for(const choice of answers.querySelectorAll<HTMLButtonElement>('button')){choice.disabled=true;if(choice.dataset.answer===id)choice.dataset.result='correct';else if(choice===button)choice.dataset.result='wrong'}
           const actual=songById(id)
           feedback.textContent=`${correct?'Yep, got it.':'That was '+actual.title+'.'} ${actual.artist}.`
-          get('quiz-points').textContent=`${score} correct`;next.textContent=index===4?'See my result →':'Next song →';next.hidden=false
+          get('quiz-points').textContent=`${score} correct`;next.textContent=index===QUIZ_LENGTH-1?'See my result →':'Next song →';next.hidden=false
         },{signal})
         return button
       }))
@@ -89,7 +89,7 @@ import '@/styles/guitar-room.css'
     instrument.addEventListener('guitar:note',event=>{const line=strings[(event as CustomEvent<number>).detail];line.getAnimations().forEach(a=>a.cancel());if(!matchMedia('(prefers-reduced-motion: reduce)').matches)line.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(3px)',opacity:1},{transform:'translateY(-2px)',opacity:1},{transform:'translateY(0)',opacity:.45}],{duration:350})},{signal})
     next.addEventListener('click',async()=>{
       if(!answered)return
-      if(index<4){index++;showQuestion();play.focus();return}
+      if(index<QUIZ_LENGTH-1){index++;showQuestion();play.focus();return}
       answered=false;stopAudio();round.hidden=true;results.hidden=false
       const resultRun=runId
       get('quiz-percentile').textContent='Finding your percentile…'

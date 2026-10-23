@@ -1,7 +1,9 @@
 /** Owner-selected repertoire. A title in this list is not a playable arrangement.
  * Only scores explicitly registered in guitar-presets.ts can become questions. */
+import ownerSongList from './guitar-song-list.json'
+export { default as ownerSongList } from './guitar-song-list.json'
 export interface QuizSong { id: string; title: string; artist: string; neighbours: string[] }
-const entries: [string,string,string][] = [
+const legacyEntries: [string,string,string][] = [
  ['shape','Shape of You','Ed Sheeran'], ['miracle','Miracle','Benjamin Steer'],
  ['bridges','Bridges','Ike Dweck'], ['dreaming','Am I Dreaming','Metro Boomin, A$AP Rocky & Roisee'],
  ['blue','blue','yung kai'], ['glimpse','Glimpse of Us','Joji'],
@@ -87,5 +89,7 @@ const confuserGroups = [
  ['505','gossip','mind','summer','good','self-aware','the-shade','best','the-first-time'],
  ['dreaming','trying','lucid','homecoming','sicko-mode','sucker-for-pain','self-love','mirror','no-role-modelz'],
 ]
-export const quizCatalogue: QuizSong[] = entries.map(([id,title,artist])=>({id,title,artist,neighbours:neighbours[id]||confuserGroups.find(group=>group.includes(id))?.filter(other=>other!==id)||[]}))
+const entries = new Map(legacyEntries.map(([id,title,artist])=>[id,{id,title,artist}]))
+for(const {id,title,artist} of ownerSongList) entries.set(id,{id,title,artist})
+export const quizCatalogue: QuizSong[] = [...entries.values()].map(song=>({...song,neighbours:neighbours[song.id]||confuserGroups.find(group=>group.includes(song.id))?.filter(other=>other!==song.id)||[]}))
 export const songById = (id:string) => quizCatalogue.find(song=>song.id===id)!

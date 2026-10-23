@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { enduranceRiff, pluckedString } from '../../src/lib/guitar-riff'
+import { guitarPresets, tuning } from '../../src/lib/guitar-presets'
 
 // Estimate the rendered wave's period, with parabolic sub-sample refinement.
 function measuredFrequency(samples: Float32Array, sampleRate: number, reference: number) {
@@ -26,7 +27,8 @@ function measuredFrequency(samples: Float32Array, sampleRate: number, reference:
 
 describe('plucked-string tuning', () => {
   for (const sampleRate of [44100, 48000]) {
-    for (const [midi, reference] of [[40,82.406889], [48,130.812783], [59,246.941651], [64,329.627557], [67,391.995436], [76,659.255114]]) {
+    for (const midi of [...new Set(guitarPresets.flatMap(p=>p.notes.map(n=>tuning[n.row]+n.fret)))] .sort((a,b)=>a-b)) {
+      const reference = 440 * 2 ** ((midi-69)/12)
       it(`keeps MIDI ${midi} within 4 cents at ${sampleRate}Hz`, () => {
         const samples = pluckedString(midi, sampleRate, .5)
         const measured = measuredFrequency(samples, sampleRate, reference)
