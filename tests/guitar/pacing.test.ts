@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { guitarPresets, THRONES_BPM } from '../../src/lib/guitar-presets'
+import { thronesIntro, guitarPresets, THRONES_BPM } from '../../src/lib/guitar-presets'
 const song = (id:string) => guitarPresets.find(p=>p.id===id)!
 
 describe('score-checked musical pacing',()=>{
@@ -32,6 +32,6 @@ describe('score-checked musical pacing',()=>{
   })
   it('uses the 170 BPM Game of Thrones pulse and equal first two notes',()=>{
     expect(THRONES_BPM).toBe(170)
-    expect(song('thrones').notes.slice(0,4).map(n=>n.beat)).toEqual([0,1,2,2.5])
+    expect(thronesIntro.notes.slice(0,4).map(n=>n.beat)).toEqual([0,1,2,2.5])
   })
 })

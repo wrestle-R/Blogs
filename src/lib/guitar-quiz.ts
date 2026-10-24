@@ -1,8 +1,8 @@
 import { songById } from './guitar-catalogue'
-import { guitarPresets } from './guitar-presets'
-export const QUIZ_VERSION = 'v4'
-export const QUIZ_LENGTH = 10
-export const QUIZ_IDS = guitarPresets.filter(preset=>preset.id!=='endurance').map(preset=>preset.id)
+import songTextures from './guitar-song-textures.json'
+export const QUIZ_VERSION = 'v5'
+export const QUIZ_LENGTH = 7
+export const QUIZ_IDS = Object.keys(songTextures)
 export interface QuizAnswer { songId: string; answerId: string }
 export function shuffled<T>(items: readonly T[]): T[] {
   const result = [...items]
@@ -22,10 +22,10 @@ export function ordinal(value: number): string {
 export interface QuizQuestion { number:number; total:number; songId:string; options:string[] }
 export interface QuizComparison { percentile:number|null; previousRuns:number; benchmarkRuns:number }
 export interface QuizAnswerResult { songId:string; correct:boolean; score:number; complete:boolean; result:QuizComparison|null }
-const apiBase=()=> (import.meta.env.PUBLIC_RUNBLOG_API_BASE_URL || (import.meta.env.DEV?'http://127.0.0.1:3000':'https://runny.russel.is-a.dev')).replace(/\/$/,'')
+export const apiBase=()=> (import.meta.env.PUBLIC_RUNBLOG_API_BASE_URL || (import.meta.env.DEV?'http://127.0.0.1:3000':'https://runny.russel.is-a.dev')).replace(/\/$/,'')
 async function postQuiz(path:string,body:unknown,signal:AbortSignal):Promise<Record<string,unknown>> {
   const response=await fetch(`${apiBase()}/api/blogs/guitar/session${path}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal})
-  if(!response.ok)throw new Error('Could not save quiz action')
+  if(!response.ok)throw new Error(response.status===503?'The quiz is taking a breather. Please try again.':response.status===404?'This quiz expired. Start a fresh round.':'Couldn’t save that. Please try again.')
   const result=await response.json()
   if(!result||typeof result!=='object')throw new Error('Invalid quiz response')
   return result
@@ -36,7 +36,7 @@ function question(value:unknown):QuizQuestion {
   return q
 }
 export async function startQuizSession(signal:AbortSignal) {
-  const result=await postQuiz('',{},signal)
+  const result=await postQuiz('',{version:QUIZ_VERSION},signal)
   if(typeof result.runId!=='string'||!/^[0-9a-f-]{36}$/i.test(result.runId)||result.version!==QUIZ_VERSION)throw new Error('Invalid quiz session')
   return {runId:result.runId,question:question(result.question)}
 }

@@ -44,7 +44,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
 
 <script>
   import { pluckedString } from '@/lib/guitar-riff'
-  import { guitarPresets, thronesIntro, type GuitarPreset } from '@/lib/guitar-presets'
+  import type { GuitarPreset } from '@/lib/guitar-presets'
   let cleanup: (() => void) | undefined
 
   function initGuitar() {
@@ -64,6 +64,12 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
     let master: GainNode | undefined
     let riffBus: GainNode | undefined
     const buffers = new Map<string, AudioBuffer>()
+    const scores = new Map<string, Promise<GuitarPreset>>()
+    function loadScore(id:string) {
+      let score=scores.get(id)
+      if(!score){score=fetch(`/guitar-riffs/${encodeURIComponent(id)}.json`).then(response=>{if(!response.ok)throw new Error('Riff unavailable');return response.json() as Promise<GuitarPreset>}).catch(error=>{scores.delete(id);throw error});scores.set(id,score)}
+      return score
+    }
     const riffVoices = new Set<AudioBufferSourceNode>()
     const voiceGains = new Map<AudioBufferSourceNode, GainNode>()
     let riffPlaying = false
@@ -149,6 +155,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
         const samples = pluckedString(midi, context!.sampleRate, seconds)
         buffer = context!.createBuffer(1, samples.length, context!.sampleRate)
         buffer.getChannelData(0).set(samples)
+        if(buffers.size>=64)buffers.delete(buffers.keys().next().value!)
         buffers.set(key, buffer)
       }
       return buffer
@@ -174,7 +181,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
     }
 
     function showPluck(button: HTMLButtonElement, clientX?: number) {
-      root!.dispatchEvent(new CustomEvent('guitar:note', {detail: Number(button.dataset.row), bubbles: true}))
+      root!.dispatchEvent(new CustomEvent('guitar:note', {detail: {row:Number(button.dataset.row),note:button.dataset.note,fret:Number(button.dataset.fret)}, bubbles: true}))
       if (readout) {
         readout.textContent = button.dataset.note || ''
         readout.classList.add('show')
@@ -246,7 +253,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
 
     function guitarVisible() { return quizMode || (root!.getBoundingClientRect().width > 0 && keys[0].offsetWidth > 0) }
 
-    async function playScore(preset: GuitarPreset) {
+    async function playScore(id: string) {
       if (!guitarVisible() || signal.aborted) return
       stopRiff(false)
       riffPlaying = true
@@ -254,13 +261,19 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
       trigger?.setAttribute('aria-pressed', 'true')
       trigger?.setAttribute('aria-label', 'Stop endurance guitar riff')
       root!.dataset.riffState = 'starting'
+      notify('starting')
       try {
-        const audio = await audioReady()
+        const [audio,preset] = await Promise.all([audioReady(),loadScore(id)])
         if (run !== riffRun || !guitarVisible()) return
         const notes = preset.notes
         const bpm = preset.bpm
         const beat = 60 / bpm
-        notes.forEach(note => noteBuffer(Number(keys[note.row * 13 + note.fret].dataset.midi), note.durationBeats === undefined ? undefined : note.durationBeats * beat))
+        let budget=performance.now()
+        for(const note of notes) {
+          noteBuffer(Number(keys[note.row * 13 + note.fret].dataset.midi),note.durationBeats===undefined?undefined:note.durationBeats*beat)
+          if(performance.now()-budget>5){await new Promise(resolve=>setTimeout(resolve,0));budget=performance.now()}
+          if(run!==riffRun||signal.aborted)return
+        }
         // Each explicit play opens the score bus after the previous stop fade.
         // The run token prevents a cancelled async start from reopening it.
         riffBus!.gain.cancelScheduledValues(audio.currentTime)
@@ -291,14 +304,15 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
 
     async function playRiff() {
       if (riffPlaying || root!.dataset.riffState === 'starting') stopRiff()
-      else await playScore(thronesIntro)
+      else await playScore('thrones-intro')
     }
 
     root.addEventListener('guitar:prepare', () => { void audioReady().catch(audioError) }, { signal })
     root.addEventListener('guitar:play', event => {
-      const preset = guitarPresets.find(p => p.id === (event as CustomEvent<string>).detail)
-      if (preset) void playScore(preset)
+      const id=(event as CustomEvent<string>).detail
+      if(typeof id==='string')void playScore(id)
     }, { signal })
+    root.addEventListener('guitar:preload', event=>{const id=(event as CustomEvent<string>).detail;if(typeof id==='string')void loadScore(id).catch(()=>{})},{signal})
     root.addEventListener('guitar:stop', () => stopRiff(false), { signal })
 
     trigger?.addEventListener('click', () => { void playRiff() }, { signal })

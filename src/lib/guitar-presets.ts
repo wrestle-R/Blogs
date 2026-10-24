@@ -90,6 +90,5 @@ export const guitarPresets: GuitarPreset[] = [
    const song = songById(arrangement.id)
    return {id:song.id,label:song.title,detail:`${song.artist} · short guitar reduction`,bpm:arrangement.bpm,beats:arrangement.beats,notes:arrangedNotes(arrangement.events)}
  }),
- {id:'thrones',label:'Game of Thrones',detail:'Ramin Djawadi · opening theme',bpm:THRONES_BPM,beats:24,notes:openingNotes},
  {id:'endurance',label:'A little endurance',detail:'An original fingerstyle phrase',bpm:RIFF_BPM,beats:RIFF_BEATS,notes:enduranceRiff},
 ]

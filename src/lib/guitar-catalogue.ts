@@ -1,7 +1,7 @@
 /** Owner-selected repertoire. A title in this list is not a playable arrangement.
  * Only scores explicitly registered in guitar-presets.ts can become questions. */
 import ownerSongList from './guitar-song-list.json'
-import arrangements from './guitar-arrangements.json'
+import songTextures from './guitar-song-textures.json'
 export { default as ownerSongList } from './guitar-song-list.json'
 export interface QuizSong { id: string; title: string; artist: string; neighbours: string[] }
 const legacyEntries: [string,string,string][] = [
@@ -65,7 +65,6 @@ const legacyEntries: [string,string,string][] = [
  ["i-just-wanna-know", "I Just Wanna Know", "NF"],
  ["less", "less", "Olivia Rodrigo"],
  ["remember-that-night", "Remember That Night?", "Sara Kays"],
- ['thrones','Game of Thrones','Ramin Djawadi'],
 ]
 // Deliberate confusers: a shared instrument, pace or musical texture, rather than
 // arbitrary titles. These are hand-curated editorial matches, not audio analysis.
@@ -79,7 +78,6 @@ const neighbours: Record<string,string[]> = {
  good:['drivers','gossip','best','young','risk'],
  smile:['snowman','dandelions','glimpse','her','another'],
  summer:['party','wildflower','october','drivers','sailor'],
- thrones:['mind','505','dreaming','another'],
  another:['glimpse','drivers','party','dead','lie','snowman'],
 }
 // Editorial confusers grouped by broad sound; these are not audio similarity scores.
@@ -92,8 +90,7 @@ const confuserGroups = [
 ]
 const entries = new Map(legacyEntries.map(([id,title,artist])=>[id,{id,title,artist}]))
 for(const {id,title,artist} of ownerSongList) entries.set(id,{id,title,artist})
-const texture=new Map(arrangements.map(a=>{const attacks=new Set(a.events.map(e=>e[0])).size;return [a.id,{bpm:a.bpm,density:attacks/a.beats,chord:a.events.length/attacks}]}))
-texture.set('thrones',{bpm:170,density:32/24,chord:1})
+const texture=new Map(Object.entries(songTextures))
 const primaryArtist=(artist:string)=>artist.split(/,| & | feat\./)[0].toLowerCase()
 function similarSongs(song:{id:string;artist:string}) {
   const original=neighbours[song.id]||confuserGroups.find(group=>group.includes(song.id))?.filter(other=>other!==song.id)||[]

@@ -250,6 +250,42 @@ export function initStickerNavigation(root) {
     main?.setAttribute('tabindex', '-1'); main?.focus({ preventScroll: true });
     scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
   });
+  // Reveal at the final anchor, after the artwork decodes. Individual rotate
+  // and scale properties leave the persisted drag translation untouched.
+  const motion = matchMedia('(prefers-reduced-motion: reduce)');
+  const reveals = new Set();
+  const reveal = async (item, index) => {
+    if (item.dataset.stickerReady) return;
+    const images = [...item.querySelectorAll('img')];
+    await Promise.all(images.map(image => {
+      if (image.complete) return image.decode?.().catch(() => {});
+      return new Promise(resolve => {
+        const done = () => { image.removeEventListener('load', done); image.removeEventListener('error', done); resolve(); };
+        image.addEventListener('load', done, { once:true, signal });
+        image.addEventListener('error', done, { once:true, signal });
+      }).then(() => image.decode?.().catch(() => {}));
+    }));
+    if (signal.aborted) return;
+    item.dataset.stickerReady = 'true';
+    if (motion.matches) return;
+    const animation = item.animate([
+      { opacity:0, rotate:'y -55deg', scale:'.88', clipPath:'polygon(0 0, 24% 0, 12% 100%, 0 100%)', offset:0 },
+      { opacity:1, rotate:'y 8deg', scale:'1.025', clipPath:'polygon(0 0, 100% 0, 100% 100%, 0 100%)', offset:.7 },
+      { opacity:1, rotate:'y 0deg', scale:'1', clipPath:'polygon(0 0, 100% 0, 100% 100%, 0 100%)', offset:1 },
+    ], { duration:480, delay:(index % 4)*45, easing:'cubic-bezier(.2,.7,.25,1)', fill:'backwards' });
+    reveals.add(animation);
+    animation.finished.then(() => reveals.delete(animation), () => reveals.delete(animation));
+    // A sticker is immediately draggable even during its entrance.
+    listen(item, 'pointerdown', () => animation.cancel(), { once:true });
+    listen(item, 'keydown', () => animation.cancel(), { once:true });
+  };
+  const revealObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) if (entry.isIntersecting) {
+      revealObserver.unobserve(entry.target);
+      void reveal(entry.target, items.indexOf(entry.target));
+    }
+  }, {rootMargin:'80px'});
   updateBack(); positionItems();
-  return () => { finish(true); controller.abort(); returnHeading?.removeAttribute('data-return-home-heading'); observer.disconnect(); cancelAnimationFrame(frame); };
+  items.forEach(item => revealObserver.observe(item));
+  return () => { finish(true); controller.abort(); returnHeading?.removeAttribute('data-return-home-heading'); observer.disconnect(); revealObserver.disconnect(); reveals.forEach(animation => animation.cancel()); cancelAnimationFrame(frame); };
 }

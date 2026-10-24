@@ -6,17 +6,17 @@ describe('quiz results',()=>{
   it('formats percentile ordinals including the teen exceptions',()=>{
     expect([0,1,2,3,11,12,13,21,22,100].map(ordinal)).toEqual(['0th','1st','2nd','3rd','11th','12th','13th','21st','22nd','100th'])
   })
-  it('samples ten distinct playable questions from the expanded pool',()=>{
-    expect(QUIZ_LENGTH).toBe(10)
-    expect(QUIZ_IDS).toHaveLength(200)
-    expect(QUIZ_VERSION).toBe('v4')
+  it('samples seven distinct playable questions from the expanded pool',()=>{
+    expect(QUIZ_LENGTH).toBe(7)
+    expect(QUIZ_IDS).toHaveLength(199)
+    expect(QUIZ_VERSION).toBe('v5')
     expect(new Set(shuffled(QUIZ_IDS))).toEqual(new Set(QUIZ_IDS))
     expect(QUIZ_IDS.every(id=>guitarPresets.some(p=>p.id===id))).toBe(true)
     const original=[...QUIZ_IDS]
     for(let i=0;i<30;i++) {
       const round=newQuestions()
-      expect(round).toHaveLength(10)
-      expect(new Set(round).size).toBe(10)
+      expect(round).toHaveLength(7)
+      expect(new Set(round).size).toBe(7)
       expect(round.every(id=>QUIZ_IDS.includes(id))).toBe(true)
     }
     expect(QUIZ_IDS).toEqual(original)
@@ -57,5 +57,7 @@ describe('answer choices',()=>{
       expect(options.filter(option=>option!==id).every(option=>songById(id).neighbours.includes(option))).toBe(true)
     }
     expect(quizCatalogue.some(song=>song.id==='twinkle')).toBe(false)
+    expect(QUIZ_IDS).not.toContain('thrones')
+    expect(quizCatalogue.some(song=>song.id==='thrones')).toBe(false)
   })
 })
