@@ -64,10 +64,13 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
     let master: GainNode | undefined
     let riffBus: GainNode | undefined
     const buffers = new Map<string, AudioBuffer>()
+    const samples = new Map<string, Float32Array>()
+    const sampleRate = 48000
+    const prepared = new Map<string, Promise<GuitarPreset>>()
     const scores = new Map<string, Promise<GuitarPreset>>()
     function loadScore(id:string) {
       let score=scores.get(id)
-      if(!score){score=fetch(`/guitar-riffs/${encodeURIComponent(id)}.json`).then(response=>{if(!response.ok)throw new Error('Riff unavailable');return response.json() as Promise<GuitarPreset>}).catch(error=>{scores.delete(id);throw error});scores.set(id,score)}
+      if(!score){score=fetch(`/guitar-riffs/${encodeURIComponent(id)}.json`,{signal}).then(response=>{if(!response.ok)throw new Error('Riff unavailable');return response.json() as Promise<GuitarPreset>}).catch(error=>{scores.delete(id);throw error});scores.set(id,score)}
       return score
     }
     const riffVoices = new Set<AudioBufferSourceNode>()
@@ -146,19 +149,50 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
       return context
     }
 
-    function noteBuffer(midi: number, duration?: number) {
-      // Long ties need a buffer that actually lasts until their notated release.
-      const seconds = duration === undefined ? 2.5 : Math.max(2.5, Math.ceil((duration + .12) * 2) / 2)
-      const key = `${midi}:${seconds}`
-      let buffer = buffers.get(key)
-      if (!buffer) {
-        const samples = pluckedString(midi, context!.sampleRate, seconds)
-        buffer = context!.createBuffer(1, samples.length, context!.sampleRate)
-        buffer.getChannelData(0).set(samples)
+    function sampleSpec(midi:number,duration?:number) {
+      const seconds=duration===undefined?2.5:Math.max(2.5,Math.ceil((duration+.12)*2)/2)
+      return {seconds,key:`${midi}:${seconds}`}
+    }
+    function noteSamples(midi:number,duration?:number) {
+      const {seconds,key}=sampleSpec(midi,duration)
+      let pcm=samples.get(key)
+      if(!pcm){
+        pcm=pluckedString(midi,sampleRate,seconds)
+        if(samples.size>=64)samples.delete(samples.keys().next().value!)
+        samples.set(key,pcm)
+      }
+      return pcm
+    }
+    function noteBuffer(midi:number,duration?:number) {
+      const {key}=sampleSpec(midi,duration)
+      let buffer=buffers.get(key)
+      if(!buffer){
+        const pcm=noteSamples(midi,duration)
+        buffer=context!.createBuffer(1,pcm.length,sampleRate)
+        buffer.getChannelData(0).set(pcm)
+        samples.delete(key)
         if(buffers.size>=64)buffers.delete(buffers.keys().next().value!)
-        buffers.set(key, buffer)
+        buffers.set(key,buffer)
       }
       return buffer
+    }
+    function prepareScore(id:string) {
+      let job=prepared.get(id)
+      if(!job){
+        job=loadScore(id).then(async preset=>{
+          let budget=performance.now()
+          for(const note of preset.notes){
+            if(signal.aborted)throw new DOMException('Aborted','AbortError')
+            const midi=Number(keys[note.row*13+note.fret].dataset.midi)
+            const duration=note.durationBeats===undefined?undefined:note.durationBeats*60/preset.bpm
+            if(!buffers.has(sampleSpec(midi,duration).key))noteSamples(midi,duration)
+            if(performance.now()-budget>4){await new Promise(resolve=>setTimeout(resolve,0));budget=performance.now()}
+          }
+          return preset
+        }).catch(error=>{prepared.delete(id);throw error})
+        prepared.set(id,job)
+      }
+      return job
     }
 
     function sound(button: HTMLButtonElement, when: number, velocity = 1, riff = false, duration?: number) {
@@ -263,7 +297,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
       root!.dataset.riffState = 'starting'
       notify('starting')
       try {
-        const [audio,preset] = await Promise.all([audioReady(),loadScore(id)])
+        const [audio,preset] = await Promise.all([audioReady(),prepareScore(id)])
         if (run !== riffRun || !guitarVisible()) return
         const notes = preset.notes
         const bpm = preset.bpm
@@ -312,7 +346,7 @@ const noteName = (midi: number) => `${names[midi % 12]}${Math.floor(midi / 12) -
       const id=(event as CustomEvent<string>).detail
       if(typeof id==='string')void playScore(id)
     }, { signal })
-    root.addEventListener('guitar:preload', event=>{const id=(event as CustomEvent<string>).detail;if(typeof id==='string')void loadScore(id).catch(()=>{})},{signal})
+    root.addEventListener('guitar:preload', event=>{const id=(event as CustomEvent<string>).detail;if(typeof id==='string')void prepareScore(id).then(()=>root!.dispatchEvent(new CustomEvent('guitar:prepared',{detail:id}))).catch(()=>root!.dispatchEvent(new CustomEvent('guitar:prepare-error',{detail:id})))},{signal})
     root.addEventListener('guitar:stop', () => stopRiff(false), { signal })
 
     trigger?.addEventListener('click', () => { void playRiff() }, { signal })

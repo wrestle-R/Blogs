@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { ordinal, shuffled, newQuestions, QUIZ_IDS, QUIZ_LENGTH, QUIZ_VERSION } from '../../src/lib/guitar-quiz'
 import { ownerSongList, quizCatalogue } from '../../src/lib/guitar-catalogue'
 import { thronesIntro, guitarPresets } from '../../src/lib/guitar-presets'
@@ -59,5 +59,28 @@ describe('answer choices',()=>{
     expect(quizCatalogue.some(song=>song.id==='twinkle')).toBe(false)
     expect(QUIZ_IDS).not.toContain('thrones')
     expect(quizCatalogue.some(song=>song.id==='thrones')).toBe(false)
+  })
+})
+
+
+describe('prepared quiz requests',()=>{
+  const q=(number:number,id='shape')=>({number,total:7,songId:id,options:['shape','blue','snowman','dandelions']})
+  it('opts into a dormant session only when background preparation is requested',async()=>{
+    const fetcher=vi.fn().mockResolvedValue({ok:true,json:async()=>({runId:'f1826582-b56c-4504-9710-32fb08995915',version:'v5',question:q(1)})})
+    vi.stubGlobal('fetch',fetcher)
+    try{const {startQuizSession}=await import('../../src/lib/guitar-quiz');const signal=new AbortController().signal
+      await startQuizSession(signal,true);expect(JSON.parse(fetcher.mock.calls[0][1].body)).toEqual({version:'v5',prepared:true})
+      await startQuizSession(signal);expect(JSON.parse(fetcher.mock.calls[1][1].body)).toEqual({version:'v5'})
+    }finally{vi.unstubAllGlobals()}
+  })
+  it('activates the requested question and validates the one-ahead preview',async()=>{
+    const fetcher=vi.fn().mockResolvedValue({ok:true,json:async()=>({question:q(2,'blue'),upcoming:q(3)})})
+    vi.stubGlobal('fetch',fetcher)
+    try{const {activateQuizQuestion}=await import('../../src/lib/guitar-quiz');const value=await activateQuizQuestion('run-id',2,new AbortController().signal)
+      expect(fetcher.mock.calls[0][0]).toContain('/run-id/activate');expect(JSON.parse(fetcher.mock.calls[0][1].body)).toEqual({questionNumber:2})
+      expect(value.upcoming?.number).toBe(3)
+      fetcher.mockResolvedValue({ok:true,json:async()=>({question:q(2,'blue'),upcoming:q(8)})})
+      await expect(activateQuizQuestion('run-id',2,new AbortController().signal)).rejects.toThrow('Invalid question')
+    }finally{vi.unstubAllGlobals()}
   })
 })

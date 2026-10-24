@@ -35,8 +35,8 @@ function question(value:unknown):QuizQuestion {
   if(!q||!Number.isInteger(q.number)||q.number<1||q.number>QUIZ_LENGTH||q.total!==QUIZ_LENGTH||!QUIZ_IDS.includes(q.songId)||!Array.isArray(q.options)||q.options.length!==4||new Set(q.options).size!==4||!q.options.includes(q.songId)||!q.options.every(id=>songById(id)))throw new Error('Invalid question')
   return q
 }
-export async function startQuizSession(signal:AbortSignal) {
-  const result=await postQuiz('',{version:QUIZ_VERSION},signal)
+export async function startQuizSession(signal:AbortSignal,prepared=false) {
+  const result=await postQuiz('',{version:QUIZ_VERSION,...(prepared?{prepared:true}:{})},signal)
   if(typeof result.runId!=='string'||!/^[0-9a-f-]{36}$/i.test(result.runId)||result.version!==QUIZ_VERSION)throw new Error('Invalid quiz session')
   return {runId:result.runId,question:question(result.question)}
 }
@@ -52,4 +52,10 @@ export async function recordQuizAnswer(runId:string,questionNumber:number,answer
     if(!result||!Number.isInteger(result.previousRuns)||result.previousRuns<0||!Number.isInteger(result.benchmarkRuns)||result.benchmarkRuns<0||!(result.percentile===null||(Number.isInteger(result.percentile)&&result.percentile>=0&&result.percentile<=100)))throw new Error('Invalid comparison')
   }
   return value as unknown as QuizAnswerResult
+}
+
+export interface QuizActivation {question:QuizQuestion;upcoming:QuizQuestion|null}
+export async function activateQuizQuestion(runId:string,questionNumber:number,signal:AbortSignal):Promise<QuizActivation> {
+  const value=await postQuiz(`/${encodeURIComponent(runId)}/activate`,{questionNumber},signal)
+  return {question:question(value.question),upcoming:value.upcoming?question(value.upcoming):null}
 }
