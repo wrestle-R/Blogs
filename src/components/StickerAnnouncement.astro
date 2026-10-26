@@ -1,0 +1,65 @@
+<aside class="sticker-announcement" data-sticker-announcement hidden aria-label="Sticker tip">
+  <p role="status">The stickers are clickable, btw. Find the Easter eggs and watch the background texture build up.</p>
+  <button type="button" aria-label="Dismiss sticker tip" data-dismiss-sticker-announcement>
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+  </button>
+</aside>
+
+<style>
+  .sticker-announcement { position: fixed; z-index: 80; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; align-items: center; gap: 12px; width: min(460px, calc(100vw - 32px)); padding: 12px 12px 12px 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--background); color: var(--foreground); box-shadow: 0 8px 30px #0002; animation: announcement-in 300ms ease both; }
+  .sticker-announcement[hidden] { display: none; }
+  .sticker-announcement[data-leaving] { animation: announcement-out 220ms ease both; pointer-events: none; }
+  .sticker-announcement p { margin: 0; font-size: 13px; line-height: 1.6; }
+  .sticker-announcement button { flex: 0 0 44px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 6px; background: transparent; color: var(--muted-foreground); cursor: pointer; }
+  .sticker-announcement button:hover { color: var(--foreground); background: var(--muted); }
+  .sticker-announcement button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  @keyframes announcement-in { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
+  @keyframes announcement-out { to { opacity: 0; translate: 0 8px; } }
+  @media (prefers-reduced-motion: reduce) { .sticker-announcement, .sticker-announcement[data-leaving] { animation-duration: 0ms; } }
+</style>
+
+<script>
+  let cleanup = () => {};
+  let seenInMemory = false;
+  document.addEventListener('astro:page-load', () => {
+    cleanup();
+    const banner = document.querySelector<HTMLElement>('[data-sticker-announcement]');
+    if (!banner) return;
+    const key = 'russel:sticker-announcement:v1';
+    let seen = seenInMemory;
+    try { seen ||= sessionStorage.getItem(key) === 'seen'; } catch { /* Optional storage. */ }
+    if (seen) return;
+    const controller = new AbortController();
+    const { signal } = controller;
+    let timer: ReturnType<typeof setTimeout>;
+    let removal: ReturnType<typeof setTimeout>;
+    let closing = false;
+    const dismiss = () => {
+      if (closing) return;
+      closing = true;
+      clearTimeout(timer);
+      banner.dataset.leaving = '';
+      removal = setTimeout(() => { banner.hidden = true; controller.abort(); }, 220);
+    };
+    const schedule = () => {
+      clearTimeout(timer);
+      if (!banner.matches(':hover, :focus-within')) timer = setTimeout(dismiss, 12000);
+    };
+    const show = () => {
+      if (signal.aborted) return;
+      banner.hidden = false;
+      seenInMemory = true;
+      try { sessionStorage.setItem(key, 'seen'); } catch { /* Memory fallback. */ }
+      schedule();
+    };
+    banner.querySelector('button')?.addEventListener('click', dismiss, { signal });
+    banner.addEventListener('pointerenter', () => clearTimeout(timer), { signal });
+    banner.addEventListener('pointerleave', schedule, { signal });
+    banner.addEventListener('focusin', () => clearTimeout(timer), { signal });
+    banner.addEventListener('focusout', () => queueMicrotask(schedule), { signal });
+    if (document.documentElement.dataset.siteIntro) document.addEventListener('russel:intro-complete', show, { once: true, signal });
+    else show();
+    cleanup = () => { clearTimeout(timer); clearTimeout(removal); controller.abort(); };
+  });
+  document.addEventListener('astro:before-swap', () => cleanup());
+</script>

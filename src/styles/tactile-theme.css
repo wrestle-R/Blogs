@@ -158,19 +158,21 @@ button:disabled { cursor: not-allowed; }
   box-shadow: var(--sk-paper-shadow);
 }
 
-/* Same Fine silt tiles as Portfolio, at the selected 100% texture strength. */
-body {
-  background-color: var(--background);
+/* Same selected Fine silt as Portfolio, with independent Blog discoveries. */
+body { isolation: isolate; background-color: var(--background); }
+.blog-silt-background {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  opacity: var(--discovery-texture, .12);
+  transition: opacity 900ms ease;
   background-image: url('/textures/fine-silt-light.png');
   background-repeat: repeat;
   background-size: 384px 384px;
-  background-attachment: fixed;
 }
-:root[data-theme='dark'] body {
+:root[data-theme='dark'] .blog-silt-background {
   background-image: url('/textures/fine-silt-dark.png');
 }
 @media print {
-  body, :root[data-theme='dark'] body { background-image: none; }
+  .blog-silt-background { display: none; }
 }
 
 .sticker-navigation .portfolio-return {
@@ -204,3 +206,6 @@ body {
   .blog-sticker-navigation [data-sticker-id='wallpapers'] { --sticker-size:64px; }
   .blog-sticker-navigation [data-sticker-id='wallpapers'] img { width:64px; height:64px; }
 }
+
+.sticker-discovery-progress { margin: 16px 2px 0; color: var(--muted-foreground); font: 11px/1.6 var(--font-mono); }
+@media (prefers-reduced-motion: reduce) { .blog-silt-background { transition: none; } }

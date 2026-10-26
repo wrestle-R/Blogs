@@ -19,8 +19,10 @@ interface Props { sticker?: boolean }
     }
 
     const readThemeCookie = () => {
-      const cookie = document.cookie.split('; ').find((row) => row.startsWith(`${THEME_KEY}=`))
-      return cookie ? decodeURIComponent(cookie.split('=')[1]) : ''
+      try {
+        const cookie = document.cookie.split('; ').find((row) => row.startsWith(`${THEME_KEY}=`))
+        return cookie ? decodeURIComponent(cookie.split('=')[1]) : ''
+      } catch { return '' }
     }
 
     const writeThemeCookie = (theme) => {
@@ -34,16 +36,18 @@ interface Props { sticker?: boolean }
       const fromCookie = readThemeCookie()
       if (VALID_THEMES.has(fromCookie)) return fromCookie
 
-      const fromStorage = window.localStorage.getItem(THEME_KEY) ?? ''
-      if (VALID_THEMES.has(fromStorage)) return fromStorage
+      try {
+        const fromStorage = window.localStorage.getItem(THEME_KEY) ?? ''
+        if (VALID_THEMES.has(fromStorage)) return fromStorage
+      } catch { /* Use the browser preference when storage is unavailable. */ }
 
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
     }
 
     const initialTheme = getPreferredTheme()
     document.documentElement.setAttribute('data-theme', initialTheme)
-    window.localStorage.setItem(THEME_KEY, initialTheme)
-    writeThemeCookie(initialTheme)
+    try { window.localStorage.setItem(THEME_KEY, initialTheme) } catch { /* Optional persistence. */ }
+    try { writeThemeCookie(initialTheme) } catch { /* Optional persistence. */ }
     document.getElementById('theme-toggle')?.setAttribute('aria-checked', String(initialTheme === 'light'))
   })()
 </script>
@@ -69,8 +73,8 @@ interface Props { sticker?: boolean }
 
   function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem(THEME_KEY, theme)
-    writeThemeCookie(theme)
+    try { localStorage.setItem(THEME_KEY, theme) } catch { /* Optional persistence. */ }
+    try { writeThemeCookie(theme) } catch { /* Optional persistence. */ }
     const button = document.getElementById('theme-toggle')
     button?.setAttribute('aria-checked', String(theme === 'light'))
     button?.setAttribute('title', theme === 'dark' ? 'Turn the lights on' : 'Turn the lights off')
@@ -148,7 +152,8 @@ interface Props { sticker?: boolean }
   initThemeToggle()
 
   document.addEventListener('astro:after-swap', () => {
-    const storedTheme = localStorage.getItem(THEME_KEY) || 'light'
+    let storedTheme = document.documentElement.getAttribute('data-theme') || 'light'
+    try { storedTheme = localStorage.getItem(THEME_KEY) || storedTheme } catch { /* Keep the current palette. */ }
     applyTheme(storedTheme)
     initThemeToggle()
   })

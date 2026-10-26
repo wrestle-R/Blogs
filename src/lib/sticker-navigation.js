@@ -1,3 +1,5 @@
+import { initStickerDiscoveries } from './sticker-discoveries';
+
 // Stickers follow named content corners; moving one never activates its link.
 export function initStickerNavigation(root) {
   const controller = new AbortController();
@@ -285,7 +287,8 @@ export function initStickerNavigation(root) {
       void reveal(entry.target, items.indexOf(entry.target));
     }
   }, {rootMargin:'80px'});
+  const cleanupDiscoveries = initStickerDiscoveries(root, isBlog ? 'blog' : 'portfolio');
   updateBack(); positionItems();
   items.forEach(item => revealObserver.observe(item));
-  return () => { finish(true); controller.abort(); returnHeading?.removeAttribute('data-return-home-heading'); observer.disconnect(); revealObserver.disconnect(); reveals.forEach(animation => animation.cancel()); cancelAnimationFrame(frame); };
+  return () => { cleanupDiscoveries(); finish(true); controller.abort(); returnHeading?.removeAttribute('data-return-home-heading'); observer.disconnect(); revealObserver.disconnect(); reveals.forEach(animation => animation.cancel()); cancelAnimationFrame(frame); };
 }

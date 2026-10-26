@@ -8,6 +8,7 @@ import { SITE } from '@/consts'
 import { cn } from '@/lib/utils'
 
 import StickerNavigation from '@/components/StickerNavigation.astro'
+import introMarkup from '@/components/page-intro.html?raw'
 interface Props {
   class?: string
 }
@@ -25,6 +26,8 @@ const { class: className } = Astro.props
     <slot name="head" />
   </Head>
   <body class="relative flex h-fit min-h-screen flex-col gap-y-6 font-sans">
+    <Fragment set:html={introMarkup} />
+    <div class="blog-silt-background" aria-hidden="true"></div>
     <a class="skip-to-content" href="#main-content">Skip to content</a>
     <StickerNavigation />
     <div class="blog-reading-tools sticky top-0 z-40 bg-background/95 backdrop-blur-sm">

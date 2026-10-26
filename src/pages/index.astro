@@ -1,5 +1,6 @@
 ---
 import BlogCard from '@/components/BlogCard.astro'
+import StickerAnnouncement from '@/components/StickerAnnouncement.astro'
 import Newsletter from '@/components/Newsletter.astro'
 import PageHead from '@/components/PageHead.astro'
 import PaginationComponent from '@/components/ui/pagination'
@@ -184,6 +185,8 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
       <h2 class="text-3xl font-bold">Latest Posts</h2>
       <span class="mobile-sticker-slot" data-mobile-sticker-slot="posts" aria-hidden="true"></span>
     </div>
+
+    <StickerAnnouncement />
 
     <div class="post-list">
       {myBlogs.length > 0 ? (
