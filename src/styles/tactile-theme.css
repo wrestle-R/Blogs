@@ -162,7 +162,7 @@ button:disabled { cursor: not-allowed; }
 body { isolation: isolate; background-color: var(--background); }
 .blog-silt-background {
   position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  opacity: var(--discovery-texture, .12);
+  opacity: 1;
   transition: opacity 900ms ease;
   background-image: url('/textures/fine-silt-light.png');
   background-repeat: repeat;

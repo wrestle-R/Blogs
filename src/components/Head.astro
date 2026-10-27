@@ -3,7 +3,6 @@ import { SITE } from '@/consts'
 import { getAssetUrl } from '@/lib/site'
 import { ClientRouter } from 'astro:transitions'
 import Favicons from './Favicons.astro'
-import PageIntroHead from './PageIntroHead.astro'
 ---
 
 <head>
@@ -46,7 +45,20 @@ import PageIntroHead from './PageIntroHead.astro'
 
 <link rel="icon" type="image/png" href="/static/logo.png" />
 
-  <PageIntroHead />
+  <script is:inline>
+    (() => {
+      let theme;
+      try {
+        const cookie = document.cookie.split('; ').find(row => row.startsWith('theme='));
+        theme = cookie ? decodeURIComponent(cookie.slice(6)) : '';
+      } catch { /* Optional cookie. */ }
+      if (theme !== 'light' && theme !== 'dark') {
+        try { theme = localStorage.getItem('theme'); } catch { /* Optional storage. */ }
+      }
+      if (theme !== 'light' && theme !== 'dark') theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = theme;
+    })();
+  </script>
   <ClientRouter />
 
   <slot />
