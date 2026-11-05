@@ -6,11 +6,11 @@
 </aside>
 
 <style>
-  .sticker-announcement { position: fixed; z-index: 80; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; align-items: center; gap: 12px; width: min(460px, calc(100vw - 32px)); padding: 12px 12px 12px 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--background); color: var(--foreground); box-shadow: 0 8px 30px #0002; animation: announcement-in 300ms ease both; }
+  .sticker-announcement { position: fixed; z-index: 80; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; align-items: center; gap: 12px; box-sizing: border-box; width: max-content; max-width: min(460px, calc(100vw - 32px)); padding: 8px 8px 8px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--background); color: var(--foreground); box-shadow: 0 8px 30px #0002; animation: announcement-in 300ms ease both; }
   .sticker-announcement[hidden] { display: none; }
   .sticker-announcement[data-leaving] { animation: announcement-out 220ms ease both; pointer-events: none; }
-  .sticker-announcement p { margin: 0; font-size: 13px; line-height: 1.6; }
-  .sticker-announcement button { flex: 0 0 44px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 6px; background: transparent; color: var(--muted-foreground); cursor: pointer; }
+  .sticker-announcement p { flex: 1; min-width: 0; margin: 0; font-size: 13px; line-height: 1.6; }
+  .sticker-announcement button { margin-left: auto; flex: 0 0 44px; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 6px; background: transparent; color: var(--muted-foreground); cursor: pointer; }
   .sticker-announcement button:hover { color: var(--foreground); background: var(--muted); }
   .sticker-announcement button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
   @keyframes announcement-in { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
