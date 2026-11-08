@@ -50,8 +50,8 @@ const current = (href: string) => href === '/' ? Astro.url.pathname === '/' : As
     {items.map((item) => (
       <div class="sticker-navigation__item" data-sticker-id={item.id} data-mobile-hidden="true" data-sticker-order={item.order} data-sticker-side={item.order < 5 ? 'left' : 'right'} style={`--sticker-row:${(item.order - 1) % 4};--sticker-angle:${[-5,6,-7,4,5,-5,3][item.order - 1]}deg`}>
         {item.id === 'music' ? <HeadphonesSticker /> : <a class="sticker-link" href={item.href} target={/^https?:/.test(item.href) ? "_blank" : undefined} rel={/^https?:/.test(item.href) ? "noopener noreferrer" : undefined} aria-label={item.id === 'spotify-back' ? 'Back to Spotify' : item.id === 'home' ? 'Blog home' : item.label} title={item.id === 'spotify-back' ? 'Back to Spotify' : item.label} aria-current={current(item.href) ? 'page' : undefined}>
-          <img src={`/charms/${item.image}.${['home', 'spotify-back'].includes(item.id) ? 'svg' : 'webp'}`} alt="" width="94" height="80" draggable="false" />
-          <span class="sticker-link__cue" aria-hidden="true">↗</span>
+          <span class="sticker-link__art"><img src={`/charms/${item.image}.${['home', 'spotify-back'].includes(item.id) ? 'svg' : 'webp'}`} alt="" width="94" height="80" draggable="false" />
+          <span class="sticker-link__cue" aria-hidden="true"><i></i><i></i><i></i><i></i></span></span>
           <span class="sticker-link__label">{item.id === 'home' ? <><span class="desktop-return-label">{item.label}</span><span class="mobile-return-label">Home</span></> : item.label}</span>
         </a>}
       </div>
@@ -62,8 +62,8 @@ const current = (href: string) => href === '/' ? Astro.url.pathname === '/' : As
     {discoveries.map((item, index) => (
       <div class="sticker-navigation__item" data-sticker-id={item.id} data-mobile-hidden="true" data-sticker-order={index + 9} style={`--sticker-angle:${[-9,8,-11,6,-7,10][index]}deg`}>
         <a class="sticker-link" href={item.href} target={/^https?:/.test(item.href) ? "_blank" : undefined} rel={/^https?:/.test(item.href) ? "noopener noreferrer" : undefined} aria-label={item.label} title={item.label}>
-          <img src={`/charms/${item.image}.${['arch', 'songbook'].includes(item.id) ? 'svg' : 'webp'}`} alt="" width="94" height="80" draggable="false" loading="lazy" />
-          <span class="sticker-link__cue" aria-hidden="true">↗</span>
+          <span class="sticker-link__art"><img src={`/charms/${item.image}.${['arch', 'songbook'].includes(item.id) ? 'svg' : 'webp'}`} alt="" width="94" height="80" draggable="false" loading="lazy" />
+          <span class="sticker-link__cue" aria-hidden="true"><i></i><i></i><i></i><i></i></span></span>
           <span class="sticker-link__label">{item.label}</span>
         </a>
       </div>
