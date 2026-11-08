@@ -35,7 +35,7 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
   
   <div class="endurance-copy flex flex-col space-y-1.5 p-5 sm:p-8">
     <div class="endurance-definition">
-    <h3 class="text-3xl font-bold leading-none sm:text-4xl"><button type="button" class="endurance-trigger" data-endurance-riff disabled aria-controls="guitar" aria-pressed="false">en·dur·ance</button></h3>
+    <h3 class="text-3xl font-bold leading-none sm:text-4xl"><button type="button" class="endurance-trigger" data-endurance-riff disabled aria-controls="guitar" aria-pressed="false"><span class="endurance-trigger__word">en·dur·ance</span></button></h3>
     <span class="sr-only" role="status" data-endurance-status></span>
     <p class="text-muted-foreground text-sm">
       /ɛnˈdjʊərəns/ • <span class="font-medium">noun</span>
@@ -134,10 +134,14 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
   #now-playing-text { display: block; width: max-content; white-space: nowrap; font-size: 12px; line-height: 16px; font-weight: 600; }
   .listening-badge__time { flex: none; white-space: nowrap; font-size: 12px; line-height: 16px; font-weight: 500; opacity: .8; }
   .listening-badge__indicator[hidden],.listening-badge__time[hidden] { display: none; }
-  .endurance-trigger { padding: 0; border: 0; background: none; color: var(--foreground); font: inherit; letter-spacing: inherit; text-align: left; min-height: 44px; transition: color 180ms ease; }
+  .endurance-trigger { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; max-width: 100%; padding: 0; border: 0; background: none; color: var(--foreground); font: inherit; letter-spacing: inherit; text-align: left; min-height: 44px; cursor: pointer; transition: color 180ms ease; }
+  .endurance-trigger__word { text-decoration: underline; text-decoration-style: solid; text-decoration-color: color-mix(in srgb, var(--foreground) 40%, transparent); text-decoration-thickness: 1.5px; text-underline-offset: 6px; }
+  .endurance-trigger:not(:disabled):is(:hover, :focus-visible), .endurance-trigger[aria-pressed='true'] { color: var(--primary); }
+  .endurance-trigger:not(:disabled):is(:hover, :focus-visible) .endurance-trigger__word, .endurance-trigger[aria-pressed='true'] .endurance-trigger__word { text-decoration-style: solid; text-decoration-color: currentColor; }
+  .endurance-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 6px; border-radius: 4px; }
   .endurance-trigger:disabled { cursor: default; }
-  .endurance-trigger:not(:disabled):hover, .endurance-trigger[aria-pressed='true'] { color: var(--primary); }
-  .endurance-trigger:focus-visible { outline: 2px solid var(--primary); outline-offset: 5px; border-radius: 3px; }
+  .endurance-trigger:disabled .endurance-trigger__word { text-decoration: none; }
+  @media (prefers-reduced-motion: reduce) { .endurance-trigger { transition: none; } }
   @media (min-width:640px) {
     .listening-badge { top: 12px; right: 16px; max-width: calc(100% - 32px); }
     .listening-badge__surface { height: 40px; gap: 8px; padding: 0 16px; }
