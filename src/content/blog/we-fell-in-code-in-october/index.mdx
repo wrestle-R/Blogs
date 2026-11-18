@@ -1,0 +1,159 @@
+---
+title: "We fell in code in October"
+description: "A month of projects, a hackathon and life in the village."
+date: 2026-11-18
+tags: ['personal', 'coding']
+authors: ['russel']
+draft: false
+---
+
+
+## Introduction
+
+Okay, so I have over 750 contributions in October (hugely inflated), but that's not even the part I find most interesting. I was looking back at the month and realised just how many different things I ended up working on, which is kinda cool to see all in one place.
+
+It's not just the sheer number of projects I made, it's the diversity of them too.
+
+- **A skill** - sounds like me, sorta. ([Russelore](https://github.com/wrestle-R/Mbappe-Special/tree/main/skills/russelore))
+- **A desktop app** - “a” is underselling it massively. ([Multi Codex](https://github.com/wrestle-R/multi-codex))
+- **A VS Code extension** - pretty neat, to be honest. ([Multi Codex extension](https://github.com/wrestle-R/multi-codex/tree/main/extension))
+- **A browser extension** - solved a problem apparently only I had (seems to be a trend with a lot of my projects). ([Unloader](https://github.com/wrestle-R/Unloader))
+- **A CLI** - technically remade it to be faster. ([Varte](https://github.com/wrestle-R/Vathavaran-Variables/tree/main/Go-cli))
+- **A TUI** - sounds similar to a CLI but differs in the sense that it's an interface in your terminal for doing stuff, like you can navigate through it and shit. ([Spotify TUI](https://github.com/wrestle-R/spotify-tui))
+- **A mobile app** - both using Expo and React Native CLI, along with widgets. ([Expenser](https://github.com/wrestle-R/Expenser))
+- **A printer thingy** - wanted to mess around with Tauri and peripherals and ended up making this. ([ArchJet](https://github.com/wrestle-R/ArchJet))
+- **My face** - felt like Frankenstein for a minute and was so creeped out. ([Russel's constellation](https://github.com/wrestle-R/russels-constellation))
+- **My portfolio** - became so obsessed with Minecraft I had to remake my portfolio using it. Easily one of the coolest things I've ever made. ([Minecraft portfolio](https://github.com/wrestle-R/minecraft-portfolio))
+- **A hackathon** - best not to mention this for now. ([Team Loondry](https://github.com/romeirofernandes/TeamLoondry_college_round))
+
+<picture>
+  <source media="(max-width: 640px)" srcSet="/blogimages/october-2026/github-2026-mobile.svg" />
+  <img src="/blogimages/october-2026/github-2026-desktop.svg" alt="My GitHub contribution graph for 2026, with October highlighted." loading="lazy" style={{ width: "100%", height: "auto" }} />
+</picture>
+
+I used to wake up and the first thing I'd do was send 2 “hello how are you doing” messages to kick-start the 5-hour limits for both my accounts, and after that I'd go to the gym (not really).
+
+You may look at the days with 59 contributions or 57 contributions and be like, there isn't a way someone can have that many meaningful contributions in a day. And you'd be right (sorta), because not all of them are meaningful. But that doesn't take away from the fact that I was actively on my laptop the entire day and left only when my limits were khalaasi. Then I had the time to do anything else (only sleep tbh and a bit of Minecraft).
+
+My relentless use of 6.1 Sol, which is a very efficient model (haters will call it slow), and my goat [Tibo's](https://x.com/thsottiaux) resets every second to third day during his 28 days of resets were just a Godsend.
+
+## My Flagship
+
+Now, if you've ever spoken to me in the past month, I must have 100% brought up [Multi Codex](https://github.com/wrestle-R/multi-codex). In short, this is an app which some Twitter folk put as “an alternative for signing in and signing out”.
+
+![Multi Codex account dashboard](/blogimages/october-2026/multicodex.png)
+
+Now here's the thing, this isn't really my first desktop app, but it was my first desktop app that I really wanted to bring to other operating systems and not just Linux. And I did.
+
+Initially, it was terrible. It was working well on Linux, but on the other OSes it was terrible. [Gavin](https://gavin-soares.vercel.app/) helped fix it on Mac a bit, but then I learnt about GitHub runners and how they provide a small instance for testing and shit. That really helped me build a semi-stable version for Windows and Mac (I was very surprised to see it work on my Windows dual boot).
+
+I even had a real user for my app who used to raise issues and be very happy when I solved them. Which was pretty cool, like someone was actually using the thing I made and cared enough to tell me when something wasn't working.
+
+But yeah, as soon as I was like, oh yeah, my productivity setup, workspace, yada yada was complete, [BigRom](https://romeiro.dev/) introduced me to [T3 Code](https://github.com/pingdotgg/t3code) and some [40-minute video](https://www.youtube.com/watch?v=uLGxb4F3SyI) of Theo explaining it.
+
+I have never switched my entire workspace to a new style quicker. I genuinely liked the Codex app (I actually waited a long time for it to come on Linux), but T3 is just sooo much better in every way. The mobile app of T3 Code, I have no words. It's just perfect. I can't even imagine something better (an imagination issue perhaps).
+
+But yeah, I developed an app for nearly every day in a month and switched off it in less than a day. And it wasn't just an app I was using, it was made by me, for me.
+
+## My commits
+
+So I used to have this really weird niche where I really hated AI-generated commit messages. I liked the personal bullshit ones, and so I had this custom instruction on my Codex:
+
+> When using GitHub CLI (`gh`), enforce **strict read-only access**.
+>
+> - Allowed: Read repository information, branches, commit history, diffs, logs, issues, pull requests, comments, and workflow runs.
+> - Allowed: Use commands such as `gh repo view`, `gh pr view`, `gh pr list`, `gh issue view`, `gh run view`, and `gh api` with GET requests.
+> - Forbidden: Any operation that modifies GitHub or repository state.
+> - Never create, edit, delete, merge, approve, close, or comment on PRs or issues.
+> - Never create releases, tags, branches, or commits.
+> - Never push, pull, fetch, checkout, reset, rebase, or modify Git history.
+> - Never use commands that trigger writes, including POST, PATCH, PUT, or DELETE API requests.
+>
+> **Rule:** GitHub CLI is strictly for inspection and information retrieval. Never perform any write operation, even if explicitly requested as part of an implementation task. If a write operation is needed, explain that it must be performed manually by the user.
+
+But recently, because of GitHub runners, the release build needed to be updated to be tested. So it was really annoying to verify each and every commit myself. I just gave up and let my agents commit, push, do whatever they want.
+
+There were sessions where I had given my entire sudo password to my system (definitely didn't cause any problems).
+
+In my view, it's something like this: I trust 6.1 Sol enough that it can't possibly break my system worse than I already have multiple times.
+
+## Changing with AI
+
+It's kinda funny to look back at how much AI has changed the way I code, at least for me. I pretty much started during the peak vibe-coding era, thanks to the GitHub Student Developer Pack. This was back when GitHub Copilot was actually pretty good.
+
+I remember writing absolutely massive prompts, dumping tonnes of context into the models, hoping they'd understand what I wanted, and praying everything would work by the second try.
+
+The frontend was a different story altogether. Early Sonnet and Haiku models were pretty terrible at UI/UX (at least in my experience). I'd get the functionality working and then end up writing most of the CSS myself to make it look the way I wanted.
+
+Then things got a little better. You could practically get an entire backend endpoint done in one prompt, and the UI was actually starting to look pretty decent. Still needed to manually tweak things here and there, but it was a massive improvement.
+
+And then came Opus bhaiya.
+
+This one was a bit of a gamble. Sometimes you'd give it one prompt and it'd build an entire feature, almost magically. Other times it'd run into some weird issue, go down a rabbit hole, and you'd still have to jump in and debug things manually.
+
+And now? I genuinely haven't seen an error page in a long time.
+
+I mean, these things will happily run 200 tests, some of which are probably completely irrelevant to what you're building, just to make sure nothing breaks. The 3D stuff is also ridiculously good now. At least the Codex models have been pretty impressive in this regard.
+
+They still occasionally miss with the UI or decide to introduce some absolutely bizarre tech stack when you haven't explicitly specified one, but overall, no complaints.
+
+I actually sorta wish I got to experience coding before the AI era (not too much though). Like reading the documentation, learning the syntax and making something on my own. Coz even now the feeling of creating something is unbelievably amazing and I can't even fathom how it would have felt back then.
+
+The only time I really coded everything myself was during SIH, when a teammate generated a preview of a website using Wix. I sat there all day and all night and hardcoded each and every thing using HTML and CSS. It looked pretty good, there was just no functionality behind it.
+
+Then I learnt a bit of React. Now I have never really understood JavaScript, but React with its hooks was somehow easy to understand.
+
+At another hackathon called Bit N Build, a teammate made an entire website using Framer and I turned that into code. So I was looking at the website and trying to recreate it in React. Again, there wasn't really any functionality behind it, just clickable and hardcoded buttons and shit.
+
+
+
+## The Hackathon
+
+Easily one of our worst hackathon performances. We had a pretty good team with 3 Codex Plus accounts, but our actual implementation was basically zero. Our team was called Team Loondry, which many many people found funny apparently.
+
+Now, we chose a thoda niche problem statement. Niche is probably underselling it, because I 100% understood the problem statement only halfway into the project. And even then, I was fairly certain 6.1 Sol High would one-shot it.
+
+![The Teleport problem statement](/blogimages/october-2026/problem.png)
+
+But I actually sort of get where we messed up (with the benefit of hindsight). We had a pretty good first round, but round 2 was fairly disastrous. If we had something to show, things might have gone a little differently.
+
+I will never get used to losing. This time, even I knew I didn't deserve to win or really expect to win, but losing always comes as a gut punch. Along with that is the fact that I'm fairly certain this is my last hackathon (God knows what's up with SIH, cba).
+
+I would have thought that after losing 15+ hackathons, I'd have gotten sorta used to this by now, but nope, not really. This is probably one of my better losses.
+
+![Our hackathon team](/blogimages/october-2026/team.jpg)
+
+## Life in the village
+
+I am currently writing this blog from my native place, Kanyakumari. It is a really beautiful place and it's also where the Arabian Sea, the Bay of Bengal and the Indian Ocean meet. You can see the difference in the colours of the water properly, which is really cool.
+
+Similar to my last blog, I have done a lot of heroics. Last time I climbed a coconut tree (using a ladder). This time I climbed another tree which had a pepper creeper growing around it.
+
+<figure>
+  <a href="https://commons.wikimedia.org/wiki/File:Pepper_negrum_on_tree_support.jpg" title="Pepper negrum on tree support by Schlawensko, Wikimedia Commons, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/)">
+    <img src="/blogimages/october-2026/pepper-vine.jpg" alt="A pepper vine growing up a tree trunk. Photo by Schlawensko, Wikimedia Commons, CC BY-SA 4.0." loading="lazy" />
+  </a>
+</figure>
+
+I also did a fair bit of vibing here. The internet was actually quite good, so nothing to complain about there. I'd only just started using T3 Code and found it really interesting, so I ended up using it quite a bit while I was here.
+
+I've been allergic to a lot of things for years. Usually I get an itchy throat, red eyes or a runny nose. I thought I'd figured out what I was allergic to by now. Turns out I don't know myself all that well. I'd never had a reaction like this before. My face swelled up, especially around my eyes, and I think it was the mussels.
+
+My dad told my mom he wanted to buy mussels because he wanted Daniel (me) to have new experiences. He definitely succeeded.
+
+<img
+  src="/blogimages/october-2026/mussels.png"
+  alt="A mussel resting on a spoon"
+  width="1080"
+  height="608"
+  loading="lazy"
+  className="aspect-video w-full rounded-lg object-cover object-[center_46%]"
+/>
+
+I've always thought of my gao as an opportunity to experience new stuff that I don't get to in Mumbai, and it's usually been good. Ig u need to learn to take the good with the bad, and such is life.
+
+## Conclusion
+
+So yeah, that was October. I made a bunch of things, spent an unreasonable amount of time on my laptop, lost another hackathon and found out I might be allergic to mussels. Quite a bit happened, looking at it now.
+
+My top song last year was [we fell in love in october](https://www.youtube.com/watch?v=iggmiF7DNoM) by girl in red, which is also where the title of this blog comes from. This October was very different from the one in the song, but I did make a lot of things I really like. And honestly, I'm pretty happy about that.

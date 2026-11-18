@@ -43,14 +43,13 @@ const discoveries = [
 
 const current = (href: string) => href === '/' ? Astro.url.pathname === '/' : Astro.url.pathname === href || Astro.url.pathname.startsWith(href + '/')
 ---
-<script is:inline>document.documentElement.dataset.stickerMotion = 'ready'</script>
 <nav class="sticker-navigation blog-sticker-navigation" data-sticker-navigation="blog" aria-description="Drag stickers to move them. On a phone, press and hold first. With a keyboard, use Alt and arrow keys." data-sticker-count={6 + discoveries.length} aria-label="Explore Russel’s blog">
   <a class="portfolio-return" href={local ? 'http://localhost:5173' : 'https://russeldanielpaul.is-a.dev'} aria-label="Portfolio"><svg class="portfolio-return__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18M5 6.5c4 2 10 2 14 0M5 17.5c4-2 10-2 14 0"/></svg><span>Portfolio</span><svg class="portfolio-return__arrow" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 12 12 4M4 4h8v8"/></svg></a>
   <div class="sticker-navigation__list" data-sticker-list id="blog-sticker-links">
     {items.map((item) => (
       <div class="sticker-navigation__item" data-sticker-id={item.id} data-mobile-hidden="true" data-sticker-order={item.order} data-sticker-side={item.order < 5 ? 'left' : 'right'} style={`--sticker-row:${(item.order - 1) % 4};--sticker-angle:${[-5,6,-7,4,5,-5,3][item.order - 1]}deg`}>
         {item.id === 'music' ? <HeadphonesSticker /> : <a class="sticker-link" href={item.href} target={/^https?:/.test(item.href) ? "_blank" : undefined} rel={/^https?:/.test(item.href) ? "noopener noreferrer" : undefined} aria-label={item.id === 'spotify-back' ? 'Back to Spotify' : item.id === 'home' ? 'Blog home' : item.label} title={item.id === 'spotify-back' ? 'Back to Spotify' : item.label} aria-current={current(item.href) ? 'page' : undefined}>
-          <span class="sticker-link__art"><img src={`/charms/${item.image}.${['home', 'spotify-back'].includes(item.id) ? 'svg' : 'webp'}`} alt="" width="94" height="80" draggable="false" />
+          <span class="sticker-link__art"><img src={`/charms/${item.image}.${['home', 'spotify-back'].includes(item.id) ? 'svg' : 'webp'}`} alt="" width="94" height="80" draggable="false" fetchpriority={['home', 'minecraft'].includes(item.id) ? 'high' : undefined} />
           <span class="sticker-link__cue" aria-hidden="true"><i></i><i></i><i></i><i></i></span></span>
           <span class="sticker-link__label">{item.id === 'home' ? <><span class="desktop-return-label">{item.label}</span><span class="mobile-return-label">Home</span></> : item.label}</span>
         </a>}
@@ -75,11 +74,13 @@ const current = (href: string) => href === '/' ? Astro.url.pathname === '/' : As
 <script>
   import { initStickerNavigation } from '@/lib/sticker-navigation'
   let cleanup: (() => void) | undefined
-  document.addEventListener('astro:page-load', () => {
+  const mount = () => {
     cleanup?.()
     const root = document.querySelector('[data-sticker-navigation="blog"]')
     if (root) cleanup = initStickerNavigation(root)
-  })
+  }
+  mount()
+  document.addEventListener('astro:after-swap', mount)
   document.addEventListener('astro:before-swap', () => cleanup?.())
 </script>
 <style is:global>

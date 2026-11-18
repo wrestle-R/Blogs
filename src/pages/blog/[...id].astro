@@ -65,7 +65,7 @@ const viewTrackTitle = isCurrentSubpost
   : post.data.title
 ---
 
-<Layout>
+<Layout class="blog-post-main">
   <PostHead slot="head" post={post} />
   <div
     id="blog-view-tracker"
@@ -92,10 +92,11 @@ const viewTrackTitle = isCurrentSubpost
   }
 
   <section
-    class="grid grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-8"
+    class="blog-post-grid grid grid-cols-[minmax(0px,1fr)_min(calc(var(--breakpoint-md)-2rem),100%)_minmax(0px,1fr)] gap-y-4 sm:gap-y-6"
+    style={`--reading-row: ${post.data.image ? 3 : 2}`}
   >
-    <div class="col-start-2 pt-4">
-      <div class="flex items-center gap-3 text-sm text-muted-foreground mb-8 pb-3 border-b border-border/40">
+    <div class="col-start-2 row-start-1">
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground mb-3 pb-2 border-b border-border/40">
         {
           authors.length > 0 && (
             <a href={`/authors/${authors[0].id}`} class="flex items-center gap-1.5 hover:text-foreground transition-colors">
@@ -118,7 +119,7 @@ const viewTrackTitle = isCurrentSubpost
         }
       </div>
       
-      <h1 class="text-2xl font-semibold text-foreground">{post.data.title}</h1>
+      <h1 data-return-home-heading class="text-2xl font-semibold text-foreground">{post.data.title}</h1>
     </div>
 
     {
@@ -128,7 +129,7 @@ const viewTrackTitle = isCurrentSubpost
           alt={post.data.title}
           width={1200}
           height={630}
-          class="col-span-full mx-auto w-full max-w-5xl object-cover rounded-lg"
+          class="col-span-full row-start-2 mx-auto w-full max-w-5xl object-cover rounded-lg"
         />
       )
     }
@@ -139,7 +140,7 @@ const viewTrackTitle = isCurrentSubpost
       )
     }
 
-    <article class="prose dark:prose-invert col-start-2 max-w-none">
+    <article class="blog-post-content prose dark:prose-invert col-start-2 min-w-0 max-w-none">
       <div
         id="intro-top"
         aria-hidden="true"
@@ -168,7 +169,7 @@ const viewTrackTitle = isCurrentSubpost
       )
     }
 
-    <div class="col-start-2 mt-12 mb-8">
+    <div class="blog-post-return col-start-2">
       <a href="/blog">
         <Button variant="outline" size="sm" className="gap-2">
           <Icon name="lucide:arrow-left" class="size-4" />
@@ -249,6 +250,34 @@ const viewTrackTitle = isCurrentSubpost
     })
   </script>
 </Layout>
+
+<style is:global>
+  .blog-post-grid > :is(.blog-post-content, #toc-sidebar-container, #subposts-sidebar-container) {
+    grid-row-start: var(--reading-row);
+  }
+
+  .blog-post-grid > .blog-post-return {
+    grid-row-start: calc(var(--reading-row) + 1);
+  }
+
+  .blog-post-grid h1[data-return-home-heading] {
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+  }
+
+  .blog-post-content { display: flow-root; }
+  .blog-post-content > #intro-top + :is(h2, h3, p),
+  .blog-post-content > #top + :is(h2, h3, p) { margin-top: 0; }
+  .blog-post-content > :last-child { margin-bottom: 0; }
+
+  @media (max-width: 1199px) {
+    body:has(.blog-post-main) { padding-top: 100px; }
+    body:has(.blog-post-main) > .blog-reading-tools { padding-right: 76px; }
+    body:has(.blog-post-main) .site-footer { padding-top: 0; }
+    .blog-post-grid h1[data-return-home-heading] { padding-left: 66px; }
+  }
+</style>
 
 <script>
   if (document.querySelector('.katex')) {

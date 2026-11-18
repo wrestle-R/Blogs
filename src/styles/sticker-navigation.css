@@ -114,12 +114,6 @@ body:has(.blog-sticker-navigation) > .sticky:not(:has(*)) { display: none; }
   .blog-sticker-navigation [data-sticker-id='home'] img { width: 52px; height: 50px; }
 }
 
-/* Opt in before the navigation is parsed, so unloaded artwork never flashes. */
-@media (prefers-reduced-motion:no-preference) {
-  html[data-sticker-motion] [data-sticker-id]:not([data-sticker-ready]) { opacity:0; }
-  html[data-sticker-motion] [data-sticker-id] { transform-origin:12% 85%; }
-}
-
 /* Linked objects lift gently; their saved drag translation stays on the parent. */
 .sticker-navigation a.sticker-link[href] { cursor: pointer; transform-origin: 50% 75%; transition: transform 360ms cubic-bezier(.2,.8,.2,1), filter 360ms ease; }
 @media (hover: hover) and (prefers-reduced-motion: no-preference) {

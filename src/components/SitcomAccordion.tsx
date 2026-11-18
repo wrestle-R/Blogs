@@ -86,7 +86,7 @@ export default function SitcomAccordion() {
       <AccordionItem value="young-sheldon">
         <AccordionTrigger>14. Young Sheldon</AccordionTrigger>
         <AccordionContent>
-          Honestly if u havent watched u havent missed out any anything great, its not bad background sound but as a dedicated show to watch just dont 
+          Honestly if u havent watched u havent missed out on anything great, its not bad background sound but as a dedicated show to watch just dont
         </AccordionContent>
       </AccordionItem>
     </Accordion>
