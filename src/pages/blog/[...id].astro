@@ -179,20 +179,6 @@ const viewTrackTitle = isCurrentSubpost
     </div>
   </section>
 
-  <Button
-    variant="outline"
-    size="icon"
-    className="group fixed right-8 bottom-8 z-50 hidden"
-    id="scroll-to-top"
-    title="Scroll to top"
-    aria-label="Scroll to top"
-  >
-    <Icon
-      name="lucide:arrow-up"
-      class="mx-auto size-4 transition-all group-hover:-translate-y-0.5"
-    />
-  </Button>
-
   <script>
     const trackBlogView = async () => {
       const tracker = document.getElementById('blog-view-tracker')
@@ -229,24 +215,7 @@ const viewTrackTitle = isCurrentSubpost
     document.addEventListener('astro:page-load', () => {
       trackBlogView()
 
-      const scrollToTopButton = document.getElementById('scroll-to-top')
-      const footer = document.querySelector('footer')
 
-      if (scrollToTopButton && footer) {
-        scrollToTopButton.addEventListener('click', () => {
-          window.scrollTo({ top: 0, behavior: 'smooth' })
-        })
-
-        window.addEventListener('scroll', () => {
-          const footerRect = footer.getBoundingClientRect()
-          const isFooterVisible = footerRect.top <= window.innerHeight
-
-          scrollToTopButton.classList.toggle(
-            'hidden',
-            window.scrollY <= 300 || isFooterVisible,
-          )
-        })
-      }
     })
   </script>
 </Layout>
@@ -267,6 +236,7 @@ const viewTrackTitle = isCurrentSubpost
   }
 
   .blog-post-content { display: flow-root; }
+  .blog-post-content :is(p, li) { text-align: justify; }
   .blog-post-content > #intro-top + :is(h2, h3, p),
   .blog-post-content > #top + :is(h2, h3, p) { margin-top: 0; }
   .blog-post-content > :last-child { margin-bottom: 0; }

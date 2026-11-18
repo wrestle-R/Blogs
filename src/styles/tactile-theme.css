@@ -140,8 +140,13 @@
 .prose :where(img) { border-radius: 6px; }
 .prose :where(table) { font-variant-numeric: tabular-nums; }
 .blog-reading-tools:has(details) {
+  background-color: var(--background);
   border-bottom: 1px solid var(--border);
   box-shadow: 0 2px 5px var(--sk-shadow);
+}
+
+@media (max-width: 1199px) {
+  .blog-reading-tools:has(details) { min-height: 76px; }
 }
 
 @media (max-width: 639px) {
