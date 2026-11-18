@@ -57,7 +57,7 @@ const runblogApiBaseUrl =
     <div class="grow blog-card-copy">
       {sticker && <span class="mobile-sticker-slot post-sticker-corner" data-mobile-sticker-slot={sticker} aria-hidden="true"></span>}
       <h3 class="mb-1 text-lg font-medium">{entry.data.title}</h3>
-      <p class="text-muted-foreground mb-2 text-sm">{entry.data.description}</p>
+      <p class="blog-card-description text-muted-foreground mb-2 text-sm">{entry.data.description}</p>
 
       <div
         class="text-muted-foreground mb-2 flex flex-wrap items-center gap-x-2 text-xs"
@@ -196,3 +196,15 @@ const runblogApiBaseUrl =
     updateCardViews()
   }
 </script>
+
+<style>
+  .blog-card-description {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    line-height: 1.5;
+    min-height: 4.5em;
+    overflow-wrap: anywhere;
+  }
+</style>
