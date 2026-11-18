@@ -105,16 +105,10 @@ const viewTrackTitle = isCurrentSubpost
             </a>
           )
         }
-        <span class="text-muted-foreground/40">•</span>
-        <div class="flex items-center">
-          <span>{formatDate(post.data.date)}</span>
-        </div>
+        <time datetime={post.data.date.toISOString()} class="whitespace-nowrap">{formatDate(post.data.date)}</time>
         {
           postReadingTime && (
-            <>
-              <span class="text-muted-foreground/40">•</span>
-              <span class="text-muted-foreground/80">{postReadingTime}</span>
-            </>
+            <span class="whitespace-nowrap text-muted-foreground/80">{postReadingTime}</span>
           )
         }
       </div>
@@ -232,7 +226,8 @@ const viewTrackTitle = isCurrentSubpost
   .blog-post-grid h1[data-return-home-heading] {
     display: flex;
     align-items: center;
-    min-height: 56px;
+    text-wrap: balance;
+    min-height: 64px;
   }
 
   .blog-post-content { display: flow-root; }
