@@ -27,7 +27,7 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
 
 <Layout class="max-w-4xl">
   <PageHead slot="head" title={page.currentPage === 1 ? 'Blog' : `Blog · Page ${page.currentPage}`} />
-  <header class="archive-heading flex flex-wrap items-center justify-between gap-x-4 gap-y-1" data-return-home-heading>
+  <header class="archive-heading flex flex-wrap items-center justify-between gap-x-4 gap-y-1" data-return-navigation data-return-home-heading>
     <h1 class="text-3xl font-semibold">All posts</h1>
     <p class="text-sm text-muted-foreground">Page {page.currentPage} of {page.lastPage}</p>
   </header>
