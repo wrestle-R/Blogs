@@ -27,7 +27,7 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
 ---
 
 <Layout class="max-w-4xl">
-  <PageHead slot="head" title="Blog" />
+  <PageHead slot="head" title={page.currentPage === 1 ? 'Blog' : `Blog · Page ${page.currentPage}`} />
   <Breadcrumbs
     items={[
       { label: 'Blog', href: '/blog', icon: 'lucide:library-big' },
@@ -35,8 +35,9 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
     ]}
   />
 
+  <h1 class="text-3xl font-semibold">All posts</h1>
   <div class="post-list">
-    <div class="flex min-h-[calc(100vh-24rem)] flex-col gap-y-8">
+    <div class="flex flex-col gap-y-8">
       {myYears.map((year) => (
         <section class="flex flex-col gap-y-4">
           <h2 class="font-medium">{year}</h2>
@@ -56,6 +57,6 @@ const mobilePostStickers = [undefined, 'music', 'about', 'constellation', 'songb
     currentPage={page.currentPage}
     totalPages={page.lastPage}
     baseUrl="/blog/"
-    firstPageUrl="/"
+    firstPageUrl="/blog"
   />
 </Layout>

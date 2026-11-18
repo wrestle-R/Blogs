@@ -11,9 +11,10 @@ import StickerNavigation from '@/components/StickerNavigation.astro'
 import ThemeToggle from '@/components/ThemeToggle.astro'
 interface Props {
   class?: string
+  compact?: boolean
 }
 
-const { class: className } = Astro.props
+const { class: className, compact = false } = Astro.props
 const hasReadingTools = Astro.slots.has('subposts-navigation') || Astro.slots.has('table-of-contents')
 ---
 
@@ -42,7 +43,7 @@ const hasReadingTools = Astro.slots.has('subposts-navigation') || Astro.slots.ha
     <main
       id="main-content"
       tabindex="-1"
-      class={cn('w-full mx-auto flex grow flex-col gap-y-6 px-4', className)}
+      class={cn('w-full mx-auto flex flex-col gap-y-6 px-4', !compact && 'grow', className)}
     >
       <slot />
     </main>

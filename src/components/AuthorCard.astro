@@ -13,7 +13,9 @@ interface Props {
 const { author } = Astro.props
 const { name, avatar, bio, pronouns } = author.data
 const currentPath = Astro.url.pathname
-const isAuthorPage = currentPath === `/authors/${author.id}`
+const isAuthorPage = currentPath.replace(/\/+$/, '') === `/authors/${author.id}`
+
+const NameHeading = isAuthorPage ? 'h1' : 'h2'
 
 const socialLinks: SocialLink[] = [
   author.data.website && { href: author.data.website, label: 'Website' },
@@ -47,7 +49,7 @@ const socialLinks: SocialLink[] = [
     <div class="flex grow flex-col justify-between gap-y-4">
       <div>
         <div class="flex flex-wrap items-center gap-x-2">
-          <h3 class="text-lg font-medium">{name}</h3>
+          <NameHeading class="text-lg font-medium">{name}</NameHeading>
           {
             pronouns && (
               <span class="text-muted-foreground text-sm">({pronouns})</span>

@@ -2,6 +2,7 @@
 import { Icon } from 'astro-icon/components'
 import '@/styles/footer.css'
 
+const onWallpapers = Astro.url.pathname.replace(/\/+$/, '') === '/wallpapers'
 const footerLinks = [
   { label: 'GitHub', href: 'https://github.com/wrestle-R', icon: 'lucide:github' },
   { label: 'LinkedIn', href: 'https://linkedin.com/in/russel-daniel-970b8a303', icon: 'lucide:linkedin' },
@@ -11,7 +12,6 @@ const footerLinks = [
 
 <footer class="site-footer blog-footer" data-home-footer={Astro.url.pathname === '/' ? '' : undefined}>
   <div class="site-footer-frame">
-    {Astro.url.pathname !== '/wallpapers' && <span class="mobile-sticker-slot site-footer-wallpapers" data-mobile-sticker-slot="wallpapers" aria-hidden="true"></span>}
     <div class="site-footer-panel">
       <p class="site-footer-copyright"><span class="site-footer-copyright-symbol">©</span><span>Running out of Excuses</span></p>
       <nav class="site-footer-connect" aria-label="Connect">
@@ -27,5 +27,10 @@ const footerLinks = [
       </nav>
     </div>
 
+    <nav class="site-footer-pages" aria-label="Blog links">
+      <a href="/">Home</a>
+      <a href="/blog">All posts</a>
+      {!onWallpapers && <a href="/wallpapers">Wallpapers</a>}
+    </nav>
   </div>
 </footer>

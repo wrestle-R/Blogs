@@ -226,11 +226,11 @@ export async function getCombinedReadingTime(postId: string): Promise<string> {
 
   let totalWords = calculateWordCountFromHtml(post.body)
 
-  if (!isSubpost(postId)) {
-    const subposts = await getSubpostsForParent(postId)
-    for (const subpost of subposts) {
-      totalWords += calculateWordCountFromHtml(subpost.body)
-    }
+  if (isSubpost(postId)) return getPostReadingTime(postId)
+  const subposts = await getSubpostsForParent(postId)
+  if (!subposts.length) return getPostReadingTime(postId)
+  for (const subpost of subposts) {
+    totalWords += calculateWordCountFromHtml(subpost.body)
   }
 
   return readingTime(totalWords)

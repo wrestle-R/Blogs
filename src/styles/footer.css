@@ -1,7 +1,5 @@
 .blog-footer { --footer-ink:var(--foreground); --footer-muted:var(--muted-foreground); --footer-accent:var(--primary); --footer-glint:#ffffffcf; max-width:56rem; margin:0 auto; }
 [data-theme='dark'] .blog-footer { --footer-glint:#ffffff0c; }
-/* Keep the existing movable wallpaper sticker outside the compact bar. */
-.blog-footer .site-footer-wallpapers { width:64px; height:64px; margin:0 8px 12px auto; }
 .site-footer { width:100%; padding:16px 16px 32px; }
 .site-footer-frame { width:100%; container:site-footer / inline-size; }
 .site-footer-panel {
@@ -36,6 +34,10 @@
   .site-footer-copyright { gap:5px; font-size:9px; }
   .site-footer-copyright-symbol { font-size:10px; }
 }
-/* Leave the existing floating return button clear of footer links. */
+/* The small footer links replace the separate mobile wallpaper slot. */
+.site-footer-pages { display:flex; flex-wrap:wrap; gap:0 16px; padding-top:6px; }
+.site-footer-pages a { display:inline-flex; align-items:center; min-height:44px; font-size:12px; text-underline-offset:3px; }
+.site-footer-pages a:hover, .site-footer-pages a:focus-visible { text-decoration:underline; }
+/* Leave the floating return button clear of footer links. */
 @media (max-width:1199px) { .site-footer { padding-bottom:calc(64px + env(safe-area-inset-bottom)); } }
 @media (prefers-reduced-motion:reduce) { .site-footer-links a { transition:none; } }

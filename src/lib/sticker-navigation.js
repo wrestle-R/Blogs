@@ -12,6 +12,8 @@ export function initStickerNavigation(root) {
   const slots = [...document.querySelectorAll('[data-mobile-sticker-slot]')];
   const prefix = `sticker-navigation:uniform-v4:${root.dataset.stickerNavigation}:${location.pathname}:`;
   const positions = new Map();
+  const pathname = location.pathname.replace(/\/+$/, '') || '/';
+  let lastMovedItem;
   let drag;
   let hold;
   let frame;
@@ -118,6 +120,7 @@ export function initStickerNavigation(root) {
       const current = positions.get(item);
       apply(item, constrain(item, { x: current.x + (event.key === 'ArrowLeft' ? -12 : event.key === 'ArrowRight' ? 12 : 0), y: current.y + (event.key === 'ArrowUp' ? -12 : event.key === 'ArrowDown' ? 12 : 0) }));
       save(item);
+      lastMovedItem = item;
       resetItem.hidden = false;
     });
   });
@@ -129,7 +132,13 @@ export function initStickerNavigation(root) {
     suppressUntil = 0;
     suppressedItem = undefined;
     items.forEach((item) => { apply(item, { x: 0, y: 0 }); try { localStorage.removeItem(storageKey(item)); } catch { /* Storage is optional. */ } });
+    const restoreFocus = document.activeElement === reset;
     resetItem.hidden = true;
+    if (restoreFocus) {
+      const previous = lastMovedItem?.querySelector('a, button');
+      const fallback = root.querySelector('.portfolio-return');
+      (previous?.getClientRects().length ? previous : fallback)?.focus({ preventScroll: true });
+    }
   });
   const returnHeading = isBlog ? document.querySelector('main [data-return-navigation]') || document.querySelector('main h1') || document.querySelector('main nav[aria-label="breadcrumb"]') : null;
   const addedHeadingAnchor = returnHeading && !returnHeading.hasAttribute('data-return-navigation') && !returnHeading.hasAttribute('data-return-home-heading');
@@ -137,7 +146,7 @@ export function initStickerNavigation(root) {
   const positionItems = () => {
     const origin = root.getBoundingClientRect();
     const wide = innerWidth >= 1200;
-    const home = location.pathname === '/';
+    const home = pathname === '/';
     const main = document.querySelector('main');
     const intro = document.querySelector('.hero-intro')?.getBoundingClientRect();
     const content = document.querySelector('.endurance-panel, .about-page, .spotify-page, .songs-page, main .col-start-2') || main;
@@ -153,11 +162,11 @@ export function initStickerNavigation(root) {
       const id = item.dataset.stickerId;
       if (item.hasAttribute('data-sticker-inline') || ['theme','home','spotify-back','reset'].includes(id)) return false;
       const target = item.querySelector('a')?.getAttribute('href');
-      if (target === location.pathname) return false;
+      if (target === pathname) return false;
       if (home) return true;
-      if (location.pathname === '/about') return ['music','minecraft','constellation','runny','songbook','arch','wallpapers'].includes(id);
-      if (location.pathname === '/spotify') return ['minecraft','songbook','constellation','posts','movies','wallpapers'].includes(id);
-      if (location.pathname.startsWith('/blog/')) return ['minecraft','posts','songbook','constellation','arch','wallpapers'].includes(id);
+      if (pathname === '/about') return ['music','minecraft','constellation','runny','songbook','arch','wallpapers'].includes(id);
+      if (pathname === '/spotify') return ['minecraft','songbook','constellation','posts','movies','wallpapers'].includes(id);
+      if (pathname.startsWith('/blog/')) return ['minecraft','posts','songbook','constellation','arch','wallpapers'].includes(id);
       return ['minecraft','posts','songbook','wallpapers'].includes(id);
     };
     const sidebarVisible = (id) => {
@@ -223,7 +232,7 @@ export function initStickerNavigation(root) {
       if (!isBlog && id === 'resume' && home) { put(item, 20, 10 - scrollY); return; }
       if (!isBlog && id === 'home' && !home) { put(item, wide ? innerWidth/2 - itemWidth(item)/2 : 16, 10 - scrollY); return; }
       const slot = slots.find((el) => el.dataset.mobileStickerSlot === id && el.getBoundingClientRect().width && el.getBoundingClientRect().height);
-      if (slot && !(isBlog && id === 'about' && location.pathname === '/about')) {
+      if (slot && !(isBlog && id === 'about' && pathname === '/about')) {
         const box = slot.getBoundingClientRect();
         if (box.width && box.height) put(item, box.left + (box.width - itemWidth(item))/2, box.top);
       }
