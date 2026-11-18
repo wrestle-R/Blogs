@@ -44,7 +44,7 @@ export default function WallpaperGalleryClient() {
   const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
   const [activePublicId, setActivePublicId] = useState<string | null>(null)
-  const hoverTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const previewRef = useRef<HTMLDialogElement>(null)
 
   const manifestUrl = useMemo(
     () => `${MANIFEST_PATH}?t=${Date.now()}`,
@@ -63,10 +63,14 @@ export default function WallpaperGalleryClient() {
       const manifestItems = normalizeCloudinaryList(payload)
 
       let cachedItems: WallpaperAsset[] = []
-      const rawCache = globalThis.localStorage.getItem(LOCAL_CACHE_KEY)
-      if (rawCache) {
-        const cachePayload = JSON.parse(rawCache) as LocalUploadCache
-        cachedItems = normalizeCloudinaryList(cachePayload)
+      try {
+        const rawCache = globalThis.localStorage.getItem(LOCAL_CACHE_KEY)
+        if (rawCache) {
+          const cachePayload = JSON.parse(rawCache) as LocalUploadCache
+          cachedItems = normalizeCloudinaryList(cachePayload)
+        }
+      } catch {
+        // The public manifest remains usable when optional local storage fails.
       }
 
       setItems(mergeAndDeduplicate(cachedItems, manifestItems))
@@ -89,18 +93,8 @@ export default function WallpaperGalleryClient() {
   const activeItem = items.find((item) => item.publicId === activePublicId) ?? null
 
   useEffect(() => {
-    if (!activeItem) return
-
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        setActivePublicId(null)
-      }
-    }
-
-    globalThis.addEventListener('keydown', onKeyDown)
-    return () => {
-      globalThis.removeEventListener('keydown', onKeyDown)
-    }
+    const dialog = previewRef.current
+    if (activeItem && dialog && !dialog.open) dialog.showModal()
   }, [activeItem])
 
   useEffect(() => {
@@ -111,7 +105,7 @@ export default function WallpaperGalleryClient() {
 
   if (loading) {
     return (
-      <section className="grid gap-4 sm:grid-cols-2">
+      <section className="grid gap-4 sm:grid-cols-2" aria-busy="true" aria-label="Loading wallpapers">
         {Array.from({ length: 6 }).map((_, index) => {
           const skeletonId = `skeleton-card-${index}`
           return (
@@ -192,15 +186,6 @@ export default function WallpaperGalleryClient() {
             <Card
               key={item.publicId}
               className="group relative overflow-hidden rounded-xl border border-white/5 bg-card/95 sexy-card-hover"
-              onMouseEnter={() => {
-                if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current)
-                hoverTimerRef.current = setTimeout(() => {
-                  setActivePublicId(item.publicId)
-                }, 1300)
-              }}
-              onMouseLeave={() => {
-                if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current)
-              }}
             >
               {/* Gradient overlay for bottom text blending */}
               <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-background/80 via-background/10 to-transparent opacity-80" />
@@ -210,6 +195,7 @@ export default function WallpaperGalleryClient() {
               
               <button
                 type="button"
+                aria-label={`Preview ${filename}`}
                 onClick={() => setActivePublicId(item.publicId)}
                 className="relative z-0 block w-full text-left overflow-hidden aspect-[16/10]"
               >
@@ -224,7 +210,7 @@ export default function WallpaperGalleryClient() {
                 />
               </button>
 
-              <CardContent className="absolute bottom-0 left-0 right-0 z-30 space-y-2 p-4 pt-10">
+              <CardContent className="pointer-events-none absolute bottom-0 left-0 right-0 z-30 space-y-2 p-4 pt-10">
                 <div>
                   <h3 className="truncate text-base font-semibold drop-shadow-md transition-all duration-300 group-hover:-translate-y-1 group-hover:text-primary">
                     {filename}
@@ -261,17 +247,19 @@ export default function WallpaperGalleryClient() {
       ) : null}
 
       {activeItem ? (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-[84vw] rounded-xl border border-white/10 bg-card/50 p-4 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between gap-2">
-              <p className="truncate text-base font-semibold text-white/90">
+        <dialog ref={previewRef} aria-labelledby="wallpaper-preview-title"
+          onClose={() => setActivePublicId(null)}
+          className="m-auto w-[calc(100%-2rem)] max-w-5xl rounded-xl border bg-card p-4 text-foreground shadow-2xl backdrop:bg-black/85">
+          <div>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <p id="wallpaper-preview-title" className="min-w-0 break-all text-base font-semibold">
                 {activeItem.publicId.split('/').pop() ?? activeItem.publicId}
               </p>
               <div className="flex items-center gap-3">
                 <Button asChild size="sm" variant="default" className="font-semibold shadow-md">
                   <a href={buildDownloadUrl(activeItem.url)}>Download HQ</a>
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setActivePublicId(null)}>
+                <Button size="sm" variant="outline" onClick={() => previewRef.current?.close()}>
                   Close
                 </Button>
               </div>
@@ -284,7 +272,7 @@ export default function WallpaperGalleryClient() {
               />
             </div>
           </div>
-        </div>
+        </dialog>
       ) : null}
     </section>
   )

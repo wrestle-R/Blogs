@@ -52,24 +52,18 @@ const hasReadingTools = Astro.slots.has('subposts-navigation') || Astro.slots.ha
       (() => {
         const attributionLine = "Copied from Russel's Blog";
 
-        const getTextControlSelection = (target) => {
-          if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
-            return '';
-          }
-
-          const start = target.selectionStart ?? 0;
-          const end = target.selectionEnd ?? 0;
-
-          if (end <= start) {
-            return '';
-          }
-
-          return target.value.slice(start, end);
-        };
-
         document.addEventListener('copy', (event) => {
-          const fromControl = getTextControlSelection(event.target);
-          const selectedText = (fromControl || window.getSelection()?.toString() || '').trim();
+          const selection = window.getSelection();
+          if (!selection || selection.isCollapsed) return;
+          const anchor = selection.anchorNode?.parentElement;
+          const focus = selection.focusNode?.parentElement;
+          const article = anchor?.closest('.blog-post-content');
+          if (!article || focus?.closest('.blog-post-content') !== article) return;
+          if (event.target instanceof Element && event.target.closest('input, textarea, [contenteditable]')) return;
+          if (anchor.closest('pre, code') || focus.closest('pre, code')) return;
+          // Preserve selections spanning code blocks, including indentation and newlines.
+          if (selection.getRangeAt(0).cloneContents().querySelector('pre, code')) return;
+          const selectedText = selection.toString();
 
           if (!selectedText || !event.clipboardData) {
             return;
