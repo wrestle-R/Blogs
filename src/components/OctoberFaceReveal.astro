@@ -1,54 +1,47 @@
-<figure class="face-reveal" data-october-face>
-  <div class="face-frame">
-    <img src="/blogimages/october-2026/face.jpg" alt="My face after the allergic reaction" loading="lazy" />
-    <div class="face-cover" aria-hidden="true">Please don't take a photo of my face, okay please and thanks.</div>
+<figure class="village-photos" data-october-face>
+  <div class="photo-grid">
+    <img class="mussel-photo" src="/blogimages/october-2026/mussels.png" alt="The mussel responsible for my new experience" loading="lazy" />
+    <button class="face-frame" type="button" aria-label="Reveal my face" aria-pressed="false">
+      <img src="/blogimages/october-2026/face.jpg" alt="My face after the allergic reaction" loading="lazy" />
+      <span class="face-cover" aria-hidden="true">Please don't take a photo of my face, okay please and thanks.</span>
+    </button>
   </div>
-  <figcaption data-prompt>Are you sure you want to look at that face? It's kinda scary and freaky.</figcaption>
-  <div class="face-actions">
-    <button type="button" data-ask>Look at my face</button>
-    <button type="button" data-show hidden>Yes, show me</button>
-    <button type="button" data-hide hidden>Hide my face</button>
-  </div>
+  <figcaption data-prompt>Tap my face if you're sure you want to see it (it's kinda scary).</figcaption>
 </figure>
 <style>
-  .face-frame{position:relative;overflow:hidden;border-radius:.5rem;max-height:520px}
-  .face-frame img{display:block;width:100%;height:auto;filter:blur(22px);transform:scale(1.05);transition:filter .25s}
-  .face-frame.revealed img{filter:none;transform:none}
-  .face-cover{display:none;position:absolute;inset:0;background:#000;color:#fff;place-items:center;text-align:center;padding:1.5rem}
+  .photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;align-items:stretch}
+  .mussel-photo,.face-frame{width:100%;height:auto;aspect-ratio:4/5;border-radius:.65rem;overflow:hidden}
+  .mussel-photo{display:block;object-fit:cover;object-position:center;margin:0}
+  .face-frame{position:relative;padding:0;border:0;background:#171717;cursor:pointer;display:block}
+  .face-frame:focus-visible{outline:3px solid currentColor;outline-offset:4px}
+  .face-frame img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 48%;filter:blur(18px) brightness(1.04) saturate(.94);transform:scale(1.08);transition:filter .25s,transform .25s;margin:0}
+  .face-frame.revealed img{filter:brightness(1.04) saturate(.94);transform:scale(1)}
+  .face-cover{display:none;position:absolute;inset:0;background:#000;color:#fff;place-items:center;text-align:center;padding:1rem;font-size:.85rem}
   .face-frame.covered .face-cover{display:grid}
-  .face-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem}
-  button{border:1px solid currentColor;border-radius:.5rem;padding:.65rem 1rem;cursor:pointer;background:transparent;color:inherit;font:inherit}
-  button[hidden]{display:none}
+  figcaption{margin-top:.6rem}
   @media print{.face-frame{visibility:hidden}}
-  @media(prefers-reduced-motion:reduce){.face-frame img{transition:none}}
+  @media(prefers-reduced-motion:reduce){.face-frame img{transition:none;}}
 </style>
 <script>
   function initFaceReveal() {
     document.querySelectorAll<HTMLElement>('[data-october-face]').forEach((root) => {
       if (root.dataset.ready) return
       root.dataset.ready = 'true'
-      const frame = root.querySelector<HTMLElement>('.face-frame')!
+      const frame = root.querySelector<HTMLButtonElement>('.face-frame')!
       const prompt = root.querySelector<HTMLElement>('[data-prompt]')!
-      const ask = root.querySelector<HTMLButtonElement>('[data-ask]')!
-      const show = root.querySelector<HTMLButtonElement>('[data-show]')!
-      const hide = root.querySelector<HTMLButtonElement>('[data-hide]')!
-      ask.addEventListener('click', () => { ask.hidden = true; show.hidden = false })
-      show.addEventListener('click', () => {
-        frame.classList.remove('covered'); frame.classList.add('revealed')
-        show.hidden = true; hide.hidden = false
-        prompt.textContent = "Please don't take a photo of my face, okay please and thanks."
-      })
-      hide.addEventListener('click', () => {
-        frame.classList.remove('revealed', 'covered'); hide.hidden = true; ask.hidden = false
-        prompt.textContent = "Are you sure you want to look at that face? It's kinda scary and freaky."
-      })
-      const cover = () => {
-        if (!frame.classList.contains('revealed')) return
-        frame.classList.remove('revealed'); frame.classList.add('covered')
-        hide.hidden = true; ask.hidden = false
+      const hide = (cover = false) => {
+        frame.classList.remove('revealed'); frame.classList.toggle('covered', cover)
+        frame.setAttribute('aria-label', 'Reveal my face'); frame.setAttribute('aria-pressed', 'false')
+        prompt.textContent = "Tap my face if you're sure you want to see it (it's kinda scary)."
       }
-      document.addEventListener('visibilitychange', () => { if (document.hidden) cover() })
-      document.addEventListener('keyup', (event) => { if (event.key === 'PrintScreen') cover() })
+      frame.addEventListener('click', () => {
+        if (frame.classList.contains('revealed')) { hide(); return }
+        frame.classList.remove('covered'); frame.classList.add('revealed')
+        frame.setAttribute('aria-label', 'Hide my face'); frame.setAttribute('aria-pressed', 'true')
+        prompt.textContent = "Please don't take a photo of my face, okay please and thanks. Tap to hide."
+      })
+      document.addEventListener('visibilitychange', () => { if (document.hidden && frame.classList.contains('revealed')) hide(true) })
+      document.addEventListener('keyup', (event) => { if (event.key === 'PrintScreen' && frame.classList.contains('revealed')) hide(true) })
     })
   }
   initFaceReveal()
