@@ -263,20 +263,25 @@ const { headings } = Astro.props
       }
     }
 
-    static setupInteraction() {
+    static setupInteraction(signal: AbortSignal) {
       if (!state.listElement) return
 
-      state.listElement.querySelectorAll('.mobile-toc-item').forEach((item) => {
-        item.addEventListener('click', () => {
-          if (state.detailsElement) state.detailsElement.open = false
-        })
-      })
+      state.listElement.addEventListener('click', (event) => {
+        if (!(event instanceof MouseEvent) || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
+        const link = event.target instanceof Element
+          ? event.target.closest<HTMLAnchorElement>('.mobile-toc-item')
+          : null
+        if (!link) return
+        if (state.detailsElement) state.detailsElement.open = false
+        // Let the native anchor update history before aligning against the collapsed bar.
+        requestAnimationFrame(MobileTOCController.handleHash)
+      }, { signal })
 
       if (state.scrollArea) {
         state.scrollArea.addEventListener(
           'scroll',
           () => TOCHeaderScrollMask.update(),
-          { passive: true },
+          { passive: true, signal },
         )
       }
 
@@ -285,7 +290,7 @@ const { headings } = Astro.props
           if (state.detailsElement?.open) {
             setTimeout(TOCHeaderScrollMask.update, 100)
           }
-        })
+        }, { signal })
       }
     }
   }
@@ -310,6 +315,28 @@ const { headings } = Astro.props
 
   class MobileTOCController {
     static observer: ResizeObserver | undefined
+    static listeners: AbortController | undefined
+    static anchor: HTMLElement | null = null
+
+    static handleHash() {
+      const id = location.hash.slice(1)
+      MobileTOCController.anchor =
+        state.headings.find((heading) => encodeURIComponent(heading.id) === id || heading.id === id)
+        ?? (id === 'intro-top' ? document.getElementById(id) : null)
+      MobileTOCController.realign()
+    }
+
+    static realign() {
+      // Keep a followed fragment aligned during reflow, then let manual scrolling take over.
+      MobileTOCController.anchor?.scrollIntoView({ block: 'start', behavior: 'instant' })
+      MobileTOCController.handleScroll()
+    }
+
+    static releaseAnchor(event: Event) {
+      if (event instanceof KeyboardEvent &&
+          !['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(event.key)) return
+      MobileTOCController.anchor = null
+    }
     static handleScroll() {
       const newActiveIds = HeadingRegions.getVisibleIds()
 
@@ -321,19 +348,8 @@ const { headings } = Astro.props
       ProgressCircle.update()
     }
 
-    static handleResize() {
-      HeadingRegions.build()
-
-      const newActiveIds = HeadingRegions.getVisibleIds()
-      if (JSON.stringify(newActiveIds) !== JSON.stringify(state.activeIds)) {
-        state.activeIds = newActiveIds
-        MobileTOCLinks.update(state.activeIds)
-      }
-
-      ProgressCircle.update()
-    }
-
     static init() {
+      this.cleanup()
       state.reset()
       HeadingRegions.build()
 
@@ -352,31 +368,34 @@ const { headings } = Astro.props
       MobileTOCLinks.update(state.activeIds)
       ProgressCircle.update()
 
-      MobileTOCLinks.setupInteraction()
-      window.addEventListener('scroll', this.handleScroll, { passive: true })
-      window.addEventListener('resize', this.handleResize, { passive: true })
+      this.listeners = new AbortController()
+      const { signal } = this.listeners
+      MobileTOCLinks.setupInteraction(signal)
+      window.addEventListener('scroll', this.handleScroll, { passive: true, signal })
+      window.addEventListener('resize', this.realign, { passive: true, signal })
+      window.addEventListener('hashchange', this.handleHash, { signal })
+      for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) {
+        window.addEventListener(event, this.releaseAnchor, { passive: true, signal })
+      }
       const article = document.querySelector('.blog-post-content')
       if (article) {
-        this.observer = new ResizeObserver(this.handleScroll)
+        this.observer = new ResizeObserver(this.realign)
         this.observer.observe(article)
       }
+      if (location.hash) this.handleHash()
     }
 
     static cleanup() {
+      this.listeners?.abort()
       this.observer?.disconnect()
-      window.removeEventListener('scroll', this.handleScroll)
+      this.anchor = null
       window.removeEventListener('scroll', ProgressCircle.update)
-      window.removeEventListener('resize', this.handleResize)
       state.activeIds = []
       state.headings = []
     }
   }
 
   document.addEventListener('astro:page-load', () => MobileTOCController.init())
-  document.addEventListener('astro:after-swap', () => {
-    MobileTOCController.cleanup()
-    MobileTOCController.init()
-  })
   document.addEventListener('astro:before-swap', () =>
     MobileTOCController.cleanup(),
   )
