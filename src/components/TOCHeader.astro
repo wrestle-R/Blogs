@@ -104,7 +104,6 @@ const { headings } = Astro.props
 
 <script>
   const INITIAL_OVERVIEW_TEXT = 'Intro'
-  const HEADER_OFFSET = 102 + 36
   const PROGRESS_CIRCLE_RADIUS = 10
   const PROGRESS_CIRCLE_CIRCUMFERENCE = 2 * Math.PI * PROGRESS_CIRCLE_RADIUS
 
@@ -115,7 +114,6 @@ const { headings } = Astro.props
     listElement: HTMLElement | null = null
     scrollArea: HTMLElement | null = null
     headings: HTMLElement[] = []
-    regions: { id: string; start: number; end: number }[] = []
     activeIds: string[] = []
 
     reset() {
@@ -133,7 +131,6 @@ const { headings } = Astro.props
       this.scrollArea =
         tocContainer?.querySelector('[data-radix-scroll-area-viewport]') || null
       this.headings = []
-      this.regions = []
       this.activeIds = []
 
       if (this.progressCircle) {
@@ -149,62 +146,28 @@ const { headings } = Astro.props
 
   class HeadingRegions {
     static build() {
-      state.headings = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          '.prose h2, .prose h3, .prose h4, .prose h5, .prose h6',
-        ),
-      )
-
-      if (state.headings.length === 0) {
-        state.regions = []
-        return
-      }
-
-      state.regions = state.headings.map((heading, index) => {
-        const nextHeading = state.headings[index + 1]
-        return {
-          id: heading.id,
-          start: heading.offsetTop,
-          end: nextHeading ? nextHeading.offsetTop : document.body.scrollHeight,
-        }
+      const ids = Array.from(state.listElement?.querySelectorAll<HTMLElement>('[data-heading-id]') ?? [])
+        .map((link) => link.dataset.headingId)
+      state.headings = ids.flatMap((id) => {
+        const heading = id && id !== 'intro-top' ? document.getElementById(id) : null
+        return heading ? [heading] : []
       })
     }
 
     static getVisibleIds(): string[] {
-      if (state.headings.length === 0) return []
-
-      const viewportTop = window.scrollY + HEADER_OFFSET
-      const viewportBottom = window.scrollY + window.innerHeight
-      const visibleIds = new Set<string>()
-
-      const isInViewport = (top: number, bottom: number) =>
-        (top >= viewportTop && top <= viewportBottom) ||
-        (bottom >= viewportTop && bottom <= viewportBottom) ||
-        (top <= viewportTop && bottom >= viewportBottom)
-
-      state.headings.forEach((heading) => {
-        const headingBottom = heading.offsetTop + heading.offsetHeight
-        if (isInViewport(heading.offsetTop, headingBottom)) {
-          visibleIds.add(heading.id)
-        }
-      })
-
-      state.regions.forEach((region) => {
-        if (region.start <= viewportBottom && region.end >= viewportTop) {
-          const heading = document.getElementById(region.id)
-          if (heading) {
-            const headingBottom = heading.offsetTop + heading.offsetHeight
-            if (
-              region.end > headingBottom &&
-              (headingBottom < viewportBottom || viewportTop < region.end)
-            ) {
-              visibleIds.add(region.id)
-            }
-          }
-        }
-      })
-
-      return Array.from(visibleIds)
+      if (!state.detailsElement?.getClientRects().length) return []
+      // Use live positions so image loads and text wrapping cannot stale the section bounds.
+      const trigger = state.detailsElement.querySelector('summary')
+      const readingLine = (trigger?.getBoundingClientRect().bottom ?? 0) + 18
+      let current: HTMLElement | undefined
+      for (const heading of state.headings) {
+        if (heading.getBoundingClientRect().top > readingLine) break
+        current = heading
+      }
+      const atEnd = window.scrollY > 0 &&
+        document.documentElement.scrollHeight - window.innerHeight - window.scrollY <= 2
+      const active = atEnd ? state.headings.at(-1) : current
+      return active ? [active.id] : []
     }
   }
 
@@ -346,6 +309,7 @@ const { headings } = Astro.props
   }
 
   class MobileTOCController {
+    static observer: ResizeObserver | undefined
     static handleScroll() {
       const newActiveIds = HeadingRegions.getVisibleIds()
 
@@ -391,15 +355,20 @@ const { headings } = Astro.props
       MobileTOCLinks.setupInteraction()
       window.addEventListener('scroll', this.handleScroll, { passive: true })
       window.addEventListener('resize', this.handleResize, { passive: true })
+      const article = document.querySelector('.blog-post-content')
+      if (article) {
+        this.observer = new ResizeObserver(this.handleScroll)
+        this.observer.observe(article)
+      }
     }
 
     static cleanup() {
+      this.observer?.disconnect()
       window.removeEventListener('scroll', this.handleScroll)
       window.removeEventListener('scroll', ProgressCircle.update)
       window.removeEventListener('resize', this.handleResize)
       state.activeIds = []
       state.headings = []
-      state.regions = []
     }
   }
 

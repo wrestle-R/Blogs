@@ -170,12 +170,12 @@ const viewTrackTitle = isCurrentSubpost
     }
 
     <div class="blog-post-return col-start-2">
-      <a href="/blog">
-        <Button variant="outline" size="sm" className="gap-2">
-          <Icon name="lucide:arrow-left" class="size-4" />
+      <Button asChild variant="outline" size="sm" className="gap-2">
+        <a href="/blog">
+          <Icon name="lucide:arrow-left" class="size-4" aria-hidden="true" />
           Back to Blogs
-        </Button>
-      </a>
+        </a>
+      </Button>
     </div>
   </section>
 
@@ -236,14 +236,21 @@ const viewTrackTitle = isCurrentSubpost
   }
 
   .blog-post-content { display: flow-root; }
-  .blog-post-content :is(p, li) { text-align: justify; }
+  .blog-post-content :is(p, li) { text-align: start; }
+  @media (max-width: 1279px) {
+    body:has(.blog-reading-tools) .blog-post-content :is(h2,h3,h4,h5,h6,#intro-top,#top) {
+      scroll-margin-top: 72px;
+    }
+    body:has(#mobile-toc-container):has(#mobile-subposts-container) .blog-post-content :is(h2,h3,h4,h5,h6,#intro-top,#top) {
+      scroll-margin-top: 128px;
+    }
+  }
   .blog-post-content > #intro-top + :is(h2, h3, p),
   .blog-post-content > #top + :is(h2, h3, p) { margin-top: 0; }
   .blog-post-content > :last-child { margin-bottom: 0; }
 
   @media (max-width: 1199px) {
     body:has(.blog-post-main) { padding-top: 100px; }
-    body:has(.blog-post-main) > .blog-reading-tools { padding-right: 76px; }
     body:has(.blog-post-main) .site-footer { padding-top: 0; }
     .blog-post-grid h1[data-return-home-heading] { padding-left: 66px; }
   }

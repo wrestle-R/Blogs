@@ -23,6 +23,7 @@ import '@/styles/sticker-navigation.css'
  * [ ] Get final visual approval for phone spacing, footer controls and desktop sticker placement.
  */
 
+const { hideTheme = false } = Astro.props
 const local = ['localhost', '127.0.0.1'].includes(Astro.url.hostname)
 const items = [
   ...(Astro.url.pathname.replace(/\/+$/, '') === '/songs' ? [{ id: 'spotify-back', order: 2, label: 'Back', href: '/spotify', image: 'back-arrow' }] : []),
@@ -55,9 +56,9 @@ const current = (href: string) => href === '/' ? Astro.url.pathname === '/' : As
         </a>}
       </div>
     ))}
-    <div class="sticker-navigation__item" data-sticker-id="theme" data-sticker-order="8" data-sticker-side="right" style="--sticker-row:3;--sticker-angle:-6deg">
+    {!hideTheme && <div class="sticker-navigation__item" data-sticker-id="theme" data-sticker-order="8" data-sticker-side="right" style="--sticker-row:3;--sticker-angle:-6deg">
       <ThemeToggle sticker />
-    </div>
+    </div>}
     {discoveries.map((item, index) => (
       <div class="sticker-navigation__item" data-sticker-id={item.id} data-mobile-hidden="true" data-sticker-order={index + 9} style={`--sticker-angle:${[-9,8,-11,6,-7,10][index]}deg`}>
         <a class="sticker-link" href={item.href} target={/^https?:/.test(item.href) ? "_blank" : undefined} rel={/^https?:/.test(item.href) ? "noopener noreferrer" : undefined} aria-label={item.label} title={item.label}>

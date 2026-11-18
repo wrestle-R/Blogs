@@ -8,11 +8,13 @@ import { SITE } from '@/consts'
 import { cn } from '@/lib/utils'
 
 import StickerNavigation from '@/components/StickerNavigation.astro'
+import ThemeToggle from '@/components/ThemeToggle.astro'
 interface Props {
   class?: string
 }
 
 const { class: className } = Astro.props
+const hasReadingTools = Astro.slots.has('subposts-navigation') || Astro.slots.has('table-of-contents')
 ---
 
 
@@ -27,11 +29,16 @@ const { class: className } = Astro.props
   <body class="relative flex h-fit min-h-screen flex-col gap-y-6 font-sans">
     <div class="blog-silt-background" aria-hidden="true"></div>
     <a class="skip-to-content" href="#main-content">Skip to content</a>
-    <StickerNavigation />
-    <div class="blog-reading-tools sticky top-0 z-40 bg-background/95 backdrop-blur-sm">
-      <slot name="subposts-navigation" />
-      <slot name="table-of-contents" />
-    </div>
+    <StickerNavigation hideTheme={hasReadingTools} />
+    {hasReadingTools && (
+      <div class="blog-reading-tools">
+        <div class="blog-reading-sections">
+          <slot name="subposts-navigation" />
+          <slot name="table-of-contents" />
+        </div>
+        <div class="blog-reading-theme"><ThemeToggle /></div>
+      </div>
+    )}
     <main
       id="main-content"
       tabindex="-1"

@@ -45,7 +45,26 @@
 .blog-sticker-navigation { z-index: 70; }
 body:has(.blog-sticker-navigation) { padding-top: 130px; padding-bottom: env(safe-area-inset-bottom); }
 body:has(.blog-sticker-navigation) > .sticky:not(:has(*)) { display: none; }
-.blog-reading-tools { top: 76px; }
+/* Keep article controls in one row until the desktop sidebars take over. */
+.blog-reading-tools {
+  position: sticky;
+  top: 0;
+  z-index: 75;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-right: max(8px, env(safe-area-inset-right));
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+}
+.blog-reading-sections summary { min-height: 56px; }
+.blog-reading-theme { align-self: start; view-transition-name: theme-control; }
+.blog-reading-theme .theme-switch { height: 56px; }
+.blog-reading-theme .theme-switch:focus-visible { outline: 2px solid var(--foreground); outline-offset: -3px; }
+.blog-reading-sections [data-radix-scroll-area-viewport] { overscroll-behavior: contain; }
+@media (min-width: 1280px) {
+  .blog-reading-tools { position: fixed; top: 12px; right: max(12px, env(safe-area-inset-right)); display: block; padding: 0; background: transparent; border: 0; }
+  .blog-reading-sections { display: none; }
+}
 .portfolio-return { position: absolute; z-index: 90; top: max(12px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--sticker-foreground); text-decoration: none; font: 600 13px/1.25 ui-sans-serif,system-ui,sans-serif; pointer-events: auto; }
 .portfolio-return:hover > span:last-child { text-decoration: underline; text-underline-offset: 3px; }
 .endurance-copy { display: block !important; }
@@ -88,7 +107,6 @@ body:has(.blog-sticker-navigation) > .sticky:not(:has(*)) { display: none; }
   .sticker-navigation .sticker-navigation__item[data-sticker-id='theme'] { position: fixed; height: 52px; }
   .desktop-return-label { display: none; }
   .mobile-return-label { display: inline; }
-  .blog-reading-tools { top: 0; z-index: 60; }
   .blog-sticker-navigation [data-sticker-id='home'] { --sticker-size: 60px; height: 80px; }
   .blog-sticker-navigation [data-sticker-id='home'] img { width: 52px; height: 50px; }
   .blog-sticker-navigation [data-sticker-id='home'] .sticker-link__label { font-size: 10px; padding: 3px 5px; }
