@@ -123,11 +123,18 @@ body:has(.blog-sticker-navigation) > .sticky:not(:has(*)) { display: none; }
 }
 
 /* Returns belong to the reading column, with Home first and Back just inside it. */
-.song-return-navigation { height: 96px; margin-bottom: 20px; }
+.song-return-navigation { height: 74px; margin-bottom: 8px; }
 .blog-sticker-navigation [data-sticker-id='home'] { height: 96px; }
 .blog-sticker-navigation [data-sticker-id='home'] img { width: 56px; height: 56px; }
 .blog-sticker-navigation [data-sticker-id='spotify-back'] { --sticker-size: 76px; height: 96px; --sticker-angle: 4deg !important; }
-.blog-sticker-navigation [data-sticker-id='spotify-back'] img { width: 72px; height: 56px; }
+.blog-sticker-navigation [data-sticker-id='spotify-back'] img { width: 64px; height: 48px; }
+body:has(.songs-page) .blog-sticker-navigation [data-sticker-id='home'],
+.blog-sticker-navigation [data-sticker-id='spotify-back'] { height: 74px; }
+.spotify-return-navigation { display: none; }
+@media (max-width: 767px) {
+  .spotify-return-navigation { display: block; height: 78px; }
+  .spotify-page h1[data-return-home-heading] { margin-inline: auto; padding-left: 0; min-height: 0; }
+}
 @media (max-width:1199px) {
   .blog-sticker-navigation [data-sticker-id='home'] img { width: 52px; height: 50px; }
 }

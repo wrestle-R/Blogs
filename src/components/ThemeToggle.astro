@@ -6,56 +6,16 @@ interface Props { sticker?: boolean }
   <CloudThemeIcon />
 </button>
 
-<script is:inline data-astro-rerun>
-  (() => {
-    const THEME_KEY = 'theme'
-    const VALID_THEMES = new Set(['dark', 'light'])
-
-    const getCookieDomain = () => {
-      const host = window.location.hostname
-      if (!host || host === 'localhost' || host === '127.0.0.1' || host === '::1') return ''
-      if (host === 'russeldanielpaul.is-a.dev' || host.endsWith('.russeldanielpaul.is-a.dev')) return '.russeldanielpaul.is-a.dev'
-      return ''
-    }
-
-    const readThemeCookie = () => {
-      try {
-        const cookie = document.cookie.split('; ').find((row) => row.startsWith(`${THEME_KEY}=`))
-        return cookie ? decodeURIComponent(cookie.split('=')[1]) : ''
-      } catch { return '' }
-    }
-
-    const writeThemeCookie = (theme) => {
-      const maxAge = 60 * 60 * 24 * 365
-      const domain = getCookieDomain()
-      const domainPart = domain ? `; domain=${domain}` : ''
-      document.cookie = `${THEME_KEY}=${encodeURIComponent(theme)}; path=/; max-age=${maxAge}; samesite=lax${domainPart}`
-    }
-
-    const getPreferredTheme = () => {
-      const fromCookie = readThemeCookie()
-      if (VALID_THEMES.has(fromCookie)) return fromCookie
-
-      try {
-        const fromStorage = window.localStorage.getItem(THEME_KEY) ?? ''
-        if (VALID_THEMES.has(fromStorage)) return fromStorage
-      } catch { /* Use the browser preference when storage is unavailable. */ }
-
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-    }
-
-    const initialTheme = getPreferredTheme()
-    document.documentElement.setAttribute('data-theme', initialTheme)
-    try { window.localStorage.setItem(THEME_KEY, initialTheme) } catch { /* Optional persistence. */ }
-    try { writeThemeCookie(initialTheme) } catch { /* Optional persistence. */ }
-    document.getElementById('theme-toggle')?.setAttribute('aria-checked', String(initialTheme === 'light'))
-  })()
-</script>
-
 <script>
   // @ts-nocheck
   const THEME_KEY = 'theme'
   let nextRevealDirection = 'expand'
+  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
+  let hasThemeOverride = /(?:^|;\s*)theme=(?:dark|light)(?:;|$)/.test(document.cookie)
+  try {
+    hasThemeOverride ||= ['dark', 'light'].includes(localStorage.getItem(THEME_KEY))
+  } catch { /* Storage is optional. */ }
+  let currentTheme = document.documentElement.dataset.theme
 
   function getCookieDomain() {
     const host = window.location.hostname
@@ -71,19 +31,18 @@ interface Props { sticker?: boolean }
     document.cookie = `${THEME_KEY}=${encodeURIComponent(theme)}; path=/; max-age=${maxAge}; samesite=lax${domainPart}`
   }
 
-  function applyTheme(theme) {
+  function applyTheme(theme, save = false) {
+    currentTheme = theme
     document.documentElement.setAttribute('data-theme', theme)
-    try { localStorage.setItem(THEME_KEY, theme) } catch { /* Optional persistence. */ }
-    try { writeThemeCookie(theme) } catch { /* Optional persistence. */ }
+    if (save) {
+      hasThemeOverride = true
+      try { localStorage.setItem(THEME_KEY, theme) } catch { /* Optional persistence. */ }
+      try { writeThemeCookie(theme) } catch { /* Optional persistence. */ }
+    }
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#080a0c' : '#f0f5f7')
     const button = document.getElementById('theme-toggle')
     button?.setAttribute('aria-checked', String(theme === 'light'))
     button?.setAttribute('title', theme === 'dark' ? 'Turn the lights on' : 'Turn the lights off')
-  }
-
-  function isEditableTarget(target) {
-    if (!(target instanceof HTMLElement)) return false
-    const tag = target.tagName.toLowerCase()
-    return target.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select'
   }
 
   function toggleTheme(sourceEl = null) {
@@ -94,7 +53,7 @@ interface Props { sticker?: boolean }
     const supportsViewTransition = typeof document.startViewTransition === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     if (!supportsViewTransition || !sourceEl || !(sourceEl instanceof HTMLElement)) {
-      applyTheme(newTheme)
+      applyTheme(newTheme, true)
       return
     }
 
@@ -116,14 +75,14 @@ interface Props { sticker?: boolean }
       element.style.removeProperty('--theme-transition-radius')
     }
     try {
-      const transition = document.startViewTransition(() => applyTheme(newTheme))
+      const transition = document.startViewTransition(() => applyTheme(newTheme, true))
       transition.finished.then(cleanup, cleanup)
       transition.ready.then(() => {
         nextRevealDirection = nextRevealDirection === 'expand' ? 'contract' : 'expand'
       }, () => { /* A skipped animation still applies the theme. */ })
     } catch {
       cleanup()
-      applyTheme(newTheme)
+      applyTheme(newTheme, true)
     }
   }
 
@@ -131,30 +90,16 @@ interface Props { sticker?: boolean }
     toggleTheme(event.currentTarget)
   }
 
-  function handleThemeKeydown(event) {
-    if (event.repeat) return
-    if (event.key.toLowerCase() !== 'd') return
-    if (isEditableTarget(event.target)) return
-    event.preventDefault()
-    toggleTheme(document.getElementById('theme-toggle'))
-  }
-
   function initThemeToggle() {
     const toggleBtn = document.getElementById('theme-toggle')
     toggleBtn?.removeEventListener('click', handleToggleClick)
     toggleBtn?.addEventListener('click', handleToggleClick)
-    applyTheme(document.documentElement.getAttribute('data-theme') || 'light')
-
-    window.removeEventListener('keydown', handleThemeKeydown)
-    window.addEventListener('keydown', handleThemeKeydown)
+    applyTheme(currentTheme || (systemTheme.matches ? 'dark' : 'light'))
   }
 
   initThemeToggle()
-
-  document.addEventListener('astro:after-swap', () => {
-    let storedTheme = document.documentElement.getAttribute('data-theme') || 'light'
-    try { storedTheme = localStorage.getItem(THEME_KEY) || storedTheme } catch { /* Keep the current palette. */ }
-    applyTheme(storedTheme)
-    initThemeToggle()
+  systemTheme.addEventListener('change', (event) => {
+    if (!hasThemeOverride) applyTheme(event.matches ? 'dark' : 'light')
   })
+  document.addEventListener('astro:after-swap', initThemeToggle)
 </script>

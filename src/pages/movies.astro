@@ -37,12 +37,12 @@ try {
               Add your favorite movies and see what others recommend
             </p>
           </div>
-          <div id="suggestions-section" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 hover:scale-105 transition-all font-medium text-sm shadow-sm hover:shadow-md cursor-pointer flex-shrink-0">
+          <button type="button" id="suggestions-section" aria-expanded="false" aria-controls="movie-suggestions-list" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-lg hover:opacity-90 hover:scale-105 transition-all font-medium text-sm shadow-sm hover:shadow-md cursor-pointer flex-shrink-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
             <span>Show suggestions</span>
-          </div>
+          </button>
         </div>
       </div>
       <div class="p-6">
@@ -373,6 +373,8 @@ try {
       // Load the saved state from localStorage
       let showingSuggestions = localStorage.getItem(SUGGESTIONS_STATE_KEY) === 'true';
       
+      newSection.setAttribute('aria-expanded', String(showingSuggestions));
+
       // Update button text to match saved state
       const span = newSection.querySelector('span');
       if (span) {
@@ -389,6 +391,7 @@ try {
       
       newSection.addEventListener('click', () => {
         showingSuggestions = !showingSuggestions;
+        newSection.setAttribute('aria-expanded', String(showingSuggestions));
         
         // Save state to localStorage
         localStorage.setItem(SUGGESTIONS_STATE_KEY, String(showingSuggestions));

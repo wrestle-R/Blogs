@@ -84,7 +84,7 @@ I LOVE listening to the songs YOU recommend.
             </div>
             <div>
               <h2 class="text-xl font-bold">My Playlist</h2>
-              <p id="playlist-count" class="text-sm text-muted-foreground">0 songs</p>
+              <p id="playlist-count" class="text-sm text-muted-foreground">Loading playlist…</p>
             </div>
           </div>
           <button
@@ -240,6 +240,7 @@ I LOVE listening to the songs YOU recommend.
     const playlistCount = document.getElementById('playlist-count');
 
     try {
+      if (playlistCount) playlistCount.textContent = 'Loading playlist…';
       playlistLoading?.classList.remove('hidden');
       playlistTracks?.classList.add('hidden');
       playlistEmpty?.classList.add('hidden');
@@ -332,6 +333,7 @@ I LOVE listening to the songs YOU recommend.
      } catch (error) {
        console.error('Error loading playlist:', error);
        playlistLoading?.classList.add('hidden');
+       if (playlistCount) playlistCount.textContent = 'Playlist unavailable';
        showPlaylistError(error);
      }
    };

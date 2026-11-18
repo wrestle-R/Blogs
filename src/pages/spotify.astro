@@ -6,9 +6,10 @@ import PageHead from '../components/PageHead.astro';
 <Layout >
   <PageHead slot="head" title="Spotify" description="What I'm listening to on Spotify." />
   <div class="spotify-page container mx-auto px-0 py-6 sm:px-4 sm:py-8 max-w-4xl">
-    <div class="mb-8 text-center space-y-4">
+    <div class="spotify-return-navigation" aria-hidden="true"></div>
+    <div class="mb-5 text-center space-y-3">
       <h1 class="text-2xl sm:text-3xl font-semibold leading-snug text-balance">
-        Isnt it weird that a random song can bring back an version of yourself?
+        Isn’t it weird that a random song can bring back a version of yourself?
       </h1>
 
       <div class="mobile-music-links">
@@ -17,7 +18,7 @@ import PageHead from '../components/PageHead.astro';
       </div>
     </div>
 
-    <div id="loading-section" class="space-y-6 min-h-[800px]">
+    <div id="loading-section" class="space-y-6" aria-busy="true" aria-label="Loading Spotify activity">
       <!-- Now Playing Skeleton -->
       <div class="rounded-lg border bg-card overflow-hidden">
         <div class="p-6 bg-gradient-to-br from-primary/5 to-transparent">

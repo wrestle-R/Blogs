@@ -132,6 +132,4 @@ body:has(.guitar-quiz) .site-footer-wallpapers { display:none; }
 @media(min-width:768px),(orientation:landscape) { .quiz-orientation { display:none; } }
 
 /* Center the short introduction as one composition instead of stranding it at the top. */
-body:has([data-quiz-intro]:not([hidden])) main { justify-content:center; }
-body:has([data-quiz-intro]:not([hidden])) .guitar-quiz { margin-block:16px 28px; }
-@media(max-height:700px) { body:has([data-quiz-intro]:not([hidden])) main { justify-content:flex-start; } }
+body:has([data-quiz-intro]:not([hidden])) .guitar-quiz { margin-block:8px 24px; }

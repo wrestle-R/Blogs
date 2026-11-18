@@ -191,7 +191,8 @@ export function initStickerNavigation(root) {
       if (compact) { if (id === 'home') put(item, 16, 16); return; }
       if (isBlog) {
         if (id === 'home' && !home && returnHeading && contentBox) {
-          const box = returnHeading.getBoundingClientRect();
+          const slot = document.querySelector('.spotify-return-navigation');
+          const box = (slot?.getClientRects().length ? slot : returnHeading).getBoundingClientRect();
           put(item, box.left + 4, box.top);
           return;
         }

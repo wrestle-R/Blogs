@@ -199,8 +199,10 @@ export default function MovieList({ showSuggestions, initialMovies = [] }: Movie
   return (
     <div className="space-y-6">
       <div className="relative" ref={searchContainerRef}>
+        <label htmlFor="movie-suggestion-search" className="mb-2 block text-sm font-medium">Suggest a movie</label>
         <Input
-          type="text"
+          id="movie-suggestion-search"
+          type="search"
           placeholder="Search for a movie to add..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -258,7 +260,8 @@ export default function MovieList({ showSuggestions, initialMovies = [] }: Movie
         )}
       </div>
 
-      {!visible && movies.length === 0 ? (
+      <div id="movie-suggestions-list" hidden={!visible}>
+      {visible && movies.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 border rounded-lg bg-muted/30">
           <svg className="w-12 h-12 text-muted-foreground/50 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
@@ -325,6 +328,7 @@ export default function MovieList({ showSuggestions, initialMovies = [] }: Movie
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }
