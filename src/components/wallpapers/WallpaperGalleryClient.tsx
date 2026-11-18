@@ -264,11 +264,11 @@ export default function WallpaperGalleryClient() {
                 </Button>
               </div>
             </div>
-            <div className="flex h-[min(78vh,calc(100dvh-10rem))] justify-center overflow-hidden rounded-lg bg-black/40">
+            <div className="flex justify-center overflow-hidden rounded-lg bg-black/40">
               <img
                 src={activeItem.url}
                 alt={activeItem.publicId}
-                className="h-full w-auto max-w-full object-contain drop-shadow-2xl"
+                className="max-h-[calc(100dvh-10rem)] w-auto max-w-full object-contain drop-shadow-2xl"
               />
             </div>
           </div>
